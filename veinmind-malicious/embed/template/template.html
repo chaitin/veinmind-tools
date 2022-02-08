@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: white;
+        }
+        .wrapper {
+            max-width: 1100px;
+            margin: auto;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 0;
+            border: 1px solid rgba(242, 242, 242, 1);
+            border-top: none;
+        }
+        .content {
+            padding: 24px;
+            border: 1px solid rgba(242, 242, 242, 1);
+            border-top: none;
+        }
+        .section {
+            padding: 0 14px;
+            left: 0px;
+            top: 0px;
+            background: inherit;
+            background-color: rgba(251, 251, 251, 1);
+            border-radius: 8px;
+            border-top-left-radius: 0px;
+            border-top-right-radius: 0px;
+        }
+        .section_header {
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .section_header-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            border-radius: 50%;
+            border: 1px solid #333;
+            background-color: #70b603;
+            margin-right: 14px;
+        }
+        .section_header-icon-success {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            border-radius: 50%;
+            background-color: #70b603;
+            margin-right: 14px;
+        }
+        .section_header-icon-failed {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            border-radius: 50%;
+            background-color: #C31E13;
+            margin-right: 14px;
+        }
+        .section_header-title {
+            font-family: PingFangSC-Semibold, 'PingFang SC Semibold', 'PingFang SC',
+            sans-serif;
+            font-weight: 650;
+            font-style: normal;
+            font-size: 14px;
+            color: rgb(127, 127, 127);
+        }
+        .section_mirror {
+            padding: 10px 0;
+            background: #ffffff;
+            border: 1px solid rgba(242, 242, 242, 1);
+            border-radius: 8px;
+        }
+        .section_mirror-header {
+            font-weight: 500;
+            font-style: normal;
+            font-size: 12px;
+            color: rgb(127, 127, 127);
+            line-height: 32px;
+            padding-left: 30px;
+        }
+        .section_mirror-content {
+            padding: 0 50px;
+            line-height: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+        .section_mirror-content_item {
+            width: 50%;
+            flex-shrink: 0;
+            color: rgb(127, 127, 127);
+            display: flex;
+        }
+        .section_mirror-content_item span:first-child {
+            width: 100px;
+            display: inline-block;
+            color: rgb(198, 198, 198);
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+        .section_mirror-content_item span:last-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            flex-grow: 1;
+        }
+        .section_malicious {
+            background-color: white;
+            color: rgb(127, 127, 127);
+            font-size: 12px;
+            margin-top: 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(242, 242, 242, 1);
+            padding: 10px 30px 14px;
+        }
+        .section_malicious-header {
+            font-weight: 500;
+            font-style: normal;
+            font-size: 12px;
+            color: rgb(127, 127, 127);
+            line-height: 32px;
+        }
+        .section_malicious-content{
+            border-radius: 8px;
+            background-color: rgba(252, 255, 247, 1);
+            padding: 8px 24px;
+            line-height: 32px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .section_malicious-content:last-child{
+            margin-bottom: 0;
+        }
+        .section_malicious-content_item{
+            line-height: 28px;
+            color: rgb(127, 127, 127);
+            width: 50%;
+            flex-shrink: 0;
+            display: flex;
+        }
+        .section_malicious-content__header{
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .section_malicious-content_item span:first-child{
+            width: 100px;
+            display: inline-block;
+            color: rgb(198, 198, 198);
+            flex-shrink: 0;
+        }
+        .section_malicious-content_item span:last-child{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            flex-grow: 1;
+        }
+        .single-line {
+          width: 100%;
+          flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        {{ if eq .MaliciousFileCount 0 }}         <svg style="margin-right: 50px" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="130px" height="130px" xmlns="http://www.w3.org/2000/svg">
+            <g transform="matrix(1 0 0 1 -253 -40 )">
+                <path d="M 107.1484375 55.09765625  C 108.1640625 54.08203125  108.671875 52.8125  108.671875 51.2890625  C 108.671875 49.709201388888886  108.1640625 48.411458333333336  107.1484375 47.395833333333336  L 99.44661458333334 39.778645833333336  C 98.37456597222224 38.706597222222214  97.10503472222224 38.170572916666664  95.63802083333334 38.170572916666664  C 94.17100694444446 38.170572916666664  92.90147569444446 38.706597222222214  91.82942708333334 39.778645833333336  L 57.29817708333333 74.22526041666667  L 38.17057291666667 55.09765625  C 37.09852430555556 54.025607638888886  35.82899305555556 53.489583333333336  34.36197916666667 53.489583333333336  C 32.89496527777778 53.489583333333336  31.62543402777778 54.025607638888886  30.553385416666664 55.09765625  L 22.8515625 62.71484375  C 21.8359375 63.73046875  21.328125000000004 65.02821180555554  21.328125 66.60807291666667  C 21.328125000000004 68.13151041666667  21.8359375 69.40104166666667  22.8515625 70.41666666666667  L 53.48958333333333 101.0546875  C 54.56163194444445 102.1267361111111  55.83116319444445 102.66276041666666  57.29817708333333 102.66276041666666  C 58.82161458333333 102.66276041666666  60.11935763888889 102.1267361111111  61.19140625 101.0546875  L 107.1484375 55.09765625  Z M 121.28255208333334 32.373046875  C 127.09418402777776 42.3318142361111  130 53.20746527777776  130 65  C 130 76.79253472222223  127.09418402777776 87.66818576388887  121.28255208333334 97.626953125  C 115.4709201388889 107.58572048611111  107.58572048611111 115.47092013888889  97.626953125 121.28255208333334  C 87.6681857638889 127.09418402777779  76.79253472222223 130  65 130  C 53.20746527777778 130  42.331814236111114 127.09418402777779  32.373046875 121.28255208333334  C 22.41427951388889 115.47092013888889  14.529079861111112 107.58572048611111  8.717447916666668 97.626953125  C 2.905815972222222 87.66818576388887  0 76.79253472222223  0 65  C 0 53.20746527777776  2.905815972222222 42.3318142361111  8.717447916666668 32.373046875  C 14.529079861111112 22.414279513888886  22.41427951388889 14.529079861111098  32.373046875 8.717447916666663  C 42.331814236111114 2.9058159722222108  53.20746527777778 0  65 0  C 76.79253472222223 0  87.6681857638889 2.9058159722222108  97.626953125 8.717447916666663  C 107.58572048611111 14.529079861111098  115.4709201388889 22.414279513888886  121.28255208333334 32.373046875  Z " fill-rule="nonzero" fill="#70b603" stroke="none" transform="matrix(1 0 0 1 253 40 )" />
+            </g>
+        </svg>
+    {{else}}         <svg version="1.1" style="margin-right: 50px" xmlns:xlink="http://www.w3.org/1999/xlink" width="130px" height="130px" xmlns="http://www.w3.org/2000/svg">
+        <g transform="matrix(1 0 0 1 -253 -40 )">
+            <path d="M 32.373046875 8.717447916666663  C 42.331814236111114 2.9058159722222108  53.20746527777778 0  65 0  C 76.79253472222223 0  87.6681857638889 2.9058159722222108  97.626953125 8.717447916666663  C 107.58572048611111 14.529079861111098  115.4709201388889 22.414279513888886  121.28255208333334 32.373046875  C 127.09418402777776 42.3318142361111  130 53.20746527777776  130 65  C 130 76.79253472222223  127.09418402777776 87.66818576388887  121.28255208333334 97.626953125  C 115.4709201388889 107.58572048611111  107.58572048611111 115.47092013888889  97.626953125 121.28255208333334  C 87.6681857638889 127.09418402777779  76.79253472222223 130  65 130  C 53.20746527777778 130  42.331814236111114 127.09418402777779  32.373046875 121.28255208333334  C 22.41427951388889 115.47092013888889  14.529079861111112 107.58572048611111  8.717447916666668 97.626953125  C 2.905815972222222 87.66818576388887  0 76.79253472222223  0 65  C 0 53.20746527777776  2.905815972222222 42.3318142361111  8.717447916666668 32.373046875  C 14.529079861111112 22.414279513888886  22.41427951388889 14.529079861111098  32.373046875 8.717447916666663  Z M 75.07161458333334 107.529296875  C 75.57942708333334 106.99327256944446  75.83333333333334 106.33029513888889  75 105.54036458333334  L 75 89.45963541666667  C 75.83333333333334 88.6697048611111  75.57942708333334 88.00672743055554  75.07161458333334 87.470703125  C 74.56380208333334 86.93467881944446  73.94314236111111 86.66666666666667  73.20963541666666 86  L 56.95963541666667 86  C 56.22612847222223 86.66666666666667  55.57725694444445 86.94878472222223  55.01302083333333 87.51302083333333  C 54.44878472222223 88.07725694444443  54.16666666666667 88.72612847222223  55 89.45963541666667  L 55 105.54036458333334  C 54.16666666666667 106.27387152777779  54.44878472222223 106.92274305555554  55.01302083333333 107.48697916666666  C 55.57725694444445 108.05121527777779  56.22612847222223 108.33333333333334  56.95963541666667 108  L 73.20963541666666 108  C 73.94314236111111 108.33333333333334  74.56380208333334 108.06532118055554  75.07161458333334 107.529296875  Z M 74.775390625 77.90690104166667  C 75.31141493055556 77.48372395833333  75.60763888888889 76.9900173611111  75.6640625 76.42578125  L 77.1875 23.8671875  C 77.18750000000001 23.19010416666666  76.90538194444446 22.68229166666666  76.34114583333334 22.34375  C 75.77690972222223 21.8923611111111  75.09982638888889 21.66666666666666  74.30989583333334 22  L 55.69010416666667 22  C 54.90017361111112 21.66666666666666  54.22309027777778 21.8923611111111  53.65885416666667 22.34375  C 53.09461805555556 22.68229166666666  52.8125 23.19010416666666  52.8125 23.8671875  L 54.25130208333333 76.42578125  C 54.25130208333333 76.9900173611111  54.53342013888889 77.48372395833333  55.09765625 77.90690104166667  C 55.66189236111112 78.330078125  56.33897569444445 78.54166666666667  57.12890625 78  L 72.78645833333334 78  C 73.57638888888889 78.54166666666667  74.23936631944446 78.330078125  74.775390625 77.90690104166667  Z " fill-rule="nonzero" fill="#c31e13" stroke="none" transform="matrix(1 0 0 1 253 40 )" />
+        </g>
+    </svg>
+    {{end}}
+        <div>
+            <div style="margin-bottom: 20px; font-weight: 600">
+            <span style="color: #7f7f7f">{{ if eq .MaliciousFileCount 0 }} 恭喜你, {{ end }}本次检测 </span
+            ><span {{ if eq .MaliciousFileCount 0 }}  style="color: #70b603" {{else}}  style="color: #C31E13" {{end}}>{{ .ScanImageCount }}</span
+                ><span style="color: #7f7f7f"> 个镜像，发现 </span
+                ><span {{ if eq .MaliciousFileCount 0 }}  style="color: #70b603" {{else}}  style="color: #C31E13" {{end}}>{{ .MaliciousFileCount }}</span
+                ><span style="color: #7f7f7f"> 个恶意样本</span>
+            </div>
+            <div
+                    style="
+              font-family: 'PingFangSC-Regular', 'PingFang SC', sans-serif;
+              font-weight: 400;
+              font-style: normal;
+              font-size: 14px;
+              line-height: 30px;
+              margin: 0;
+              color: #7f7f7f;
+            "
+            >
+                <div>使用时间：{{ .ScanSpendTime }} </div>
+                <div>扫描时间：{{ .ScanStartTime }}</div>
+                <div>扫描样本：{{ .ScanFileCount }} 个</div>
+            </div>
+        </div>
+    </div>
+    {{ range .ScanImageResult }}
+        <div class="content">
+            <div class="section">
+                <div class="section_header">
+                    {{if .IsMalicious}}
+                        <span class="section_header-icon-failed"></span>
+                    {{else}}
+                        <span class="section_header-icon-success"></span>
+                    {{end}}
+                    <span class="section_header-title">{{ .ImageName }}</span>
+                </div>
+                <div class="section_mirror">
+                    <div class="section_mirror-header">镜像信息</div>
+                    <div class="section_mirror-content">
+                        <div class="section_mirror-content_item single-line">
+                            <span>镜像 ID</span>
+                            <span>{{ .ImageID }}</span>
+                        </div>
+                        <div class="section_mirror-content_item single-line">
+                            <span>镜像创建时间</span>
+                            <span>{{ .ImageCreatedAt }}</span>
+                        </div>
+                        <div class="section_mirror-content_item">
+                            <span>恶意样本数</span>
+                            <span>{{ .MaliciousFileCount }}</span>
+                        </div>
+                        <div class="section_mirror-content_item">
+                            <span>扫描样本数</span>
+                            <span>{{ .ScanFileCount }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="section_malicious">
+                    <div class="section_malicious-header">恶意样本</div>
+                    {{ range .Layers }}
+                    {{ range .MaliciousFileInfos }}
+                        <div class="section_malicious-content">
+                            <div class="section_malicious-content__header">
+                                <span>{{ .FileName }}</span>
+                            </div>
+                            <div class="section_malicious-content_item">
+                                <span>样本路径: </span>
+                                <span>{{ .RelativePath }}</span>
+                            </div>
+                            <div class="section_malicious-content_item">
+                                <span>MD5: </span>
+                                <span>{{ .FileMd5 }}</span>
+                            </div>
+                            <div class="section_malicious-content_item">
+                                <span>样本大小: </span>
+                                <span>{{ .FileSize }}</span>
+                            </div>
+                            <div class="section_malicious-content_item">
+                                <span>样本类型: </span>
+                                <span>{{ .Description }}</span>
+                            </div>
+                            <div class="section_malicious-content_item single-line">
+                              <span>SHA-256: </span>
+                              <span>{{ .FileSha256 }}</span>
+                            </div>
+                            <div class="section_malicious-content_item">
+                                <span>创建时间: </span>
+                                <span>{{ .FileCreated }}</span>
+                            </div>
+                        </div>
+                    {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    {{ end }}
+</div>
+</body>
+</html>

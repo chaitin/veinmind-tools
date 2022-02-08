@@ -1,0 +1,7 @@
+version: "3.3"
+services:
+  clamav:
+    image: clamav/clamav:latest
+    restart: always
+    ports:
+    - "${CLAMD_HOST}:${CLAMD_PORT}:3310"
