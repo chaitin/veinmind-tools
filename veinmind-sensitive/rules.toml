@@ -118,7 +118,7 @@ match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
 [[rules]]
 id = "Heroku API Key"
 description = "Heroku API Key"
-match = ''' (?i)(heroku[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})['\"]'''
+match = '''(?i)(heroku[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})['\"]'''
 secretGroup = 3
 
 [[rules]]
@@ -157,12 +157,12 @@ secretGroup = 3
 [[rules]]
 id = "Adobe Client Secret"
 description = "Adobe Client Secret"
-match = '''(p8e-)(?i)[a-z0-9]{32}'''
+match = '''(?i)(p8e-)[a-z0-9]{32}'''
 
 [[rules]]
 id = "Alibaba AccessKey ID"
 description = "Alibaba AccessKey ID"
-match = '''(LTAI)(?i)[a-z0-9]{20}'''
+match = '''(?i)(LTAI)[a-z0-9]{20}'''
 
 [[rules]]
 id = "Alibaba Secret Key"
@@ -209,7 +209,7 @@ secretGroup = 3
 [[rules]]
 id = "Clojars API token"
 description = "Clojars API token"
-match = '''(CLOJARS_)(?i)[a-z0-9]{60}'''
+match = '''(?i)(CLOJARS_)[a-z0-9]{60}'''
 
 [[rules]]
 id = "Contentful delivery API token"
@@ -249,7 +249,7 @@ secretGroup = 3
 [[rules]]
 id = "Doppler API token"
 description = "Doppler API token"
-match = '''['\"](dp\.pt\.)(?i)[a-z0-9]{43}['\"]'''
+match = '''(?i)['\"](dp\.pt\.)[a-z0-9]{43}['\"]'''
 
 [[rules]]
 id = "Dropbox API secret/key"
@@ -269,22 +269,22 @@ match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"][a-
 [[rules]]
 id = "Duffel API token"
 description = "Duffel API token"
-match = '''['\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\"]'''
+match = '''(?i)['\"]duffel_(test|live)_[a-z0-9_-]{43}['\"]'''
 
 [[rules]]
 id = "Dynatrace API token"
 description = "Dynatrace API token"
-match = '''['\"]dt0c01\.(?i)[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
+match = '''(?i)['\"]dt0c01\.[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
 
 [[rules]]
 id = "EasyPost API token"
 description = "EasyPost API token"
-match = '''['\"]EZAK(?i)[a-z0-9]{54}['\"]'''
+match = '''(?i)['\"]EZAK[a-z0-9]{54}['\"]'''
 
 [[rules]]
 id = "EasyPost test API token"
 description = "EasyPost test API token"
-match = '''['\"]EZTK(?i)[a-z0-9]{54}['\"]'''
+match = '''(?i)['\"]EZTK[a-z0-9]{54}['\"]'''
 
 [[rules]]
 id = "Fastly API token"
@@ -307,12 +307,12 @@ secretGroup = 3
 [[rules]]
 id = "Flutterweave public key"
 description = "Flutterweave public key"
-match = '''FLWPUBK_TEST-(?i)[a-h0-9]{32}-X'''
+match = '''(?i)FLWPUBK_TEST-[a-h0-9]{32}-X'''
 
 [[rules]]
 id = "Flutterweave secret key"
 description = "Flutterweave secret key"
-match = '''FLWSECK_TEST-(?i)[a-h0-9]{32}-X'''
+match = '''(?i)FLWSECK_TEST-[a-h0-9]{32}-X'''
 
 [[rules]]
 id = "Flutterweave encrypted key"
@@ -322,22 +322,22 @@ match = '''FLWSECK_TEST[a-h0-9]{12}'''
 [[rules]]
 id = "Frame.io API token"
 description = "Frame.io API token"
-match = '''fio-u-(?i)[a-z0-9-_=]{64}'''
+match = '''(?i)fio-u-[a-z0-9-_=]{64}'''
 
 [[rules]]
 id = "GoCardless API token"
 description = "GoCardless API token"
-match = '''['\"]live_(?i)[a-z0-9-_=]{40}['\"]'''
+match = '''(?i)['\"]live_[a-z0-9-_=]{40}['\"]'''
 
 [[rules]]
 id = "Grafana API token"
 description = "Grafana API token"
-match = '''['\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\"]'''
+match = '''(?i)['\"]eyJrIjoi[a-z0-9-_=]{72,92}['\"]'''
 
 [[rules]]
 id = "Hashicorp Terraform user/org API token"
 description = "Hashicorp Terraform user/org API token"
-match = '''['\"](?i)[a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
+match = '''(?i)['\"][a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
 
 [[rules]]
 id = "Hashicorp Vault batch token"
@@ -365,12 +365,12 @@ secretGroup = 3
 [[rules]]
 id = "Ionic API token"
 description = "Ionic API token"
-match = '''ion_(?i)[a-z0-9]{42}'''
+match = '''(?i)ion_[a-z0-9]{42}'''
 
 [[rules]]
 id = "Linear API token"
 description = "Linear API token"
-match = '''lin_api_(?i)[a-z0-9]{40}'''
+match = '''(?i)lin_api_[a-z0-9]{40}'''
 
 [[rules]]
 id = "Linear client secret/ID"
@@ -450,22 +450,22 @@ match = '''['\"](NRJS-[a-f0-9]{19})['\"]'''
 [[rules]]
 id = "npm access token"
 description = "npm access token"
-match = '''['\"](npm_(?i)[a-z0-9]{36})['\"]'''
+match = '''(?i)['\"](npm_[a-z0-9]{36})['\"]'''
 
 [[rules]]
 id = "Planetscale password"
 description = "Planetscale password"
-match = '''pscale_pw_(?i)[a-z0-9\-_\.]{43}'''
+match = '''(?i)pscale_pw_[a-z0-9\-_\.]{43}'''
 
 [[rules]]
 id = "Planetscale API token"
 description = "Planetscale API token"
-match = '''pscale_tkn_(?i)[a-z0-9\-_\.]{43}'''
+match = '''(?i)pscale_tkn_[a-z0-9\-_\.]{43}'''
 
 [[rules]]
 id = "Postman API token"
 description = "Postman API token"
-match = '''PMAK-(?i)[a-f0-9]{24}\-[a-f0-9]{34}'''
+match = '''(?i)PMAK-[a-f0-9]{24}\-[a-f0-9]{34}'''
 
 [[rules]]
 id = "Pulumi API token"
@@ -480,12 +480,12 @@ match = '''rubygems_[a-f0-9]{48}'''
 [[rules]]
 id = "Sendgrid API token"
 description = "Sendgrid API token"
-match = '''SG\.(?i)[a-z0-9_\-\.]{66}'''
+match = '''(?i)SG\.[a-z0-9_\-\.]{66}'''
 
 [[rules]]
 id = "Sendinblue API token"
 description = "Sendinblue API token"
-match = '''xkeysib-[a-f0-9]{64}\-(?i)[a-z0-9]{16}'''
+match = '''(?i)xkeysib-[a-f0-9]{64}\-[a-z0-9]{16}'''
 
 [[rules]]
 id = "Shippo API token"
