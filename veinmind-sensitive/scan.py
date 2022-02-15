@@ -6,6 +6,8 @@ import magic
 import logging
 import fnmatch
 import chardet
+import time
+import jsonpickle
 from veinmind import *
 from stat import *
 
@@ -22,25 +24,39 @@ def load_rules():
     with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "rules.toml"), encoding="utf8") as f:
         rules = toml.load(f)
 
+class Report():
+    def __init__(self):
+        self.scan_counts = 0
+        self.imagename = ""
+        self.spend_time = 0
+        self.sensitive_filepath_lists = []
+
 @click.command()
 @click.option('--engine',default="docker", help="engine type you use, e.g. docker/containerd")
 @click.option('--name', default="", help="image name e.g. ubuntu:latest")
-def cli(engine, name):
+@click.option('--output', default="stdout", help="output format e.g. stdout/json")
+def cli(engine, name, output):
     load_rules()
     with runtime(engine) as client:
         if name != "":
             image_ids = client.find_image_ids(name)
         else:
             image_ids = client.list_image_ids()
+
+        report_list = []
         for id in image_ids:
+            report = Report()
+            start = time.time()
             image = client.open_image_by_id(id)
             refs = image.reporefs()
             if len(refs) > 0:
                 ref = refs[0]
             else:
                 ref = image.id()
+            report.imagename = ref
             logger.info("start scan: " + ref)
             for root, dirs, files in image.walk('/'):
+                report.scan_counts = report.scan_counts + 1
                 for filepath in files:
                     try:
                         filepath = os.path.join(root, filepath)
@@ -96,10 +112,39 @@ def cli(engine, name):
                                             logger.warning("find sensitive file: " + filepath)
                                     else:
                                         if re.match(match, f_content):
+                                            report.sensitive_filepath_lists.append(filepath)
                                             logger.warning("find sensitive file: " + filepath)
                     except Exception as e:
                         print(e)
+            spend_time = time.time() - start
+            report.spend_time = spend_time
+            report_list.append(report)
 
+        if output == "stdout":
+            print("# ============================================================================================ #")
+            print("Scan Image Total: " + str(len(report_list)))
+            spend_time_total = 0
+            sensitive_file_total = 0
+            for r in report_list:
+                spend_time_total = spend_time_total + r.spend_time
+                sensitive_file_total = sensitive_file_total + len(r.sensitive_filepath_lists)
+            print("Spend Time Total: " + spend_time_total.__str__() + "s")
+            print("Sensitive File Total: " + str(sensitive_file_total))
+            print("Unsafe Image List: ")
+            for r in report_list:
+                if len(r.sensitive_filepath_lists) == 0:
+                    continue
+                print("+----------------------------------------------------------------------------------------------+")
+                print("| ImageName: " + r.imagename)
+                print("| Scan Total: " + str(r.scan_counts))
+                print("| Spend Time: " + r.spend_time.__str__() + "s")
+                print("| Sensitive File Total: " + str(len(r.sensitive_filepath_lists)))
+                for fp in r.sensitive_filepath_lists:
+                    print("| Sensitive File: " + fp)
+            print("+----------------------------------------------------------------------------------------------+")
+        elif output == "json":
+            with open("output.json", mode="w") as f:
+                f.write(jsonpickle.dumps(report_list))
 
 def runtime(engine):
     if engine == "docker":
