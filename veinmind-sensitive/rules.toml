@@ -1,0 +1,530 @@
+# ref https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks.toml
+
+[whitelist]
+paths = ["/usr/**", "/lib/**", "/lib32/**", "/bin/**", "/sbin/**" ,"/var/lib/**", "/var/log/**"]
+
+[[rules]]
+id = "gitlab_personal_access_token"
+description = "GitLab Personal Access Token"
+match = '''glpat-[0-9a-zA-Z\-]{20}'''
+tags = ["gitlab", "revocation_type"]
+
+[[rules]]
+id = "AWS"
+description = "AWS Access Token"
+match = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws", "revocation_type"]
+
+# Cryptographic keys
+[[rules]]
+id = "PKCS8 private key"
+description = "PKCS8 private key"
+match = '''-----BEGIN PRIVATE KEY-----'''
+
+[[rules]]
+id = "RSA private key"
+description = "RSA private key"
+match = '''-----BEGIN RSA PRIVATE KEY-----'''
+
+[[rules]]
+id = "SSH private key"
+description = "SSH private key"
+match = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
+
+[[rules]]
+id = "PGP private key"
+description = "PGP private key"
+match = '''-----BEGIN PGP PRIVATE KEY BLOCK-----'''
+
+[[rules]]
+id = "Github Personal Access Token"
+description = "Github Personal Access Token"
+match = '''ghp_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+id = "Github OAuth Access Token"
+description = "Github OAuth Access Token"
+match = '''gho_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+id = "SSH (DSA) private key"
+description = "SSH (DSA) private key"
+match = '''-----BEGIN DSA PRIVATE KEY-----'''
+
+[[rules]]
+id = "SSH (EC) private key"
+description = "SSH (EC) private key"
+match = '''-----BEGIN EC PRIVATE KEY-----'''
+
+[[rules]]
+id = "Github App Token"
+description = "Github App Token"
+match = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+id = "Github Refresh Token"
+description = "Github Refresh Token"
+match = '''ghr_[0-9a-zA-Z]{76}'''
+
+[[rules]]
+id = "Shopify shared secret"
+description = "Shopify shared secret"
+match = '''shpss_[a-fA-F0-9]{32}'''
+
+[[rules]]
+id = "Shopify access token"
+description = "Shopify access token"
+match = '''shpat_[a-fA-F0-9]{32}'''
+
+[[rules]]
+id = "Shopify custom app access token"
+description = "Shopify custom app access token"
+match = '''shpca_[a-fA-F0-9]{32}'''
+
+[[rules]]
+id = "Shopify private app access token"
+description = "Shopify private app access token"
+match = '''shppa_[a-fA-F0-9]{32}'''
+
+[[rules]]
+id = "Slack token"
+description = "Slack token"
+match = '''xox[baprs]-([0-9a-zA-Z]{10,48})?'''
+
+[[rules]]
+id = "Stripe"
+description = "Stripe"
+match = '''(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}'''
+
+[[rules]]
+id = "PyPI upload token"
+description = "PyPI upload token"
+match = '''pypi-AgEIcHlwaS5vcmc[A-Za-z0-9-_]{50,1000}'''
+tags = ["pypi", "revocation_type"]
+
+[[rules]]
+id = "Google (GCP) Service-account"
+description = "Google (GCP) Service-account"
+match = '''\"type\": \"service_account\"'''
+
+[[rules]]
+# demo of this match not matching passwords in urls that contain env vars:
+# https://match101.com/r/rT9Lv9/3
+id = "Password in URL"
+description = "Password in URL"
+match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
+
+
+[[rules]]
+id = "Heroku API Key"
+description = "Heroku API Key"
+match = '''(?i)(heroku[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Slack Webhook"
+description = "Slack Webhook"
+match = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
+
+[[rules]]
+id = "Twilio API Key"
+description = "Twilio API Key"
+match = '''SK[0-9a-fA-F]{32}'''
+
+[[rules]]
+id = "Age secret key"
+description = "Age secret key"
+match = '''AGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}'''
+
+[[rules]]
+id = "Facebook token"
+description = "Facebook token"
+match = '''(?i)(facebook[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Twitter token"
+description = "Twitter token"
+match = '''(?i)(twitter[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{35,44})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Adobe Client ID (Oauth Web)"
+description = "Adobe Client ID (Oauth Web)"
+match = '''(?i)(adobe[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Adobe Client Secret"
+description = "Adobe Client Secret"
+match = '''(?i)(p8e-)[a-z0-9]{32}'''
+
+[[rules]]
+id = "Alibaba AccessKey ID"
+description = "Alibaba AccessKey ID"
+match = '''(?i)(LTAI)[a-z0-9]{20}'''
+
+[[rules]]
+id = "Alibaba Secret Key"
+description = "Alibaba Secret Key"
+match = '''(?i)(alibaba[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Asana Client ID"
+description = "Asana Client ID"
+match = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{16})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Asana Client Secret"
+description = "Asana Client Secret"
+match = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Atlassian API token"
+description = "Atlassian API token"
+match = '''(?i)(atlassian[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{24})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Bitbucket client ID"
+description = "Bitbucket client ID"
+match = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Bitbucket client secret"
+description = "Bitbucket client secret"
+match = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9_\-]{64})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Beamer API token"
+description = "Beamer API token"
+match = '''(?i)(beamer[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](b_[a-z0-9=_\-]{44})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Clojars API token"
+description = "Clojars API token"
+match = '''(?i)(CLOJARS_)[a-z0-9]{60}'''
+
+[[rules]]
+id = "Contentful delivery API token"
+description = "Contentful delivery API token"
+match = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Contentful preview API token"
+description = "Contentful preview API token"
+match = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Databricks API token"
+description = "Databricks API token"
+match = '''dapi[a-h0-9]{32}'''
+
+[[rules]]
+id = "Discord API key"
+description = "Discord API key"
+match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{64})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Discord client ID"
+description = "Discord client ID"
+match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{18})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Discord client secret"
+description = "Discord client secret"
+match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_\-]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Doppler API token"
+description = "Doppler API token"
+match = '''(?i)['\"](dp\.pt\.)[a-z0-9]{43}['\"]'''
+
+[[rules]]
+id = "Dropbox API secret/key"
+description = "Dropbox API secret/key"
+match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{15})['\"]'''
+
+[[rules]]
+id = "Dropbox short lived API token"
+description = "Dropbox short lived API token"
+match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](sl\.[a-z0-9\-=_]{135})['\"]'''
+
+[[rules]]
+id = "Dropbox long lived API token"
+description = "Dropbox long lived API token"
+match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"][a-z0-9]{11}(AAAAAAAAAA)[a-z0-9\-_=]{43}['\"]'''
+
+[[rules]]
+id = "Duffel API token"
+description = "Duffel API token"
+match = '''(?i)['\"]duffel_(test|live)_[a-z0-9_-]{43}['\"]'''
+
+[[rules]]
+id = "Dynatrace API token"
+description = "Dynatrace API token"
+match = '''(?i)['\"]dt0c01\.[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
+
+[[rules]]
+id = "EasyPost API token"
+description = "EasyPost API token"
+match = '''(?i)['\"]EZAK[a-z0-9]{54}['\"]'''
+
+[[rules]]
+id = "EasyPost test API token"
+description = "EasyPost test API token"
+match = '''(?i)['\"]EZTK[a-z0-9]{54}['\"]'''
+
+[[rules]]
+id = "Fastly API token"
+description = "Fastly API token"
+match = '''(?i)(fastly[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Finicity client secret"
+description = "Finicity client secret"
+match = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{20})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Finicity API token"
+description = "Finicity API token"
+match = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Flutterweave public key"
+description = "Flutterweave public key"
+match = '''(?i)FLWPUBK_TEST-[a-h0-9]{32}-X'''
+
+[[rules]]
+id = "Flutterweave secret key"
+description = "Flutterweave secret key"
+match = '''(?i)FLWSECK_TEST-[a-h0-9]{32}-X'''
+
+[[rules]]
+id = "Flutterweave encrypted key"
+description = "Flutterweave encrypted key"
+match = '''FLWSECK_TEST[a-h0-9]{12}'''
+
+[[rules]]
+id = "Frame.io API token"
+description = "Frame.io API token"
+match = '''(?i)fio-u-[a-z0-9-_=]{64}'''
+
+[[rules]]
+id = "GoCardless API token"
+description = "GoCardless API token"
+match = '''(?i)['\"]live_[a-z0-9-_=]{40}['\"]'''
+
+[[rules]]
+id = "Grafana API token"
+description = "Grafana API token"
+match = '''(?i)['\"]eyJrIjoi[a-z0-9-_=]{72,92}['\"]'''
+
+[[rules]]
+id = "Hashicorp Terraform user/org API token"
+description = "Hashicorp Terraform user/org API token"
+match = '''(?i)['\"][a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
+
+[[rules]]
+id = "Hashicorp Vault batch token"
+description = "Hashicorp Vault batch token"
+match = '''b\.AAAAAQ[0-9a-zA-Z_-]{156}'''
+
+[[rules]]
+id = "Hubspot API token"
+description = "Hubspot API token"
+match = '''(?i)(hubspot[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Intercom API token"
+description = "Intercom API token"
+match = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_]{60})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Intercom client secret/ID"
+description = "Intercom client secret/ID"
+match = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Ionic API token"
+description = "Ionic API token"
+match = '''(?i)ion_[a-z0-9]{42}'''
+
+[[rules]]
+id = "Linear API token"
+description = "Linear API token"
+match = '''(?i)lin_api_[a-z0-9]{40}'''
+
+[[rules]]
+id = "Linear client secret/ID"
+description = "Linear client secret/ID"
+match = '''(?i)(linear[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Lob API Key"
+description = "Lob API Key"
+match = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((live|test)_[a-f0-9]{35})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Lob Publishable API Key"
+description = "Lob Publishable API Key"
+match = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((test|live)_pub_[a-f0-9]{31})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Mailchimp API key"
+description = "Mailchimp API key"
+match = '''(?i)(mailchimp[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32}-us20)['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Mailgun private API token"
+description = "Mailgun private API token"
+match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](key-[a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Mailgun public validation key"
+description = "Mailgun public validation key"
+match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](pubkey-[a-f0-9]{32})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Mailgun webhook signing key"
+description = "Mailgun webhook signing key"
+match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Mapbox API token"
+description = "Mapbox API token"
+match = '''(?i)(pk\.[a-z0-9]{60}\.[a-z0-9]{22})'''
+
+[[rules]]
+id = "messagebird-api-token"
+description = "MessageBird API token"
+match = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{25})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "MessageBird API client ID"
+description = "MessageBird API client ID"
+match = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "New Relic user API Key"
+description = "New Relic user API Key"
+match = '''['\"](NRAK-[A-Z0-9]{27})['\"]'''
+
+[[rules]]
+id = "New Relic user API ID"
+description = "New Relic user API ID"
+match = '''(?i)(newrelic[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([A-Z0-9]{64})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "New Relic ingest browser API token"
+description = "New Relic ingest browser API token"
+match = '''['\"](NRJS-[a-f0-9]{19})['\"]'''
+
+[[rules]]
+id = "npm access token"
+description = "npm access token"
+match = '''(?i)['\"](npm_[a-z0-9]{36})['\"]'''
+
+[[rules]]
+id = "Planetscale password"
+description = "Planetscale password"
+match = '''(?i)pscale_pw_[a-z0-9\-_\.]{43}'''
+
+[[rules]]
+id = "Planetscale API token"
+description = "Planetscale API token"
+match = '''(?i)pscale_tkn_[a-z0-9\-_\.]{43}'''
+
+[[rules]]
+id = "Postman API token"
+description = "Postman API token"
+match = '''(?i)PMAK-[a-f0-9]{24}\-[a-f0-9]{34}'''
+
+[[rules]]
+id = "Pulumi API token"
+description = "Pulumi API token"
+match = '''pul-[a-f0-9]{40}'''
+
+[[rules]]
+id = "Rubygem API token"
+description = "Rubygem API token"
+match = '''rubygems_[a-f0-9]{48}'''
+
+[[rules]]
+id = "Sendgrid API token"
+description = "Sendgrid API token"
+match = '''(?i)SG\.[a-z0-9_\-\.]{66}'''
+
+[[rules]]
+id = "Sendinblue API token"
+description = "Sendinblue API token"
+match = '''(?i)xkeysib-[a-f0-9]{64}\-[a-z0-9]{16}'''
+
+[[rules]]
+id = "Shippo API token"
+description = "Shippo API token"
+match = '''shippo_(live|test)_[a-f0-9]{40}'''
+
+[[rules]]
+id = "Linkedin Client secret"
+description = "Linkedin Client secret"
+match = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z]{16})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Linkedin Client ID"
+description = "Linkedin Client ID"
+match = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{14})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Twitch API token"
+description = "Twitch API token"
+match = '''(?i)(twitch[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+secretGroup = 3
+
+[[rules]]
+id = "Typeform API token"
+description = "Typeform API token"
+match = '''(?i)(typeform[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}(tfp_[a-z0-9\-_\.=]{59})'''
+secretGroup = 3
+
+[[rules]]
+id = "Social Security Number"
+description = "Social Security Number"
+match = '''\d{3}-\d{2}-\d{4}'''
+
+[allowlist]
+description = "global allow lists"
+regexes = ['''219-09-9999''', '''078-05-1120''', '''(9[0-9]{2}|666)-\d{2}-\d{4}''']
+paths = [
+    '''gitleaks.toml''',
+    '''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)$'''
+]

@@ -15,3 +15,5 @@
 # vendor/
 
 .idea
+test
+venv
