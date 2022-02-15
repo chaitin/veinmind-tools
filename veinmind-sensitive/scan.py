@@ -93,10 +93,10 @@ def cli(engine, name):
                                     if match.startswith("$contains:"):
                                         keyword = match.lstrip("$contains:")
                                         if keyword in f_content:
-                                            logger.warn("find sensitive file: " + filepath)
+                                            logger.warning("find sensitive file: " + filepath)
                                     else:
                                         if re.match(match, f_content):
-                                            logger.warn("find sensitive file: " + filepath)
+                                            logger.warning("find sensitive file: " + filepath)
                     except Exception as e:
                         print(e)
 
