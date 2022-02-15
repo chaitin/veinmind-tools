@@ -9,10 +9,12 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 
 ## 工具列表
 ### 镜像安全
-- 镜像恶意样本检测工具：
+- 镜像恶意样本检测工具:
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-malicious
-- 镜像弱口令检测工具：
+- 镜像弱口令检测工具:
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-weakpass
+- 镜像敏感信息检测工具:
+    https://github.com/chaitin/veinmind-tools/tree/master/veinmind-sensitive
     
 ## 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
