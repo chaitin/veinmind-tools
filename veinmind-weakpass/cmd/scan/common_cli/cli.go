@@ -1,10 +1,14 @@
 package common_cli
 
 import (
+	"fmt"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	common "github.com/chaitin/veinmind-tools/veinmind-weakpass/log"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/scan"
 	"github.com/urfave/cli/v2"
+	"os"
+	"strconv"
+	"text/tabwriter"
 	"time"
 )
 
@@ -65,24 +69,36 @@ var App = &cli.App{
 					return err
 				}
 
+				tabw := tabwriter.NewWriter(os.Stdout, 95, 95, 0, ' ', tabwriter.TabIndent|tabwriter.Debug)
+				fmt.Fprintln(tabw, "# ============================================================================================ #")
+				spend := time.Since(scanStart)
+				fmt.Fprintln(tabw, "| Scan Total: ", strconv.Itoa(len(results)), "\t")
+				fmt.Fprintln(tabw, "| Spend Time: ", spend.String(), "\t")
+				var weakpassImageTotal = 0
+				var weakpassTotal = 0
 				for _, r := range results {
-					if len(r.WeakpassResults) == 0 {
-						common.Log.Info("ImageName: ", r.ImageName)
-						common.Log.Info("Status: Safe")
-						common.Log.Info("====================================================================================")
-					} else {
-						common.Log.Warn("ImageName: ", r.ImageName)
-						common.Log.Warn("Status: Unsafe")
-						for _, w := range r.WeakpassResults {
-							common.Log.Warn("Username: ", w.Username)
-							common.Log.Warn("Password: ", w.Password)
-						}
-						common.Log.Info("====================================================================================")
+					if len(r.WeakpassResults) > 0 {
+						weakpassImageTotal++
+						weakpassTotal += len(r.WeakpassResults)
 					}
 				}
-				spend := time.Since(scanStart)
-				common.Log.Info("Scan Spend Time: ", spend.String())
-				common.Log.Info("====================================================================================")
+				fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassTotal), "\t")
+				fmt.Fprintln(tabw, "| Weakpass Total: ", strconv.Itoa(weakpassTotal), "\t")
+				fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
+
+				for _, r := range results {
+					if len(r.WeakpassResults) > 0 {
+						fmt.Fprintln(tabw, "| ImageName: ", r.ImageName, "\t")
+						fmt.Fprintln(tabw, "| Status: Unsafe", "\t")
+						for _, w := range r.WeakpassResults {
+							fmt.Fprintln(tabw, "| Username: ", w.Username, "\t")
+							fmt.Fprintln(tabw, "| Password: ", w.Password, "\t")
+						}
+						fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
+					}
+				}
+				fmt.Fprintln(tabw, "# ============================================================================================ #\n")
+				tabw.Flush()
 
 				return nil
 			},
