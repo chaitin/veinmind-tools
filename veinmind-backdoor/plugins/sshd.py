@@ -12,7 +12,6 @@ class sshd():
     rootok_list = ("su", "chsh", "chfn", "runuser")
 
     def detect(self, image):
-        log.logger.info("Detect image sshd symlink backdoor: " + image.id())
         results = []
 
         for root, dirs, files in image.walk("/"):

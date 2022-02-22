@@ -1,1 +1,1 @@
-__all__ = ['log', 'result', 'regex']
+__all__ = ['log', 'result', 'regex', 'tools']

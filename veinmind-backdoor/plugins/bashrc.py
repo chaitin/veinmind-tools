@@ -21,7 +21,6 @@ class bashrc:
     ]
 
     def detect(self, image):
-        log.logger.info("Detect image bashrc backdoor: " + image.id())
         results = []
 
         for bashrc_dir in self.bashrc_dirs:

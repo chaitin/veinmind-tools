@@ -8,7 +8,6 @@ class service():
     service_dir_list = ["/etc/systemd/system"]
 
     def detect(self, image):
-        log.logger.info("Detect image service backdoor: " + image.id())
         results = []
 
         for service_dir in self.service_dir_list:

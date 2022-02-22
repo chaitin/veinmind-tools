@@ -1,7 +1,7 @@
 <h1 align="center"> veinmind-sensitive </h1>
 
 <p align="center">
-veinmind-weakpass 是由长亭科技自研的一款镜像敏感信息扫描工具 
+veinmind-sensitive 是由长亭科技自研的一款镜像敏感信息扫描工具 
 </p>
 
 ## 功能特性

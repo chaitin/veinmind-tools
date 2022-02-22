@@ -23,7 +23,6 @@ class crontab:
     ]
 
     def detect(self, image):
-        log.logger.info("Detect image crontab backdoor: " + image.id())
         results = []
         for cron in self.cron_list:
             try:
