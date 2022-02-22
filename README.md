@@ -15,6 +15,8 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-weakpass
 - 镜像敏感信息检测工具:
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-sensitive
+- 镜像后门检测工具:
+    https://github.com/chaitin/veinmind-tools/tree/master/veinmind-backdoor
     
 ## 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
