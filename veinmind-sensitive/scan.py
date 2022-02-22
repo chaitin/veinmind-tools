@@ -24,6 +24,9 @@ def load_rules():
     with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "rules.toml"), encoding="utf8") as f:
         rules = toml.load(f)
 
+def tab_print(printstr: str):
+    print(("| " + printstr + "\t|").expandtabs(95))
+
 class Report():
     def __init__(self):
         self.scan_counts = 0
@@ -122,25 +125,25 @@ def cli(engine, name, output):
 
         if output == "stdout":
             print("# ============================================================================================ #")
-            print("Scan Image Total: " + str(len(report_list)))
+            tab_print("Scan Image Total: " + str(len(report_list)))
             spend_time_total = 0
             sensitive_file_total = 0
             for r in report_list:
                 spend_time_total = spend_time_total + r.spend_time
                 sensitive_file_total = sensitive_file_total + len(r.sensitive_filepath_lists)
-            print("Spend Time Total: " + spend_time_total.__str__() + "s")
-            print("Sensitive File Total: " + str(sensitive_file_total))
-            print("Unsafe Image List: ")
+            tab_print("Spend Time Total: " + spend_time_total.__str__() + "s")
+            tab_print("Sensitive File Total: " + str(sensitive_file_total))
+            tab_print("Unsafe Image List: ")
             for r in report_list:
                 if len(r.sensitive_filepath_lists) == 0:
                     continue
                 print("+----------------------------------------------------------------------------------------------+")
-                print("| ImageName: " + r.imagename)
-                print("| Scan Total: " + str(r.scan_counts))
-                print("| Spend Time: " + r.spend_time.__str__() + "s")
-                print("| Sensitive File Total: " + str(len(r.sensitive_filepath_lists)))
+                tab_print("ImageName: " + r.imagename)
+                tab_print("Scan Total: " + str(r.scan_counts))
+                tab_print("Spend Time: " + r.spend_time.__str__() + "s")
+                tab_print("Sensitive File Total: " + str(len(r.sensitive_filepath_lists)))
                 for fp in r.sensitive_filepath_lists:
-                    print("| Sensitive File: " + fp)
+                    tab_print("Sensitive File: " + fp)
             print("+----------------------------------------------------------------------------------------------+")
         elif output == "json":
             with open("output.json", mode="w") as f:
