@@ -16,4 +16,8 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-malicious-amd64
-          path: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious
+          path: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
