@@ -4,9 +4,6 @@
 veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chaitin/libveinmind">veinmind-sdk</a>打造的容器安全工具集
 </p>
 
-## 下载链接
-[https://download.veinmind.tech/](https://download.veinmind.tech/)
-
 ## 工具列表
 ### 镜像安全
 - 镜像恶意样本检测工具:
