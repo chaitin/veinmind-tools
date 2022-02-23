@@ -16,4 +16,8 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-weakpass-amd64
-          path: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass
+          path: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
