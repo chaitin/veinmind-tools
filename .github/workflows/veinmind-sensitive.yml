@@ -1,0 +1,23 @@
+name: veinmind-sensitive
+on: [push]
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+      - run: |
+          cd veinmind-sensitive
+          tar -cvzf veinmind-sensitive.tar.gz *
+      - uses: actions/upload-artifact@v2
+        with:
+          name: veinmind-sensitive.tar.gz
+          path: ./veinmind-sensitive/veinmind-sensitive.tar.gz
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./veinmind-sensitive/veinmind-sensitive.tar.gz
+
