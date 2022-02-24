@@ -33,7 +33,7 @@ def cli(engine, name, output):
                     results.append(r)
     spend_time = time.time() - start
 
-    if output == "stdout":
+    if output == "stdout" and len(results) > 0:
         print("# ================================================================================================= #")
         image_id_dict = {}
         for r in results:
