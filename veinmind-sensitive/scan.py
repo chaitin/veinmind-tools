@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pytoml as toml
 import click
 import re
