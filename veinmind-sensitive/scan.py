@@ -25,7 +25,19 @@ def load_rules():
         rules = toml.load(f)
 
 def tab_print(printstr: str):
-    print(("| " + printstr + "\t|").expandtabs(95))
+    if len(printstr) < 95:
+        print(("| " + printstr + "\t|").expandtabs(100))
+    else:
+        char_count = 0
+        printstr_temp = ""
+        for char in printstr:
+            char_count = char_count + 1
+            printstr_temp = printstr_temp + char
+            if char_count == 95:
+                char_count = 0
+                print(("| " + printstr_temp + "\t|").expandtabs(100))
+                printstr_temp = ""
+        print(("| " + printstr_temp + "\t|").expandtabs(100))
 
 class Report():
     def __init__(self):
@@ -123,8 +135,8 @@ def cli(engine, name, output):
             report.spend_time = spend_time
             report_list.append(report)
 
-        if output == "stdout":
-            print("# ============================================================================================ #")
+        if output == "stdout" and len(report_list) > 0:
+            print("# ================================================================================================= #")
             tab_print("Scan Image Total: " + str(len(report_list)))
             spend_time_total = 0
             sensitive_file_total = 0
@@ -137,14 +149,14 @@ def cli(engine, name, output):
             for r in report_list:
                 if len(r.sensitive_filepath_lists) == 0:
                     continue
-                print("+----------------------------------------------------------------------------------------------+")
+                print("+---------------------------------------------------------------------------------------------------+")
                 tab_print("ImageName: " + r.imagename)
                 tab_print("Scan Total: " + str(r.scan_counts))
                 tab_print("Spend Time: " + r.spend_time.__str__() + "s")
                 tab_print("Sensitive File Total: " + str(len(r.sensitive_filepath_lists)))
                 for fp in r.sensitive_filepath_lists:
                     tab_print("Sensitive File: " + fp)
-            print("+----------------------------------------------------------------------------------------------+")
+            print("+---------------------------------------------------------------------------------------------------+")
         elif output == "json":
             with open("output.json", mode="w") as f:
                 f.write(jsonpickle.dumps(report_list))
