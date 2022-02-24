@@ -151,7 +151,15 @@ func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) 
 	defer func() {
 		image.Close()
 	}()
-	common.Log.Info("Scan Image: ", id)
+
+	refs , err := image.RepoRefs()
+	var imageRef string
+	if err == nil && len(refs) > 0 {
+		imageRef = refs[0]
+	}else{
+		imageRef = image.ID()
+	}
+	common.Log.Info("Scan Image: ", imageRef)
 
 	// 判断是否可以获取 Layer
 	switch v := image.(type) {
