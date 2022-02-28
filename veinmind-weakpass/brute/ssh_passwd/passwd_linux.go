@@ -5,7 +5,7 @@ package ssh_passwd
 // #include <string.h>
 // #define __USE_GNU 1
 // #include <crypt.h>
-// #cgo LDFLAGS: -lcrypt
+// #cgo LDFLAGS: -Wl,-Bstatic -lcrypt -Wl,-Bdynamic
 //
 // static int passwd_match
 // (const char* salt, const char* src, const char* dst) {
