@@ -2,32 +2,34 @@ package clamav
 
 import (
 	"errors"
+	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av"
 	"github.com/dutchcoders/go-clamd"
 	"io"
+	"os"
 	"strings"
 )
 
-func ScanFile(address string, path string) ([]clamd.ScanResult, error) {
-	c := clamd.NewClamd(address)
-	response, err := c.ScanFile(path)
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]clamd.ScanResult, 0, len(response))
-	for s := range response {
-		if s.Status == clamd.RES_FOUND {
-			ret = append(ret, *s)
-		} else if s.Status == clamd.RES_ERROR || s.Status == clamd.RES_PARSE_ERROR {
-			return nil, errors.New(s.Description)
+var client = func() *clamd.Clamd{
+	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
+	c := clamd.NewClamd(CLAMD_ADDRESS)
+	return c
+}()
+
+func Active() bool {
+	if client == nil {
+		return false
+	}else{
+		if client.Ping() != nil {
+			return false
+		}else{
+			return true
 		}
 	}
-	return ret, nil
 }
 
-func ScanStream(address string, stream io.Reader) ([]clamd.ScanResult, error) {
-	c := clamd.NewClamd(address)
+func ScanStream(stream io.Reader) ([]av.ScanResult, error) {
 	abort := make(chan bool, 1)
-	response, err := c.ScanStream(stream, abort)
+	response, err := client.ScanStream(stream, abort)
 	defer func() {
 		close(abort)
 	}()
@@ -48,7 +50,21 @@ func ScanStream(address string, stream io.Reader) ([]clamd.ScanResult, error) {
 			return nil, new(ResultParseError)
 		}
 	}
-	return ret, nil
+
+	// 转换为公共结构体
+	retCommon := []av.ScanResult{}
+	for _, r := range ret {
+		commonResult := av.ScanResult{
+			EngineName: "ClamAV",
+			Description: r.Description,
+			IsMalicious: true,
+			Method: "blacklist",
+		}
+
+		retCommon = append(retCommon, commonResult)
+	}
+
+	return retCommon, nil
 }
 
 type ServiceInfo struct {
@@ -58,29 +74,6 @@ type ServiceInfo struct {
 	Threads  string
 	Memstats string
 	Queue    string
-}
-
-func QueryServiceInfo(sockPath string) (ServiceInfo, error) {
-	c := clamd.NewClamd(sockPath)
-	var r ServiceInfo
-	response, err := c.Version()
-	if err != nil {
-		return r, err
-	}
-	for s := range response {
-		r = ServiceInfo{Version: s.Raw}
-		break
-	}
-	stats, err := c.Stats()
-	if err != nil {
-		return r, err
-	}
-	r.Pools = stats.Pools
-	r.State = stats.State
-	r.Threads = stats.Threads
-	r.Memstats = stats.Memstats
-	r.Queue = stats.Queue
-	return r, nil
 }
 
 type SizeLimitReachedError struct {

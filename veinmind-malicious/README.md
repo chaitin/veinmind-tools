@@ -6,7 +6,7 @@ veinmind-malicious 是由长亭科技自研的一款镜像恶意文件扫描工�
 
 ## 功能特性
 
-- 快速扫描镜像中的恶意文件 (目前支持`clamAv`)
+- 快速扫描镜像中的恶意文件 (目前支持`ClamAV`以及`VirusTotal`)
 - 支持`docker`镜像文件系统扫描
 - 支持`containerd`镜像文件系统扫描
 - 支持`JSON`/`CSV`/`HTML`等多种报告格式输出
@@ -22,10 +22,15 @@ veinmind-malicious 是由长亭科技自研的一款镜像恶意文件扫描工�
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
-确保机器上安装了`docker`以及`docker-compose`，并启动`clamAv`
+确保机器上安装了`docker`以及`docker-compose`，并启动`ClamAV`。
 
 ```
 chmod +x veinmind-malicious && ./veinmind-malicious extract && cd scripts && docker-compose pull && docker-compose up -d
+```
+
+如果您使用的是`VirusTotal`，则需要在环境变量或`scripts/.env`文件中声明`VT_API_KEY`
+```
+export VT_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ## 使用

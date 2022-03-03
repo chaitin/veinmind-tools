@@ -2,6 +2,7 @@ package malicious
 
 import (
 	"code.cloudfoundry.org/bytefmt"
+	"context"
 	"crypto/md5"
 	"crypto/sha256"
 	"debug/elf"
@@ -13,12 +14,16 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/scanner/scanner_common"
+	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/clamav"
+	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/virustotal"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	fs "io/fs"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -27,6 +32,11 @@ type MaliciousPlugin struct {
 }
 
 func (self *MaliciousPlugin) Scan(opt scanner_common.ScanOption) (scanReportAll model.ReportData, err error) {
+	// 扫描之前需要至少拥有一个存活的 AV 引擎， 否则抛出异常
+	if !clamav.Active() && !virustotal.Active() {
+		log.Fatal("Please active anti virus engine at least one")
+	}
+
 	// 判断引擎类型
 	var client veinmindcommon.Runtime
 
@@ -83,56 +93,6 @@ func (self *MaliciousPlugin) Scan(opt scanner_common.ScanOption) (scanReportAll 
 	return scanReportAll, nil
 }
 
-//func ScanByName(name string, opt ScanOption) (scanReports []model.ReportImage, err error) {
-//	// 判断引擎类型
-//	var client veinmindcommon.Runtime
-//
-//	switch opt.EngineType {
-//	case Dockerd:
-//		dockerClient, err := docker.New()
-//		if err != nil {
-//			return
-//		}
-//
-//		client = dockerClient
-//
-//		defer func() {
-//			client.Close()
-//		}()
-//	case Containerd:
-//		containerClient, err := containerd.New()
-//		if err != nil {
-//			return
-//		}
-//
-//		client = containerClient
-//
-//		defer func() {
-//			client.Close()
-//		}()
-//	default:
-//		return []model.ReportImage{}, errors.New("Engine Type Not Match")
-//	}
-//
-//	imageIDs, err := client.FindImageIDs(name)
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for _, imageID := range imageIDs {
-//		report, err := ScanById(imageID, client)
-//		if err != nil {
-//			common.Log.Error(err)
-//			continue
-//		}
-//
-//		scanReports = append(scanReports, report)
-//	}
-//
-//	return scanReports, nil
-//}
-
 func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", id).Find(&scanReport)
@@ -140,8 +100,6 @@ func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) 
 		common.Log.Info(id, " Has been detected")
 		return scanReport, nil
 	}
-
-	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
 
 	image, err := client.OpenImageByID(id)
 	if err != nil {
@@ -240,52 +198,66 @@ func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) 
 						return nil
 					}
 
-					results, err := clamav.ScanStream(CLAMD_ADDRESS, f)
-					if err != nil {
-						if _, ok := err.(*net.OpError); ok {
-							common.Log.Error(err)
-						} else {
-							//TODO: 告知使用者其他Err
-							common.Log.Debug(err)
+					results := []av.ScanResult{}
+
+					// 使用 ClamAV 进行扫描
+					if clamav.Active() {
+						results, err = clamav.ScanStream(f)
+						if err != nil {
+							if _, ok := err.(*net.OpError); ok {
+								common.Log.Error(err)
+							} else {
+								//TODO: 告知使用者其他Err
+								common.Log.Debug(err)
+							}
 						}
-						return nil
+					}
+
+					// 使用 Virustotal 进行扫描
+					fileByte, err := ioutil.ReadAll(f)
+					hash := sha256.New()
+					fileSha256 := hex.EncodeToString(hash.Sum(fileByte))
+
+					virustotalContext, _ := context.WithTimeout(context.Background(), 10 * time.Millisecond)
+					if virustotal.Active() {
+						vtResults, err := virustotal.ScanSHA256(virustotalContext, fileSha256)
+						if err == nil && vtResults != nil && len(vtResults) > 0 {
+							results = append(results, vtResults...)
+						}
 					}
 
 					if len(results) > 0 {
 						common.Log.Warn("Find malicious file: ", path)
 
+						// 假设有多个结果，直接拼接 description
+						description := ""
 						for _, r := range results {
-							scanReport.MaliciousFileCount++
-
-							// 计算文件MD5
-							hash := md5.New()
-							fileByte, err := ioutil.ReadAll(f)
-							var fileMd5 string
-							if err == nil {
-								fileMd5 = hex.EncodeToString(hash.Sum(fileByte)[:16])
-							}
-
-							// 计算文件Sha256
-							hash = sha256.New()
-							var fileSha256 string
-							if err == nil {
-								fileSha256 = hex.EncodeToString(hash.Sum(fileByte))
-							}
-
-							// 获取文件时间
-							stat := info.Sys().(*syscall.Stat_t)
-
-							result := model.MaliciousFileInfo{
-								RelativePath: path,
-								FileName:     info.Name(),
-								FileSize:     bytefmt.ByteSize(uint64(info.Size())),
-								FileMd5:      fileMd5,
-								FileSha256:   fileSha256,
-								FileCreated:  time.Unix(int64(stat.Ctim.Sec), int64(stat.Ctim.Nsec)).Format("2006-01-02 15:04:05"),
-								Description:  r.Description,
-							}
-							reportLayer.MaliciousFileInfos = append(reportLayer.MaliciousFileInfos, result)
+							description = description + r.Description + ","
 						}
+						description = strings.TrimRight(description, ",")
+
+						scanReport.MaliciousFileCount++
+
+						// 计算文件MD5
+						hash := md5.New()
+						var fileMd5 string
+						if err == nil {
+							fileMd5 = hex.EncodeToString(hash.Sum(fileByte)[:16])
+						}
+
+						// 获取文件时间
+						stat := info.Sys().(*syscall.Stat_t)
+
+						result := model.MaliciousFileInfo{
+							RelativePath: path,
+							FileName:     info.Name(),
+							FileSize:     bytefmt.ByteSize(uint64(info.Size())),
+							FileMd5:      fileMd5,
+							FileSha256:   fileSha256,
+							FileCreated:  time.Unix(int64(stat.Ctim.Sec), int64(stat.Ctim.Nsec)).Format("2006-01-02 15:04:05"),
+							Description:  description,
+						}
+						reportLayer.MaliciousFileInfos = append(reportLayer.MaliciousFileInfos, result)
 					}
 					for _, r := range results {
 						common.Log.Warn(r)
