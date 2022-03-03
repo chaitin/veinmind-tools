@@ -1,6 +1,8 @@
 code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5 h1:tM5+dn2C9xZw1RzgI6WTQW1rGqdUimKB3RFbyu4h6Hc=
 code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5/go.mod h1:v4VVB6oBMz/c9fRY6vZrwr5xKRWOH5NPDjQZlPk0Gbs=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/VirusTotal/vt-go v0.0.0-20211209151516-855a1e790678 h1:IVvLDz0INo1rn7wG4OQub9MkyNNaBp0sQgU1apho/mk=
+github.com/VirusTotal/vt-go v0.0.0-20211209151516-855a1e790678/go.mod h1:u1+HeRyl/gQs67eDgVEWNE7+x+zCyXhdtNVrRJR5YPE=
 github.com/chaitin/libveinmind v1.0.2 h1:IqHmEoQK7r3uBUNZoSF+k30oCOuDEk6JngEEGsrZOlw=
 github.com/chaitin/libveinmind v1.0.2/go.mod h1:XC6Lk4VkbKjtkL/AWhphYRQP2FAxls9K2P7/W+cnibc=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
@@ -68,6 +70,8 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/thedevsaddam/gojsonq/v2 v2.5.2 h1:CoMVaYyKFsVj6TjU6APqAhAvC07hTI6IQen8PHzHYY0=
+github.com/thedevsaddam/gojsonq/v2 v2.5.2/go.mod h1:bv6Xa7kWy82uT0LnXPE2SzGqTj33TAEeR560MdJkiXs=
 github.com/urfave/cli/v2 v2.3.0 h1:qph92Y649prgesehzOrQjdWyxFOp/QVM+6imKHad91M=
 github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

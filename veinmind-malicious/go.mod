@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
+	github.com/VirusTotal/vt-go v0.0.0-20211209151516-855a1e790678 // indirect
 	github.com/chaitin/libveinmind v1.0.2
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/dutchcoders/go-clamd v0.0.0-20170520113014-b970184f4d9e
