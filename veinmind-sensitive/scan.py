@@ -73,9 +73,24 @@ def cli(engine, name, output):
             logger.info("start scan: " + ref)
             for root, dirs, files in image.walk('/'):
                 report.scan_counts = report.scan_counts + 1
-                for filepath in files:
+                for dir in dirs:
                     try:
-                        filepath = os.path.join(root, filepath)
+                        dirpath = os.path.join(root, dir)
+
+                        # detect filepath or filename
+                        for r in rules["rules"]:
+                            if "filepath" in r.keys():
+                                filepath_match_regex = r["filepath"]
+                                if re.match(filepath_match_regex, dirpath):
+                                    report.sensitive_filepath_lists.append(dirpath)
+                                    logger.warning("find sensitive filepath: " + dirpath)
+                                    break
+                    except Exception as e:
+                        print(e)
+
+                for filename in files:
+                    try:
+                        filepath = os.path.join(root, filename)
 
                         # skip whitelist
                         whitelist = rules["whitelist"]
@@ -100,6 +115,19 @@ def cli(engine, name, output):
                             continue
                         except BaseException as e:
                             print(e)
+
+                        # detect filepath or filename
+                        match = False
+                        for r in rules["rules"]:
+                            if "filepath" in r.keys():
+                                filepath_match_regex = r["filepath"]
+                                if re.match(filepath_match_regex, filepath):
+                                    report.sensitive_filepath_lists.append(filepath)
+                                    logger.warning("find sensitive filepath: " + filepath)
+                                    match = True
+                                    break
+                        if match:
+                            continue
 
                         chardet_guess = chardet.detect(f_content_byte[0:64])
                         if chardet_guess["encoding"] != None:
