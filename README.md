@@ -1,10 +1,17 @@
 <h1 align="center"> veinmind-tools </h1>
 
 <p align="center">
+<img src="https://img.shields.io/github/v/release/chaitin/veinmind-tools.svg" />
+<img src="https://img.shields.io/github/release-date/chaitin/veinmind-tools.svg?color=blue&label=update" />
+<img src="https://img.shields.io/badge/go report-A+-brightgreen.svg" />
+
 veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chaitin/libveinmind">veinmind-sdk</a>打造的容器安全工具集
 </p>
 
-## 工具列表
+## 🔥 Demo
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220307110440.gif)
+
+## 🔨 工具列表
 ### 镜像安全
 - 镜像恶意样本检测工具:
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-malicious
@@ -15,7 +22,7 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 - 镜像后门检测工具:
     https://github.com/chaitin/veinmind-tools/tree/master/veinmind-backdoor
     
-## 联系我们
+## 🏘️ 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
 2. 扫描下方二维码可以通过添加问脉小助手，以加入问脉用户讨论群进行详细讨论
 
