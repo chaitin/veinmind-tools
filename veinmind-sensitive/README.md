@@ -58,6 +58,7 @@ python scan.py --output [outputtype]
 - description: 规则描述
 - match: 内容匹配规则，默认为正则
 - filepath: 路径匹配规则，默认为正则
+- env: 环境变量匹配规则，默认为正则且忽略大小写
 
 ## 演示
 1.扫描指定镜像名称 `sensitive`

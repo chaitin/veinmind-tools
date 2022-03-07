@@ -46,6 +46,7 @@ class Report():
         self.imagename = ""
         self.spend_time = 0
         self.sensitive_filepath_lists = []
+        self.sensitive_env_lists = []
 
 @click.command()
 @click.option('--engine',default="docker", help="engine type you use, e.g. docker/containerd")
@@ -71,6 +72,22 @@ def cli(engine, name, output):
                 ref = image.id()
             report.imagename = ref
             logger.info("start scan: " + ref)
+
+            # detect env
+            ocispec = image.ocispec_v1()
+            if 'config' in ocispec.keys() and 'Env' in ocispec['config'].keys():
+                env_list = image.ocispec_v1()['config']['Env']
+                for env in env_list:
+                    env_split = env.split("=")
+                    if len(env_split) >= 2:
+                        for r in rules["rules"]:
+                            if "env" in r.keys():
+                                env_regex = r["env"]
+                                if re.match(env_regex, env, re.IGNORECASE):
+                                    report.sensitive_env_lists.append(env)
+                                    logger.warning("find sensitive env: " + env)
+                                    break
+
             for root, dirs, files in image.walk('/'):
                 report.scan_counts = report.scan_counts + 1
                 for dir in dirs:
@@ -185,6 +202,8 @@ def cli(engine, name, output):
                 tab_print("Sensitive File Total: " + str(len(r.sensitive_filepath_lists)))
                 for fp in r.sensitive_filepath_lists:
                     tab_print("Sensitive File: " + fp)
+                for env in r.sensitive_env_lists:
+                    tab_print("Sensitive Env: " + env)
             print("+---------------------------------------------------------------------------------------------------+")
         elif output == "json":
             with open("output.json", mode="w") as f:
