@@ -1,0 +1,2 @@
+veinmind==1.0.2
+click==8.0.3
