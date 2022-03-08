@@ -1,0 +1,9 @@
+[[rules]]
+description = "Miner Repo"
+instruct = "RUN"
+match = '''.*(xmrig|ethminer|miner)\.git.*'''
+
+[[rules]]
+description = "Unsafe Path"
+instruct = "ENV"
+match = '''PATH=.*(|:)(/tmp|/dev/shm)'''

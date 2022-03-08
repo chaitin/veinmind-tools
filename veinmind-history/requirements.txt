@@ -1,0 +1,15 @@
+certifi==2020.12.5
+chardet==4.0.0
+distlib==0.3.4
+eql==0.9.9
+filelock==3.6.0
+idna==2.10
+lark-parser==0.11.3
+platformdirs==2.5.1
+prompt-toolkit==3.0.19
+Pygments==2.9.0
+requests==2.25.1
+six==1.16.0
+urllib3==1.26.2
+virtualenv==20.13.1
+wcwidth==0.2.5
