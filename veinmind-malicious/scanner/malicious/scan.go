@@ -7,20 +7,16 @@ import (
 	"crypto/sha256"
 	"debug/elf"
 	"encoding/hex"
-	"errors"
 	veinmindcommon "github.com/chaitin/libveinmind/go"
-	containerd "github.com/chaitin/libveinmind/go/containerd"
 	docker "github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/scanner/scanner_common"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/clamav"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/virustotal"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	fs "io/fs"
 	"io/ioutil"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -28,87 +24,13 @@ import (
 	"time"
 )
 
-type MaliciousPlugin struct {
-}
-
-func (self *MaliciousPlugin) Scan(opt scanner_common.ScanOption) (scanReportAll model.ReportData, err error) {
-	// 扫描之前需要至少拥有一个存活的 AV 引擎， 否则抛出异常
-	if !clamav.Active() && !virustotal.Active() {
-		log.Fatal("Please active anti virus engine at least one")
-	}
-
-	// 判断引擎类型
-	var client veinmindcommon.Runtime
-
-	switch opt.EngineType {
-	case scanner_common.Dockerd:
-		dockerClient, err := docker.New()
-		if err != nil {
-			return model.ReportData{}, err
-		}
-
-		client = dockerClient
-
-		defer func() {
-			client.Close()
-		}()
-	case scanner_common.Containerd:
-		containerClient, err := containerd.New()
-		if err != nil {
-			return model.ReportData{}, err
-		}
-
-		client = containerClient
-
-		defer func() {
-			client.Close()
-		}()
-	default:
-		return model.ReportData{}, errors.New("Engine Type Not Match")
-	}
-
-	var imageIds []string
-	if opt.ImageName != "" {
-		imageIds, err = client.FindImageIDs(opt.ImageName)
-		if err != nil {
-			return
-		}
-	} else {
-		imageIds, err = client.ListImageIDs()
-		if err != nil {
-			return
-		}
-	}
-
-	for _, imageID := range imageIds {
-		scanResult, err := self.ScanById(imageID, client)
-		if err != nil {
-			common.Log.Error(err)
-			continue
-		}
-
-		scanReportAll.ScanImageResult = append(scanReportAll.ScanImageResult, scanResult)
-	}
-
-	return scanReportAll, nil
-}
-
-func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) (scanReport model.ReportImage, err error) {
+func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
-	database.GetDbInstance().Where("image_id = ?", id).Find(&scanReport)
+	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
-		common.Log.Info(id, " Has been detected")
+		common.Log.Info(image.ID(), " Has been detected")
 		return scanReport, nil
 	}
-
-	image, err := client.OpenImageByID(id)
-	if err != nil {
-		common.Log.Error(err)
-		return
-	}
-	defer func() {
-		image.Close()
-	}()
 
 	refs , err := image.RepoRefs()
 	var imageRef string
@@ -301,8 +223,4 @@ func (self *MaliciousPlugin) ScanById(id string, client veinmindcommon.Runtime) 
 	}
 
 	return scanReport, nil
-}
-
-func (self *MaliciousPlugin) PluginName() string {
-	return "MaliciousPlugin"
 }

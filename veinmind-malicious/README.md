@@ -7,8 +7,7 @@ veinmind-malicious 是由长亭科技自研的一款镜像恶意文件扫描工�
 ## 功能特性
 
 - 快速扫描镜像中的恶意文件 (目前支持`ClamAV`以及`VirusTotal`)
-- 支持`docker`镜像文件系统扫描
-- 支持`containerd`镜像文件系统扫描
+- 支持 `docker`/`containerd` 容器运行时
 - 支持`JSON`/`CSV`/`HTML`等多种报告格式输出
 
 ## 兼容性
@@ -59,12 +58,12 @@ export VT_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ./veinmind-malicious scan -n [reportname]
 ```
 
-5.指定镜像类型
+5.指定容器运行时类型
 ```
-./veinmind-malicious scan -e [enginetype]
+./veinmind-malicious scan --containerd
 ```
 
-镜像类型
+容器运行时类型
 - dockerd
 - containerd
 
