@@ -33,7 +33,7 @@ veinmind-host 是由长亭科技自研的一款用于运行和管理问脉插件
 
 3.指定容器运行时类型
 ```
-./veinmind-malicious scan --containerd
+./veinmind-host scan --containerd
 ```
 
 容器运行时类型
