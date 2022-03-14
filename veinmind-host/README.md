@@ -40,6 +40,11 @@ veinmind-host 是由长亭科技自研的一款用于运行和管理问脉插件
 - dockerd
 - containerd
 
+4.使用`glob`筛选插件
+```
+./veinmind-host scan -g "**/veinmind-malicious"
+```
+
 ## 演示
 1.扫描指定镜像名称 `xmrig/xmrig`
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220310150011.png)
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220314150819.png)
