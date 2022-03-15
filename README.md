@@ -28,6 +28,6 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 ![](docs/veinmind-group-qrcode.jpg)
 
 ## ✨ 404星链计划
-<img src lazysrc="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">
+<img src="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">
 
 veinmind-tools 现已加入 [404星链计划](https://github.com/knownsec/404StarLink)
