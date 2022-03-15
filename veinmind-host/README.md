@@ -4,6 +4,12 @@
 veinmind-host 是由长亭科技自研的一款用于运行和管理问脉插件的宿主
 </p>
 
+## 基本介绍
+长亭团队以丰富的研发经验为背景， 基于 [veinmind-sdk]() 提供了一套插件系统。
+在该插件系统的支持下，只需要调用 [veinmind-sdk]() 所提供的API，即可自动化的生成符合标准规范的插件。(具体代码示例可查看[example](./example))
+`veinmind-host`作为宿主，则会自动化的扫描符合规范的插件，并将需要扫描的镜像信息传递给对应的插件。
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220315114324.png)
+
 ## 功能特性
 
 - 自动扫描并注册当前目录下(含子目录)的插件
