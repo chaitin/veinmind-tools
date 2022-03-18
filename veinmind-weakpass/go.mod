@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/Jeffail/tunny v0.1.4
-	github.com/chaitin/libveinmind v1.0.2
+	github.com/chaitin/libveinmind v0.0.0-20220308034536-d046ce2fd621
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/urfave/cli/v2 v2.3.0
