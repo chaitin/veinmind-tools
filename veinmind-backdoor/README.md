@@ -27,11 +27,21 @@ veinmind-backdoor 是由长亭科技自研的一款镜像后门扫描工具
 - linux/arm
 
 ## 开始之前
+
+### 安装方式一
+
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
 然后安装`veinmind-backdoor`所需要的`python`依赖
 ```
 pip install -r requirements.txt
+```
+
+### 安装方式二
+
+基于平行容器的模式，获取 `veinmind-backdoor` 的镜像并启动
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-backdoor
 ```
 
 ## 使用
@@ -48,18 +58,27 @@ python scan.py --name [imagename/imageid]
 python scan.py
 ```
 
-3.指定镜像类型
+3.指定容器运行时类型
 ```
-python scan.py --engine [enginetype]
+python scan.py --containerd
 ```
 
-镜像类型
+容器运行时类型
 - dockerd
 - containerd
 
 4.指定输出类型
 ```
-python scan.py --output [outputtype]
+python scan.py --format [formattype]
+```
+
+输出类型
+- stdout
+- json
+
+5.指定输出路径
+```
+python scan.py --format json --output /tmp
 ```
 
 ## 演示

@@ -58,6 +58,8 @@ def cli(engine, name, output):
             else:
                 ref = image.id()
             report.imagename = ref
+            logger.info("start scan: " + ref)
+
             ocispec = image.ocispec_v1()
             if 'history' in ocispec.keys() and len(ocispec['history']) > 0:
                 for history in ocispec['history']:

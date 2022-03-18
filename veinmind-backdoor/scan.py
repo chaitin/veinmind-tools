@@ -3,6 +3,7 @@ import register
 import click
 import jsonpickle
 import time
+import os
 from common import log
 from common import tools
 from veinmind import *
@@ -12,8 +13,9 @@ from plugins import *
 @click.command()
 @click.option('--engine',default="docker", help="engine type you use, e.g. docker/containerd")
 @click.option('--name', default="", help="image name e.g. ubuntu:latest")
-@click.option('--output', default="stdout", help="output format e.g. stdout/json")
-def cli(engine, name, output):
+@click.option('--format', default="stdout", help="output format e.g. stdout/json")
+@click.option('--output', default='.', help="output path e.g. /tmp")
+def cli(engine, name, format, output):
     results = []
 
     start = time.time()
@@ -34,7 +36,7 @@ def cli(engine, name, output):
                     results.append(r)
     spend_time = time.time() - start
 
-    if output == "stdout" and len(results) > 0:
+    if format == "stdout" and len(results) > 0:
         print("# ================================================================================================= #")
         image_id_dict = {}
         for r in results:
@@ -50,8 +52,9 @@ def cli(engine, name, output):
         print("+---------------------------------------------------------------------------------------------------+")
         print("# ================================================================================================= #")
 
-    elif output == "json":
-        with open("output.json", mode="w") as f:
+    elif format == "json":
+        fpath = os.path.join(output, "report.json")
+        with open(fpath, mode="w") as f:
             f.write(jsonpickle.dumps(results))
 
 def runtime(engine):

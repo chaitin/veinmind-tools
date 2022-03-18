@@ -1,3 +1,5 @@
+// +build static
+
 package ssh_passwd
 
 // #include <stdlib.h>
