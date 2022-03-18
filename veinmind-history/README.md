@@ -18,12 +18,23 @@ veinmind-history 是由长亭科技自研的一款镜像异常历史命令扫描
 - linux/arm
 
 ## 开始之前
+
+### 安装方式一
+
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
 然后安装`veinmind-history`所需要的`python`依赖
 ```
 pip install -r requirements.txt
 ```
+
+### 安装方式二
+
+基于平行容器的模式，获取 `veinmind-history` 的镜像并启动
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-history
+```
+
 
 ## 使用
 
@@ -39,9 +50,9 @@ python scan.py --name [imagename/imageid]
 python scan.py
 ```
 
-3.指定镜像类型
+3.指定容器运行时类型
 ```
-python scan.py --engine [enginetype]
+python scan.py --containerd
 ```
 
 镜像类型

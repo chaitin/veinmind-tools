@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	_ "net/http/pprof"
 	"os"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -40,15 +41,17 @@ var scanCmd = &cmd.Command{
 
 		format, _ := cmd.Flags().GetString("format")
 		name, _ := cmd.Flags().GetString("name")
+		outputPath, _ := cmd.Flags().GetString("output")
 		name = strings.Join([]string{name, format}, ".")
+		fpath := path.Join(outputPath, name)
 
 		switch format {
 		case report.HTML:
-			report.OutputHTML(reportData, name)
+			report.OutputHTML(reportData, fpath)
 		case report.JSON:
-			report.OutputJSON(reportData, name)
+			report.OutputJSON(reportData, fpath)
 		case report.CSV:
-			report.OutputCSV(reportData, name)
+			report.OutputCSV(reportData, fpath)
 		}
 	},
 }
@@ -73,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{}))
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")
 	scanCmd.Flags().StringP("name", "n", "report", "report name for scan report")
+	scanCmd.Flags().StringP("output", "o", ".", "output path for report")
 }
 
 func main() {

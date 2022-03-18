@@ -21,6 +21,8 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 |  [veinmind-backdoor](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-backdoor) | 扫描镜像中的后门 |
 |  [veinmind-history](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-history) | 扫描镜像中的异常历史命令 |
     
+PS: 目前所有工具均已支持平行容器的方式运行
+
 ## 🏘️ 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
 2. 扫描下方二维码可以通过添加问脉小助手，以加入问脉用户讨论群进行详细讨论

@@ -18,11 +18,21 @@ veinmind-sensitive 是由长亭科技自研的一款镜像敏感信息扫描工�
 - linux/arm
 
 ## 开始之前
+
+### 安装方式一
+
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
 然后安装`veinmind-sensitive`所需要的`python`依赖
 ```
 pip install -r requirements.txt
+```
+
+### 安装方式二
+
+基于平行容器的模式，获取 `veinmind-sensitive` 的镜像并启动
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive
 ```
 
 ## 使用
