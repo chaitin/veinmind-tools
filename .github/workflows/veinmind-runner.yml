@@ -1,0 +1,51 @@
+name: veinmind-runner
+on: [push]
+jobs:
+  build-amd64:
+    runs-on: ubuntu-latest
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.1'
+      - run: /bin/bash scripts/libveinmind/install_libveinmind_${CI_GOARCH}.sh
+      - run: cd veinmind-runner && /bin/bash -x ../scripts/build/build_veinmind_runner_amd64.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: veinmind-runner-amd64
+          path: ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+  push-image:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-18.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+            linux/arm64
+            linux/386
+          tags: |
+            veinmind/veinmind-runner:latest
+            veinmind/veinmind-runner:${{github.ref_name}}
+          context: ./veinmind-runner
+          build-args: |
+            CI_GOOS=${{env.CI_GOOS}}
+            CI_GOARCH=${{env.CI_GOARCH}}
