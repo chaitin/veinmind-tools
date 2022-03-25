@@ -47,6 +47,11 @@ docker run -d --network veinmind --name clamav clamav/clamav
 docker run --rm -it --network veinmind --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/data -e CLAMD_HOST=clamav -e CLAMD_PORT=3310 veinmind/veinmind-malicious scan
 ```
 
+或者使用项目提供的脚本启动
+```
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
+```
+
 ## 使用
 
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
