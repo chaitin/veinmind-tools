@@ -20,7 +20,22 @@ veinmind-weakpass 是由长亭科技自研的一款镜像弱口令扫描工具
 - linux/arm
 
 ## 开始之前
+
+### 安装方式一
+
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
+
+### 安装方式二
+
+基于平行容器的模式，获取 `veinmind-weakpass` 的镜像并启动
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan
+```
+
+或者使用项目提供的脚本启动
+```
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
+```
 
 ## 使用
 

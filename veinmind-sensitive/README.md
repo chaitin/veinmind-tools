@@ -35,6 +35,11 @@ pip install -r requirements.txt
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive
 ```
 
+或者使用项目提供的脚本启动
+```
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh
+```
+
 ## 使用
 
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)

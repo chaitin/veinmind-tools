@@ -35,6 +35,10 @@ pip install -r requirements.txt
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-history
 ```
 
+或者使用项目提供的脚本启动
+```
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh
+```
 
 ## 使用
 
