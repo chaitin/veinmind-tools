@@ -543,3 +543,133 @@ paths = [
     '''gitleaks.toml''',
     '''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)$'''
 ]
+
+[[rules]]
+id = "Bakup File"
+description = "Bakup File"
+filepath = '''.*\/.+\.(bak|swp|old)$'''
+
+[[rules]]
+id = "Desktop Services Store"
+description = "Desktop Services Store"
+filepath = ''' .*\/\.DS_Store$'''
+
+[[rules]]
+id = "Shell command history file"
+description = "Shell command history file"
+filepath = '''.*\/\.(bash_|zsh_|dash_)history$'''
+
+[[rules]]
+id = "MySQL client command history file"
+description = "MySQL client command history file"
+filepath = '''.*\/\.mysql_history$'''
+
+[[rules]]
+id = "PostgreSQL client command history file"
+description = "PostgreSQL client command history file"
+filepath = '''.*\/\.psql_history$'''
+
+[[rules]]
+id = "Ruby IRB console history file"
+description = "Ruby IRB console history file"
+filepath = '''.*\/\.irb_history$'''
+
+[[rules]]
+id = "Pidgin chat client account configuration file"
+description = "Pidgin chat client account configuration file"
+filepath = '''.*\/\.purple\/accounts\.xml$'''
+
+[[rules]]
+id = "Hexchat/XChat IRC client server list configuration file"
+description = "Hexchat/XChat IRC client server list configuration file"
+filepath = '''.*\/\.xchat2?\/servlist_?\.conf$'''
+
+[[rules]]
+id = "Irssi IRC client configuration file"
+description = "Irssi IRC client configuration file"
+filepath = '''.*\/\.irssi\/config$'''
+
+[[rules]]
+id = "Recon-ng web reconnaissance framework API key database"
+description = "Recon-ng web reconnaissance framework API key database"
+filepath = '''.*\/\.recon-ng\/keys\.db$'''
+
+[[rules]]
+id = "DBeaver SQL database manager configuration file"
+description = "DBeaver SQL database manager configuration file"
+filepath = '''.*\/\.dbeaver-data-sources\.xml$'''
+
+[[rules]]
+id = "Mutt e-mail client configuration file"
+description = "Mutt e-mail client configuration file"
+filepath = '''.*\/\.muttrc$'''
+
+[[rules]]
+id = "S3cmd configuration file"
+description = "S3cmd configuration file"
+filepath = '''.*\/\.s3cfg$'''
+
+[[rules]]
+id = "Ruby On Rails secret token configuration file"
+description = "If the Rails secret token is known, it can allow for remote code execution. (http://www.exploit-db.com/exploits/27527/)"
+filepath = '''.*\/secret_token\.rb$'''
+
+[[rules]]
+id = "OmniAuth configuration file"
+description = "The OmniAuth configuration file might contain client application secrets."
+filepath = '''.*\/omniauth\.rb$'''
+
+[[rules]]
+id = "Carrierwave configuration file"
+description = "Can contain credentials for online storage systems such as Amazon S3 and Google Storage."
+filepath = '''.*\/carrierwave\.rb$'''
+
+[[rules]]
+id = "Potential Ruby On Rails database configuration file"
+description = "Might contain database credentials."
+filepath = '''.*\/database\.yml$'''
+
+[[rules]]
+id = "Django configuration file"
+description = "Might contain database credentials, online storage system credentials, secret keys, etc."
+filepath = '''.*\/settings\.py$'''
+
+[[rules]]
+id = "PHP configuration file"
+description = "Might contain credentials and keys."
+filepath = '''.*\/config(\.inc)?\.php$'''
+
+[[rules]]
+id = "Jenkins publish over SSH plugin file"
+description = "Jenkins publish over SSH plugin file"
+filepath = '''.*\/jenkins\.plugins\.publish_over_ssh\.BapSshPublisherPlugin\.xml$'''
+
+[[rules]]
+id = "Potential Jenkins credentials file"
+description = "Potential Jenkins credentials file"
+filepath = '''.*\/credentials\.xml$'''
+
+[[rules]]
+id = "Apache htpasswd file"
+description = "Apache htpasswd file"
+filepath = '''.*\/\.htpasswd$'''
+
+[[rules]]
+id = "Configuration file for auto-login process"
+description = "Might contain username and password."
+filepath = '''.*\/\.(netrc|git-credentials)$'''
+
+[[rules]]
+id = "Potential MediaWiki configuration file"
+description = "Potential MediaWiki configuration file"
+filepath = '''.*\/LocalSettings\.php$'''
+
+[[rules]]
+id = "Rubygems credentials file"
+description = "Might contain API key for a rubygems.org account."
+filepath = '''.*\/\.gem\/credentials$'''
+
+[[rules]]
+id = "Potential MSBuild publish profile"
+description = "Potential MSBuild publish profile"
+filepath = '''.*\/\.pubxml(\.user)?$'''
