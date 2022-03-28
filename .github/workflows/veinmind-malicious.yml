@@ -21,9 +21,6 @@ jobs:
           files: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   push-amd64-image:
     runs-on: ubuntu-18.04
-    env:
-      CI_GOOS: linux
-      CI_GOARCH: amd64
     steps:
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
@@ -42,6 +39,3 @@ jobs:
           tags: |
             veinmind/veinmind-malicious:latest
           context: ./veinmind-malicious
-          build-args: |
-            CI_GOOS=${{env.CI_GOOS}}
-            CI_GOARCH=${{env.CI_GOARCH}}
