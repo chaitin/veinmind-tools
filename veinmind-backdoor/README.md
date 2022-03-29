@@ -54,18 +54,18 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-python scan.py --name [imagename/imageid]
+python scan.py scan-images [imagename/imageid]
 ```
 
 2.扫描所有本地镜像
 
 ```
-python scan.py
+python scan.py scan-images
 ```
 
 3.指定容器运行时类型
 ```
-python scan.py --containerd
+python scan.py scan-images --containerd
 ```
 
 容器运行时类型
@@ -74,7 +74,7 @@ python scan.py --containerd
 
 4.指定输出类型
 ```
-python scan.py --format [formattype]
+python scan.py --format [formattype] scan-images
 ```
 
 输出类型
@@ -83,12 +83,12 @@ python scan.py --format [formattype]
 
 5.指定输出路径
 ```
-python scan.py --format json --output /tmp
+python scan.py --format json --output /tmp scan-images
 ```
 
 ## 演示
 1.扫描指定镜像名称 `service`
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220222163431.png)
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220329141342.png)
 
 2.扫描所有镜像
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220222163443.png)
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220329141357.png)
