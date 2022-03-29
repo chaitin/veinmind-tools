@@ -5,14 +5,13 @@ import jsonpickle
 import pytoml as toml
 
 report_list = []
+instruct_set = ("FROM", "CMD", "RUN", "LABEL", "MAINTAINER", "EXPOSE", "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER", "WORKDIR", "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL")
+
 
 def load_rules():
     global rules
     with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "rules.toml"), encoding="utf8") as f:
         rules = toml.load(f)
-
-
-instruct_set = ("FROM", "CMD", "RUN", "LABEL", "MAINTAINER", "EXPOSE", "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER", "WORKDIR", "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL")
 
 
 def tab_print(printstr: str):
@@ -40,6 +39,7 @@ class Report():
 @command.group()
 @command.option("--output", default="stdout", help="output format e.g. stdout/json")
 def cli(output):
+    load_rules()
     pass
 
 
@@ -117,7 +117,7 @@ def callback(result, output):
         with open("output.json", mode="w") as f:
             f.write(jsonpickle.dumps(report_list))
 
+
 if __name__ == '__main__':
-    load_rules()
     cli.add_info_command()
     cli()
