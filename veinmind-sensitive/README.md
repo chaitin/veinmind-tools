@@ -45,18 +45,18 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-python scan.py --name [imagename/imageid]
+python scan.py scan-images [imagename/imageid]
 ```
 
 2.扫描所有本地镜像
 
 ```
-python scan.py
+python scan.py scan-images
 ```
 
 3.指定镜像类型
 ```
-python scan.py --engine [enginetype]
+python scan.py scan-images --containerd
 ```
 
 镜像类型
@@ -65,7 +65,7 @@ python scan.py --engine [enginetype]
 
 4.指定输出类型
 ```
-python scan.py --output [outputtype]
+python scan.py --output [outputtype] scan-images
 ```
 
 ## 规则字段说明
@@ -77,7 +77,7 @@ python scan.py --output [outputtype]
 
 ## 演示
 1.扫描指定镜像名称 `sensitive`
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220215163700.png)
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220329142155.png)
 
 2.扫描所有镜像
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220215164355.png)
+![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220329142506.png)

@@ -52,6 +52,7 @@ def cli(output):
 
 @cli.image_command()
 def scan_images(image):
+    """scan image sensitive file"""
     report = Report()
     start = time.time()
     refs = image.reporefs()
@@ -140,7 +141,7 @@ def scan_images(image):
                     try:
                         f_content = f_content_byte.decode(chardet_guess["encoding"])
                     except:
-                        pass
+                        continue
                 else:
                     f_content = str(f_content_byte)
                 mime_guess = magic.from_buffer(f_content_byte, mime=True)
