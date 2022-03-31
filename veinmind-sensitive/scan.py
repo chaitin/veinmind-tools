@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 import pytoml as toml
-import click
 import re
-import os
+import os, sys
 import magic
 import fnmatch
 import chardet
-import time
-import jsonpickle
 from veinmind import *
 from stat import *
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+from report import *
+
 report_list = []
+report_event_list = []
+
 
 def load_rules():
     global rules
     with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "rules.toml"), encoding="utf8") as f:
         rules = toml.load(f)
+
 
 def tab_print(printstr: str):
     if len(printstr) < 95:
@@ -53,14 +56,14 @@ def cli(output):
 @cli.image_command()
 def scan_images(image):
     """scan image sensitive file"""
-    report = Report()
+    report_local = Report()
     start = time.time()
     refs = image.reporefs()
     if len(refs) > 0:
         ref = refs[0]
     else:
         ref = image.id()
-    report.imagename = ref
+    report_local.imagename = ref
     log.info("start scan: " + ref)
 
     # detect env
@@ -74,12 +77,21 @@ def scan_images(image):
                     if "env" in r.keys():
                         env_regex = r["env"]
                         if re.match(env_regex, env, re.IGNORECASE):
-                            report.sensitive_env_lists.append(env)
-                            log.warning("find sensitive env: " + env)
+                            report_local.sensitive_env_lists.append(env)
+                            detail = AlertDetail.sensitive_env(SensitiveEnvDetail(
+                                key=env_split[0], value=''.join(env_split[1:]), description=env_regex
+                            ))
+                            report_event = ReportEvent(id=image.id(), level=Level.Medium.value,
+                                                       detect_type=DetectType.Image.value,
+                                                       event_type=EventType.Risk.value,
+                                                       alert_type=AlertType.Sensitive.value,
+                                                       alert_details=[detail])
+                            report_event_list.append(report_event)
+                            report(report_event)
                             break
 
     for root, dirs, files in image.walk('/'):
-        report.scan_counts = report.scan_counts + 1
+        report_local.scan_counts = report_local.scan_counts + 1
         for dir in dirs:
             try:
                 dirpath = os.path.join(root, dir)
@@ -89,8 +101,18 @@ def scan_images(image):
                     if "filepath" in r.keys():
                         filepath_match_regex = r["filepath"]
                         if re.match(filepath_match_regex, dirpath):
-                            report.sensitive_filepath_lists.append(dirpath)
-                            log.warning("find sensitive filepath: " + dirpath)
+                            report_local.sensitive_filepath_lists.append(dirpath)
+                            file_stat = image.stat(dirpath)
+                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=filepath_match_regex,
+                                                                                    file_detail=FileDetail.from_stat(
+                                                                                        dirpath,
+                                                                                        file_stat)))
+                            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                                       detect_type=DetectType.Image.value,
+                                                       event_type=EventType.Risk.value,
+                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail])
+                            report_event_list.append(report_event)
+                            report(report_event)
                             break
             except Exception as e:
                 print(e)
@@ -129,8 +151,18 @@ def scan_images(image):
                     if "filepath" in r.keys():
                         filepath_match_regex = r["filepath"]
                         if re.match(filepath_match_regex, filepath):
-                            report.sensitive_filepath_lists.append(filepath)
-                            log.warning("find sensitive filepath: " + filepath)
+                            report_local.sensitive_filepath_lists.append(filepath)
+                            file_stat = image.stat(filepath)
+                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=filepath_match_regex,
+                                                                                    file_detail=FileDetail.from_stat(
+                                                                                        filepath,
+                                                                                        file_stat)))
+                            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                                       detect_type=DetectType.Image.value,
+                                                       event_type=EventType.Risk.value,
+                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail])
+                            report_event_list.append(report_event)
+                            report(report_event)
                             match = True
                             break
                 if match:
@@ -160,16 +192,38 @@ def scan_images(image):
                             if match.startswith("$contains:"):
                                 keyword = match.lstrip("$contains:")
                                 if keyword in f_content:
-                                    log.warning("find sensitive file: " + filepath)
+                                    report_local.sensitive_filepath_lists.append(filepath)
+                                    file_stat = image.stat(filepath)
+                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=match,
+                                                                                            file_detail=FileDetail.from_stat(
+                                                                                                filepath, file_stat)))
+                                    report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                                               detect_type=DetectType.Image.value,
+                                                               event_type=EventType.Risk.value,
+                                                               alert_type=AlertType.Sensitive.value,
+                                                               alert_details=[detail])
+                                    report_event_list.append(report_event)
+                                    report(report_event)
                             else:
                                 if re.match(match, f_content):
-                                    report.sensitive_filepath_lists.append(filepath)
-                                    log.warning("find sensitive file: " + filepath)
+                                    report_local.sensitive_filepath_lists.append(filepath)
+                                    file_stat = image.stat(filepath)
+                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=match,
+                                                                                      file_detail=FileDetail.from_stat(
+                                                                                          filepath, file_stat)))
+                                    report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                                               detect_type=DetectType.Image.value,
+                                                               event_type=EventType.Risk.value,
+                                                               alert_type=AlertType.Sensitive.value,
+                                                               alert_details=[detail])
+                                    report_event_list.append(report_event)
+                                    report(report_event)
             except Exception as e:
                 print(e)
     spend_time = time.time() - start
-    report.spend_time = spend_time
-    report_list.append(report)
+    report_local.spend_time = spend_time
+    report_list.append(report_local)
+
 
 @cli.resultcallback()
 def callback(result, output):

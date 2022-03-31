@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -45,7 +46,12 @@ var (
 			for {
 				select {
 				case evt := <-reportService.EventChannel:
-					log.Info(evt)
+					evtBytes, err := json.MarshalIndent(evt, "", "	")
+					if err != nil {
+						log.Error(err)
+					}else{
+						log.Warn(string(evtBytes))
+					}
 				}
 			}
 		}()
@@ -219,7 +225,7 @@ func scan(c *cmd.Command, image api.Image) error {
 		ref = image.ID()
 	}
 	log.Infof("Scan image: %#v\n", ref)
-	if err := cmd.ScanImages(ctx, ps, []api.Image{image},
+	if err := cmd.ScanImage(ctx, ps, image,
 		plugin.WithExecInterceptor(func(
 			ctx context.Context, plug *plugin.Plugin, c *plugin.Command,
 			next func(context.Context, ...plugin.ExecOption) error,

@@ -6,7 +6,7 @@ replace github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0 => ../veinmi
 
 require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/chaitin/libveinmind v1.0.4
+	github.com/chaitin/libveinmind v1.0.6
 	github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0
 	github.com/containerd/containerd v1.6.1 // indirect
 	github.com/docker/cli v20.10.12+incompatible

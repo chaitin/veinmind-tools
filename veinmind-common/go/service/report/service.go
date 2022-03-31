@@ -6,7 +6,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-const Namespace = "github.com/chaitin/veinmind-tools/veinmind-common/go/report"
+const Namespace = "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 const BufferSize = 1 << 8
 
 
@@ -17,13 +17,11 @@ type ReportService struct {
 type reportClient struct {
 	ctx    context.Context
 	group  *errgroup.Group
-	Report func([]ReportEvent) error
+	Report func(ReportEvent) error
 }
 
-func (s *ReportService) Report(evts []ReportEvent){
-	for _, evt := range evts {
-		s.EventChannel <- evt
-	}
+func (s *ReportService) Report(evt ReportEvent){
+	s.EventChannel <- evt
 }
 
 func (s *ReportService) Add(registry *service.Registry) {

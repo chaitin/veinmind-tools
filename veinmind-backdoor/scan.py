@@ -3,11 +3,14 @@ import register
 import click
 import jsonpickle
 import time
-import os
+import os, sys
 from common import log
 from common import tools
 from veinmind import *
 from plugins import *
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+from report import *
 
 results = []
 start = 0
@@ -35,6 +38,14 @@ def scan_images(image):
         p = plugin()
         for r in p.detect(image):
             results.append(r)
+            file_stat = image.stat(r.filepath)
+            detail = AlertDetail.backdoor(backdoor_detail=BackdoorDetail(r.description, FileDetail.from_stat(r.filepath, file_stat)))
+            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                       detect_type=DetectType.Image.value,
+                                       event_type=EventType.Risk.value,
+                                       alert_type=AlertType.Backdoor.value,
+                                       alert_details=[detail])
+            report(report_event)
 
 @cli.resultcallback()
 def callback(result, format, output):

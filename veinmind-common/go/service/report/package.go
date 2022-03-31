@@ -36,7 +36,7 @@ const (
 	Vulnerability AlertType = iota
 	MaliciousFile
 	Backdoor
-	SensitiveFile
+	Sensitive
 	AbnormalHistory
 	Weakpass
 )
@@ -47,7 +47,14 @@ const (
 	SSH WeakpassService = iota
 )
 
-type AlertDetail interface{}
+type AlertDetail struct {
+	MaliciousFileDetail *MaliciousFileDetail `json:"malicious_file_detail"`
+	WeakpassDetail      *WeakpassDetail      `json:"weakpass_detail"`
+	BackdoorDetail      *BackdoorDetail      `json:"backdoor_detail"`
+	SensitiveFileDetail *SensitveFileDetail  `json:"sensitive_file_detail"`
+	SensitiveEnvDetail  *SensitiveEnvDetail  `json:"sensitive_env_detail"`
+	HistoryDetail       *HistoryDetail       `json:"history_detail"`
+}
 
 type FileDetail struct {
 	Path string      `json:"path"`
@@ -68,9 +75,31 @@ type MaliciousFileDetail struct {
 }
 
 type WeakpassDetail struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string          `json:"username"`
+	Password string          `json:"password"`
 	Service  WeakpassService `json:"service"`
+}
+
+type BackdoorDetail struct {
+	FileDetail
+	Description string `json:"description"`
+}
+
+type SensitveFileDetail struct {
+	FileDetail
+	Description string `json:"description"`
+}
+
+type SensitiveEnvDetail struct {
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+}
+
+type HistoryDetail struct {
+	Instruction string `json:"instruction"`
+	Content     string `json:"content"`
+	Description string `json:"description"`
 }
 
 type ReportEvent struct {

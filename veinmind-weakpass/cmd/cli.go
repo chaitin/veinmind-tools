@@ -1,5 +1,3 @@
-//+build community
-
 package main
 
 import (
@@ -8,6 +6,7 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/scanner"
@@ -105,6 +104,32 @@ func scan(c *cmd.Command, image api.Image) error {
 	resultsLock.Lock()
 	results = append(results, result)
 	resultsLock.Unlock()
+
+	// Report Event
+	if len(result.WeakpassResults) > 0 {
+		details := []report.AlertDetail{}
+		for _, wr := range result.WeakpassResults{
+			details = append(details, report.AlertDetail{
+				WeakpassDetail: &report.WeakpassDetail{
+					Username: wr.Username,
+					Password: wr.Password,
+					Service: report.WeakpassService(wr.PassType)},
+			},)
+		}
+		reportEvent := report.ReportEvent{
+			ID: image.ID(),
+			Time: time.Now(),
+			Level: report.High,
+			DetectType: report.Image,
+			EventType: report.Risk,
+			AlertType: report.Weakpass,
+			AlertDetails: details,
+		}
+		err = report.DefaultReportClient().Report(reportEvent)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

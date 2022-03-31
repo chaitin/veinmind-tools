@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"golang.org/x/sync/errgroup"
@@ -26,7 +27,7 @@ func DefaultReportClient() *reportClient {
 		}
 
 		if hasService {
-			var report func([]ReportEvent) (error)
+			var report func(ReportEvent) (error)
 			service.GetService(Namespace, "report", &report)
 			group, ctx := errgroup.WithContext(context.Background())
 
@@ -41,11 +42,12 @@ func DefaultReportClient() *reportClient {
 			defaultClient = &reportClient{
 				ctx: ctx,
 				group: group,
-				Report: func(evts []ReportEvent) error {
-					for _, evt := range evts {
-						log.Info(evt)
+				Report: func(evt ReportEvent) error {
+					evtBytes, err := json.MarshalIndent(evt, "", "	")
+					if err != nil {
+						return err
 					}
-
+					log.Warn(string(evtBytes))
 					return nil
 				},
 			}

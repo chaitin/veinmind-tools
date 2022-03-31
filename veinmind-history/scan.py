@@ -1,11 +1,17 @@
+#!/usr/bin/env python3
 from veinmind import *
-import os
+import os, sys
 import re
-import jsonpickle
 import pytoml as toml
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+from report import *
+
 report_list = []
-instruct_set = ("FROM", "CMD", "RUN", "LABEL", "MAINTAINER", "EXPOSE", "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER", "WORKDIR", "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL")
+instruct_set = (
+    "FROM", "CMD", "RUN", "LABEL", "MAINTAINER", "EXPOSE", "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER",
+    "WORKDIR",
+    "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL")
 
 
 def load_rules():
@@ -30,12 +36,6 @@ def tab_print(printstr: str):
         print(("| " + printstr_temp + "\t|").expandtabs(100))
 
 
-class Report():
-    def __init__(self):
-        self.imagename = ""
-        self.abnormal_history_list = []
-
-
 @command.group()
 @command.option("--output", default="stdout", help="output format e.g. stdout/json")
 def cli(output):
@@ -46,15 +46,14 @@ def cli(output):
 @cli.image_command()
 def scan_images(image):
     """scan image abnormal history instruction"""
-    report = Report()
+    image_report = None
     refs = image.reporefs()
     if len(refs) > 0:
         ref = refs[0]
     else:
         ref = image.id()
-    report.imagename = ref
     log.info("start scan: " + ref)
-    
+
     ocispec = image.ocispec_v1()
     if 'history' in ocispec.keys() and len(ocispec['history']) > 0:
         for history in ocispec['history']:
@@ -71,7 +70,17 @@ def scan_images(image):
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
                                 if re.match(r["match"], command_content):
-                                    report.abnormal_history_list.append(created_by)
+                                    detail = AlertDetail()
+                                    detail.history_detail = HistoryDetail(
+                                                              instruction=instruct, content=command_content,
+                                                              description=r["match"]
+                                                          )
+                                    image_report = ReportEvent(id=image.id(),
+                                                          level=Level.High.value, detect_type=DetectType.Image.value,
+                                                          event_type=EventType.Risk.value,
+                                                          alert_type=AlertType.AbnormalHistory.value,
+                                                          alert_details=[detail])
+                                    report(image_report)
                                     break
                     else:
                         instruct = command_split[0]
@@ -79,7 +88,17 @@ def scan_images(image):
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
                                 if re.match(r["match"], command_content):
-                                    report.abnormal_history_list.append(created_by)
+                                    detail = AlertDetail()
+                                    detail.history_detail = HistoryDetail(
+                                                              instruction=instruct, content=command_content,
+                                                              description=r["match"]
+                                                          )
+                                    image_report = ReportEvent(id=image.id(),
+                                                          level=Level.High.value, detect_type=DetectType.Image.value,
+                                                          event_type=EventType.Risk.value,
+                                                          alert_type=AlertType.AbnormalHistory.value,
+                                                          alert_details=[detail])
+                                    report(image_report)
                                     break
                 else:
                     command_split = created_by.split()
@@ -87,15 +106,38 @@ def scan_images(image):
                         for r in rules["rules"]:
                             if r["instruct"] == command_split[0]:
                                 if re.match(r["match"], " ".join(command_split[1:])):
-                                    report.abnormal_history_list.append(created_by)
+                                    detail = AlertDetail()
+                                    detail.history_detail = HistoryDetail(
+                                                              instruction=command_split[0],
+                                                              content=" ".join(command_split[1:]),
+                                                              description=r["match"]
+                                                          )
+                                    image_report = ReportEvent(id=image.id(),
+                                                          level=Level.High.value, detect_type=DetectType.Image.value,
+                                                          event_type=EventType.Risk.value,
+                                                          alert_type=AlertType.AbnormalHistory.value,
+                                                          alert_details=[detail])
+                                    report(image_report)
                                     break
                     else:
                         for r in rules["rules"]:
                             if r["instruct"] == "RUN":
                                 if re.match(r["match"], created_by):
-                                    report.abnormal_history_list.append(created_by)
+                                    detail = AlertDetail()
+                                    detail.history_detail = HistoryDetail(
+                                                              instruction="RUN", content=created_by,
+                                                              description=r["match"]
+                                                          )
+                                    image_report = ReportEvent(id=image.id(),
+                                                          level=Level.High.value, detect_type=DetectType.Image.value,
+                                                          event_type=EventType.Risk.value,
+                                                          alert_type=AlertType.AbnormalHistory.value,
+                                                          alert_details=[detail])
+                                    report(image_report)
                                     break
-    report_list.append(report)
+
+    if image_report != None:
+        report_list.append(image_report)
 
 
 @cli.resultcallback()
@@ -105,13 +147,14 @@ def callback(result, output):
         tab_print("Scan Image Total: " + str(len(report_list)))
         tab_print("Unsafe Image List: ")
         for r in report_list:
-            if len(r.abnormal_history_list) == 0:
+            if len(r.alert_details) == 0:
                 continue
-            print("+---------------------------------------------------------------------------------------------------+")
-            tab_print("ImageName: " + r.imagename)
-            tab_print("Abnormal History Total: " + str(len(r.abnormal_history_list)))
-            for history in r.abnormal_history_list:
-                tab_print("History: " + history)
+            print(
+                "+---------------------------------------------------------------------------------------------------+")
+            tab_print("ImageName: " + r.id)
+            tab_print("Abnormal History Total: " + str(len(r.alert_details)))
+            for detail in r.alert_details:
+                tab_print("History: " + detail.content)
         print("+---------------------------------------------------------------------------------------------------+")
     elif output == "json":
         with open("output.json", mode="w") as f:
