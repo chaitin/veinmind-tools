@@ -9,6 +9,7 @@ from veinmind import *
 from stat import *
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
 from report import *
 
 report_list = []

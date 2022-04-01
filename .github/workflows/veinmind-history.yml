@@ -10,6 +10,7 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
+          cp -r ./veinmind-common ./veinmind-history && rm -rf ./veinmind-history/veinmind-common/go
           cd veinmind-history
           tar -cvzf veinmind-history.tar.gz *
       - uses: actions/upload-artifact@v2

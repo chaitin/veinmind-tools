@@ -10,6 +10,7 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
+          cp -r ./veinmind-common ./veinmind-backdoor && rm -rf ./veinmind-backdoor/veinmind-common/go
           cd veinmind-backdoor
           tar -cvzf veinmind-backdoor.tar.gz *
       - uses: actions/upload-artifact@v2

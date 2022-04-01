@@ -5,6 +5,7 @@ import re
 import pytoml as toml
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
 from report import *
 
 report_list = []
