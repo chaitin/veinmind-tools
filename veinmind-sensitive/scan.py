@@ -80,7 +80,7 @@ def scan_images(image):
                         if re.match(env_regex, env, re.IGNORECASE):
                             report_local.sensitive_env_lists.append(env)
                             detail = AlertDetail.sensitive_env(SensitiveEnvDetail(
-                                key=env_split[0], value=''.join(env_split[1:]), description=env_regex
+                                key=env_split[0], value=''.join(env_split[1:]), description="regex: " + env_regex
                             ))
                             report_event = ReportEvent(id=image.id(), level=Level.Medium.value,
                                                        detect_type=DetectType.Image.value,
@@ -104,7 +104,7 @@ def scan_images(image):
                         if re.match(filepath_match_regex, dirpath):
                             report_local.sensitive_filepath_lists.append(dirpath)
                             file_stat = image.stat(dirpath)
-                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=filepath_match_regex,
+                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="regex: " + filepath_match_regex,
                                                                                     file_detail=FileDetail.from_stat(
                                                                                         dirpath,
                                                                                         file_stat)))
@@ -154,7 +154,7 @@ def scan_images(image):
                         if re.match(filepath_match_regex, filepath):
                             report_local.sensitive_filepath_lists.append(filepath)
                             file_stat = image.stat(filepath)
-                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=filepath_match_regex,
+                            detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="regex: " + filepath_match_regex,
                                                                                     file_detail=FileDetail.from_stat(
                                                                                         filepath,
                                                                                         file_stat)))
@@ -195,7 +195,7 @@ def scan_images(image):
                                 if keyword in f_content:
                                     report_local.sensitive_filepath_lists.append(filepath)
                                     file_stat = image.stat(filepath)
-                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=match,
+                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="match: " + match,
                                                                                             file_detail=FileDetail.from_stat(
                                                                                                 filepath, file_stat)))
                                     report_event = ReportEvent(id=image.id(), level=Level.High.value,
@@ -209,7 +209,7 @@ def scan_images(image):
                                 if re.match(match, f_content):
                                     report_local.sensitive_filepath_lists.append(filepath)
                                     file_stat = image.stat(filepath)
-                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description=match,
+                                    detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="match: " + match,
                                                                                       file_detail=FileDetail.from_stat(
                                                                                           filepath, file_stat)))
                                     report_event = ReportEvent(id=image.id(), level=Level.High.value,
@@ -259,5 +259,5 @@ def callback(result, output):
 
 
 if __name__ == '__main__':
-    cli.add_info_command()
+    cli.add_info_command(manifest=command.Manifest(name="veinmind-sensitive", author="veinmind-team", description="veinmind-sensitive scan image sensitive file"))
     cli()

@@ -178,7 +178,7 @@ def report(evt: ReportEvent, *args, **kwargs):
         except RuntimeError as e:
             log.error(e)
     else:
-        log.warn(jsonpickle.encode(evt))
+        log.warn(jsonpickle.encode(evt, indent=4))
 
 
 class Entry:

@@ -6,6 +6,7 @@ import (
 
 type MaliciousFileInfo struct {
 	gorm.Model
+	Engine       string
 	ImageID      string
 	LayerID      string
 	RelativePath string
@@ -29,7 +30,6 @@ type ReportData struct {
 
 type ReportImage struct {
 	gorm.Model
-	EngineType         string
 	ImageName          string
 	ImageID            string
 	MaliciousFileCount int64

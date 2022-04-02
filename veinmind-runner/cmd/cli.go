@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -12,6 +11,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -20,12 +20,11 @@ import (
 )
 
 var (
-	ps            []*plugin.Plugin
-	ctx           context.Context
-	reportService = func() *report.ReportService {
-		return report.NewReportService()
-	}()
-	scanPreRunE = func(c *cobra.Command, args []string) error {
+	ps             []*plugin.Plugin
+	ctx            context.Context
+	runnerReporter *reporter.Reporter
+	reportService  *report.ReportService
+	scanPreRunE    = func(c *cobra.Command, args []string) error {
 		// Discover Plugins
 		ctx = c.Context()
 		glob, err := c.Flags().GetString("glob")
@@ -41,20 +40,52 @@ var (
 			log.Infof("Discovered plugin: %#v\n", p.Name)
 		}
 
+		// Reporter Channel Listen
+		go runnerReporter.Listen()
+
 		// Event Channel Listen
 		go func() {
 			for {
 				select {
 				case evt := <-reportService.EventChannel:
-					evtBytes, err := json.MarshalIndent(evt, "", "	")
-					if err != nil {
-						log.Error(err)
-					}else{
-						log.Warn(string(evtBytes))
-					}
+					runnerReporter.EventChannel <- evt
 				}
 			}
 		}()
+
+		return nil
+	}
+	scanPostRunE = func(cmd *cobra.Command, args []string) error {
+		// Stop reporter listen
+		runnerReporter.StopListen()
+
+		// Output
+		err := runnerReporter.Write(os.Stdout)
+		if err != nil{
+			log.Error(err)
+		}
+		output, _ := cmd.Flags().GetString("output")
+		if _, err := os.Stat(output); errors.Is(err, os.ErrNotExist){
+			f , err := os.Create(output)
+			if err != nil{
+				log.Error(err)
+			}else{
+				err = runnerReporter.Write(f)
+				if err != nil{
+					return err
+				}
+			}
+		}else{
+			f, err := os.OpenFile(output,os.O_WRONLY, 0666)
+			if err != nil{
+				log.Error(err)
+			}else{
+				err = runnerReporter.Write(f)
+				if err != nil{
+					return err
+				}
+			}
+		}
 
 		return nil
 	}
@@ -65,6 +96,7 @@ var scanHostCmd = &cmd.Command{
 	Use:     "scan-host",
 	Short:   "perform hosted scan command",
 	PreRunE: scanPreRunE,
+	PostRunE: scanPostRunE,
 }
 var scanRegistryCmd = &cmd.Command{
 	Use:     "scan-registry",
@@ -214,6 +246,7 @@ var scanRegistryCmd = &cmd.Command{
 
 		return nil
 	},
+	PostRunE: scanPostRunE,
 }
 
 func scan(c *cmd.Command, image api.Image) error {
@@ -247,15 +280,29 @@ func scan(c *cmd.Command, image api.Image) error {
 }
 
 func init() {
+	// Cobra init
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
 	scanHostCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
+	scanHostCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
+	scanRegistryCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
+	scanRegistryCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
 	scanRegistryCmd.Flags().StringP("address", "a", "index.docker.io", "server address of registry")
 	scanRegistryCmd.Flags().StringP("username", "u", "", "username of registry")
 	scanRegistryCmd.Flags().StringP("password", "p", "", "password of registry")
 	scanRegistryCmd.Flags().StringP("namespace", "n", "", "namespace of repo")
 	scanRegistryCmd.Flags().StringSliceP("reponames", "r", []string{}, "name of repo")
 	scanRegistryCmd.Flags().StringSliceP("tags", "t", []string{"latest"}, "tags of repo")
+
+	// Service client init
+	reportService = report.NewReportService()
+
+	// Reporter init
+	r, err := reporter.NewReporter()
+	if err != nil {
+		log.Fatal(err)
+	}
+	runnerReporter = r
 }
 
 func main() {
