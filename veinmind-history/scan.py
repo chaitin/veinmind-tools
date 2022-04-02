@@ -155,7 +155,8 @@ def callback(result, output):
             tab_print("ImageName: " + r.id)
             tab_print("Abnormal History Total: " + str(len(r.alert_details)))
             for detail in r.alert_details:
-                tab_print("History: " + detail.content)
+                if detail.history_detail:
+                    tab_print("History: " + detail.history_detail.content)
         print("+---------------------------------------------------------------------------------------------------+")
     elif output == "json":
         with open("output.json", mode="w") as f:
@@ -163,5 +164,5 @@ def callback(result, output):
 
 
 if __name__ == '__main__':
-    cli.add_info_command()
+    cli.add_info_command(manifest=command.Manifest(name="veinmind-history", author="veinmind-team", description="veinmind-history scan image abnormal history"))
     cli()

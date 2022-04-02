@@ -2,7 +2,7 @@
 import register
 import click
 import jsonpickle
-import time
+import time as timep
 import os, sys
 from common import log
 from common import tools
@@ -22,7 +22,7 @@ image_ids = []
 @click.option('--output', default='.', help="output path e.g. /tmp")
 def cli(format, output):
     global start
-    start = time.time()
+    start = timep.time()
     pass
 
 
@@ -50,7 +50,7 @@ def scan_images(image):
 
 @cli.resultcallback()
 def callback(result, format, output):
-    spend_time = time.time() - start
+    spend_time = timep.time() - start
 
     if format == "stdout":
         print("# ================================================================================================= #")
@@ -72,5 +72,5 @@ def callback(result, format, output):
 
 
 if __name__ == '__main__':
-    cli.add_info_command()
+    cli.add_info_command(manifest=command.Manifest(name="veinmind-backdoor", author="veinmind-team", description="veinmind-backdoor scan image backdoor file"))
     cli()

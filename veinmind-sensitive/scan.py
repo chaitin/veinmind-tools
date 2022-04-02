@@ -5,6 +5,7 @@ import os, sys
 import magic
 import fnmatch
 import chardet
+import time as timep
 from veinmind import *
 from stat import *
 
@@ -58,7 +59,7 @@ def cli(output):
 def scan_images(image):
     """scan image sensitive file"""
     report_local = Report()
-    start = time.time()
+    start = timep.time()
     refs = image.reporefs()
     if len(refs) > 0:
         ref = refs[0]
@@ -221,7 +222,7 @@ def scan_images(image):
                                     report(report_event)
             except Exception as e:
                 print(e)
-    spend_time = time.time() - start
+    spend_time = timep.time() - start
     report_local.spend_time = spend_time
     report_list.append(report_local)
 

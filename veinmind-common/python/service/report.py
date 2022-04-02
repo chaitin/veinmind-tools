@@ -1,15 +1,14 @@
 import enum
-import time
+import time as timep
 import jsonpickle
 import json
 import os, stat
 from veinmind import service, log
-from typing import List
 
 _namespace = "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 
 # Normalize timezone and format into RFC3339 format.
-_timezone = time.strftime('%z')
+_timezone = timep.strftime('%z')
 assert len(_timezone) == 5
 if _timezone == "+0000" or _timezone == "-0000":
     _timezone = "Z"
@@ -49,16 +48,16 @@ class AlertType(enum.Enum):
 
 
 class FileDetail():
-    path: str
-    perm: int
-    size: int
-    gid: int
-    uid: int
-    ctim: int
-    mtim: int
-    atim: int
+    path = ""
+    perm = 0
+    size = 0
+    gid = 0
+    uid = 0
+    ctim = 0
+    mtim = 0
+    atim = 0
 
-    def __init__(self, path: str, perm: int, size: int, gid: int, uid: int, ctim: int, mtim: int, atim: int) -> None:
+    def __init__(self, path, perm, size, gid, uid, ctim, mtim, atim) -> None:
         self.path = path
         self.perm = perm
         self.size = size
@@ -69,57 +68,57 @@ class FileDetail():
         self.atim = atim
 
     @classmethod
-    def from_stat(cls, path: str, file_stat: os.stat_result):
+    def from_stat(cls, path, file_stat):
         return cls(path=path, perm=stat.S_IMODE(file_stat.st_mode), size=file_stat.st_size, gid=file_stat.st_gid,
                    uid=file_stat.st_uid, ctim=int(file_stat.st_ctime), mtim=int(file_stat.st_mtime),
                    atim=int(file_stat.st_atime))
 
 
 class HistoryDetail():
-    instruction: str
-    content: str
-    description: str
+    instruction = ""
+    content = ""
+    description = ""
 
-    def __init__(self, instruction: str, content: str, description: str):
+    def __init__(self, instruction, content, description):
         self.instruction = instruction
         self.content = content
         self.description = description
 
 
 class SensitiveFileDetail(FileDetail):
-    description: str
+    description = ""
 
-    def __init__(self, description: str, file_detail: FileDetail):
+    def __init__(self, description, file_detail):
         self.description = description
         super().__init__(file_detail.path, file_detail.perm, file_detail.size, file_detail.gid, file_detail.uid,
                          file_detail.ctim, file_detail.mtim, file_detail.atim)
 
 
 class SensitiveEnvDetail():
-    key: str
-    value: str
-    description: str
+    key = ""
+    value = ""
+    description = ""
 
-    def __init__(self, key: str, value: str, description: str):
+    def __init__(self, key, value, description):
         self.key = key
         self.value = value
         self.description = description
 
 
 class BackdoorDetail(FileDetail):
-    description: str
+    description = ""
 
-    def __init__(self, description: str, file_detail: FileDetail):
+    def __init__(self, description, file_detail):
         self.description = description
         super().__init__(file_detail.path, file_detail.perm, file_detail.size, file_detail.gid, file_detail.uid,
                          file_detail.ctim, file_detail.mtim, file_detail.atim)
 
 
 class AlertDetail:
-    backdoor_detail: BackdoorDetail
-    sensitive_file_detail: SensitiveFileDetail
-    sensitive_env_detail: SensitiveEnvDetail
-    history_detail: HistoryDetail
+    backdoor_detail = None
+    sensitive_file_detail = None
+    sensitive_env_detail = None
+    history_detail = None
 
     def __init__(self, backdoor_detail=None, sensitve_file_detail=None,
                  sensitive_env_detail=None, history_detail=None):
@@ -129,33 +128,33 @@ class AlertDetail:
         self.history_detail = history_detail
 
     @classmethod
-    def backdoor(cls, backdoor_detail: BackdoorDetail):
+    def backdoor(cls, backdoor_detail):
         return cls(backdoor_detail=backdoor_detail)
 
     @classmethod
-    def sensitive_file(cls, sensitve_file_detail: SensitiveFileDetail):
+    def sensitive_file(cls, sensitve_file_detail):
         return cls(sensitve_file_detail=sensitve_file_detail)
 
     @classmethod
-    def sensitive_env(cls, sensitive_env_detail: SensitiveEnvDetail):
+    def sensitive_env(cls, sensitive_env_detail):
         return cls(sensitive_env_detail=sensitive_env_detail)
 
     @classmethod
-    def history(cls, history_detail: HistoryDetail):
+    def history(cls, history_detail):
         return cls(history_detail=history_detail)
 
 
 class ReportEvent():
-    id: str
-    time: str
-    level: int
-    detect_type: int
-    event_type: int
-    alert_type: int
-    alert_details: List[AlertDetail]
+    id = ""
+    time = ""
+    level = 0
+    detect_type = 0
+    event_type = 0
+    alert_type = 0
+    alert_details = []
 
-    def __init__(self, id: str, level: int, detect_type: int, event_type: int, alert_type: int,
-                 alert_details: List[AlertDetail], t: str = time.strftime(_format)) -> None:
+    def __init__(self, id, level, detect_type, event_type, alert_type,
+                 alert_details, t = timep.strftime(_format)):
         self.id = id
         self.time = t
         self.level = level
@@ -170,7 +169,7 @@ def _report(evt):
     pass
 
 
-def report(evt: ReportEvent, *args, **kwargs):
+def report(evt, *args, **kwargs):
     if service.is_hosted():
         try:
             evt_dict = json.loads(jsonpickle.encode(evt))
@@ -185,5 +184,5 @@ class Entry:
     def __init__(self, **kwargs):
         self.fields = kwargs.copy()
 
-    def report(self, evt: ReportEvent):
+    def report(self, evt):
         report(evt)
