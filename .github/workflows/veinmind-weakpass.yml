@@ -47,6 +47,7 @@ jobs:
       CI_GOARCH: amd64
     steps:
       - uses: actions/checkout@v2
+      - run: cp -r ./veinmind-common ./veinmind-weakpass && rm -rf ./veinmind-weakpass/veinmind-common/python
       - uses: actions/download-artifact@v2
         with:
           name: veinmind-weakpass-amd64-dynamic
