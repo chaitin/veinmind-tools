@@ -216,6 +216,10 @@ var scanRegistryCmd = &cmd.Command{
 				continue
 			}
 			log.Infof("Pull image success: %#v\n", repo)
+
+			if strings.Contains(repo, "index.docker.io") {
+				repo = strings.Replace(repo, "index.docker.io/", "", 1)
+			}
 			ids, err := d.FindImageIDs(repo)
 			defer func() {
 				for _, id := range ids {
