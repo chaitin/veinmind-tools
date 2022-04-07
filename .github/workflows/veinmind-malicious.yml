@@ -4,7 +4,7 @@ jobs:
   build-amd64:
     runs-on: ubuntu-18.04
     container:
-      image: veinmind/go1.16:1.0.2-stretch
+      image: veinmind/go1.16:1.0.4-stretch
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
