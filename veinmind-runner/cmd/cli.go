@@ -45,11 +45,8 @@ var (
 
 		// Event Channel Listen
 		go func() {
-			for {
-				select {
-				case evt := <-reportService.EventChannel:
-					runnerReporter.EventChannel <- evt
-				}
+			for evt := range reportService.EventChannel {
+				runnerReporter.EventChannel <- evt
 			}
 		}()
 

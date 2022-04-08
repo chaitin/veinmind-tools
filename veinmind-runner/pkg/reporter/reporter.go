@@ -18,59 +18,59 @@ type reportEvent struct {
 
 type Reporter struct {
 	EventChannel chan report.ReportEvent
-	closeCh chan struct{}
-	events []reportEvent
+	closeCh      chan struct{}
+	events       []reportEvent
 }
 
-func NewReporter()(*Reporter, error){
+func NewReporter() (*Reporter, error) {
 	return &Reporter{
-		EventChannel: make(chan report.ReportEvent, 1 << 8),
-		closeCh: make(chan struct{}),
-		events: []reportEvent{},
+		EventChannel: make(chan report.ReportEvent, 1<<8),
+		closeCh:      make(chan struct{}),
+		events:       []reportEvent{},
 	}, nil
 }
 
-func (r *Reporter) Listen(){
-	for{
+func (r *Reporter) Listen() {
+	for {
 		select {
-		case evt := <- r.EventChannel:
+		case evt := <-r.EventChannel:
 			evtN, err := r.convert(evt)
-			if err != nil{
+			if err != nil {
 				log.Error(err)
 			}
 			r.events = append(r.events, evtN)
-		case <- r.closeCh:
-			goto END
+		case <-r.closeCh:
+			return
 		}
 	}
-	END:
+}
+
+func (r *Reporter) StopListen() {
+	r.closeCh <- struct{}{}
 	log.Info("Stop reporter listen")
 }
 
-func (r *Reporter) StopListen(){
-	r.closeCh <- struct {}{}
-}
-
-func (r *Reporter) Write(writer io.Writer)(error){
+func (r *Reporter) Write(writer io.Writer) error {
 	eventsBytes, err := json.MarshalIndent(r.events, "", "  ")
-	if err!= nil {
+	if err != nil {
 		return err
 	}
+	eventsBytes = append(eventsBytes, []byte("\n")...)
 
 	_, err = writer.Write(eventsBytes)
 	return err
 }
 
-func (r *Reporter) convert(event report.ReportEvent)(reportEvent, error){
+func (r *Reporter) convert(event report.ReportEvent) (reportEvent, error) {
 	dr, _ := docker.New()
 	cr, _ := containerd.New()
 	runtimes := []api.Runtime{dr, cr}
 	var image api.Image
 	find := false
-	for _, runtime := range runtimes{
-		if runtime != nil{
+	for _, runtime := range runtimes {
+		if runtime != nil {
 			i, err := runtime.OpenImageByID(event.ID)
-			if err != nil{
+			if err != nil {
 				continue
 			}
 			image = i
@@ -78,7 +78,7 @@ func (r *Reporter) convert(event report.ReportEvent)(reportEvent, error){
 			break
 		}
 	}
-	if !find || image == nil{
+	if !find || image == nil {
 		return reportEvent{}, errors.New("Can't get image object")
 	}
 
@@ -95,7 +95,7 @@ func (r *Reporter) convert(event report.ReportEvent)(reportEvent, error){
 	//}
 
 	return reportEvent{
-		ImageRefs: refs,
+		ImageRefs:   refs,
 		ReportEvent: event,
 	}, nil
 }
