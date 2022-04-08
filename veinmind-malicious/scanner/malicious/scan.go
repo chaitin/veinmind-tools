@@ -153,10 +153,19 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 
 						// 假设有多个结果，直接拼接 description
 						description := ""
+						engine := map[string]bool{}
+						engineName := ""
 						for _, r := range results {
 							description = description + r.Description + ","
+							engine[r.EngineName] = true
 						}
+						for e, _ := range engine{
+							engineName = e + ","
+						}
+						engineName = strings.TrimRight(engineName, ",")
 						description = strings.TrimRight(description, ",")
+
+
 
 						scanReport.MaliciousFileCount++
 
@@ -171,6 +180,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 						stat := info.Sys().(*syscall.Stat_t)
 
 						result := model.MaliciousFileInfo{
+							Engine: engineName,
 							RelativePath: path,
 							FileName:     info.Name(),
 							FileSize:     bytefmt.ByteSize(uint64(info.Size())),

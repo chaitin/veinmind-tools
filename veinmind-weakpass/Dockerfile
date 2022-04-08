@@ -1,10 +1,12 @@
-FROM veinmind/base:1.0.2-stretch
-ARG CI_GOOS
-ENV CI_GOOS $CI_GOOS
-ARG CI_GOARCH
-ENV CI_GOARCH $CI_GOARCH
+FROM veinmind/go1.16:1.0.4-stretch as builder
+WORKDIR /build
+COPY . .
+RUN sed -i 's/\.\.\/veinmind-common/\.\/veinmind-common/g' go.mod
+RUN chmod +x script/build.sh && /bin/bash script/build.sh
+
+FROM veinmind/base:1.0.4-stretch as release
 WORKDIR /tool
-ADD veinmind-weakpass_${CI_GOOS}_${CI_GOARCH} .
-RUN echo "#!/bin/bash\n\n./veinmind-weakpass_${CI_GOOS}_${CI_GOARCH} \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-weakpass_${CI_GOOS}_${CI_GOARCH}
+COPY --from=builder /build/veinmind-weakpass .
+RUN echo "#!/bin/bash\n\n./veinmind-weakpass \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-weakpass
 ENTRYPOINT ["/tool/entrypoint.sh"]
 

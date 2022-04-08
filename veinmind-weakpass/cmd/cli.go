@@ -1,5 +1,3 @@
-//+build community
-
 package main
 
 import (
@@ -8,6 +6,7 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/scanner"
@@ -26,14 +25,14 @@ var scanStart = time.Now()
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cobra.Command{
-	Use: "extract",
+	Use:   "extract",
 	Short: "extract dict file to disk",
-	Run: func(cmd *cobra.Command, args []string){
+	Run: func(cmd *cobra.Command, args []string) {
 		embed.ExtractAll()
 	},
 }
 var scanCmd = &cmd.Command{
-	Use: "scan",
+	Use:   "scan",
 	Short: "Scan image weakpass",
 	PostRun: func(cmd *cobra.Command, args []string) {
 		tabw := tabwriter.NewWriter(os.Stdout, 95, 95, 0, ' ', tabwriter.TabIndent|tabwriter.Debug)
@@ -70,12 +69,12 @@ var scanCmd = &cmd.Command{
 }
 
 func scan(c *cmd.Command, image api.Image) error {
-	result, err :=  scanner.Scan(image, scanner.ScanOption{
+	result, err := scanner.Scan(image, scanner.ScanOption{
 		ScanThreads: func() int {
 			threads, err := c.Flags().GetInt("threads")
 			if err != nil {
 				return 10
-			}else{
+			} else {
 				return threads
 			}
 		}(),
@@ -83,7 +82,7 @@ func scan(c *cmd.Command, image api.Image) error {
 			username, err := c.Flags().GetString("username")
 			if err != nil {
 				return ""
-			}else{
+			} else {
 				return username
 			}
 		}(),
@@ -91,7 +90,7 @@ func scan(c *cmd.Command, image api.Image) error {
 			dictpath, err := c.Flags().GetString("dictpath")
 			if err != nil {
 				return ""
-			}else{
+			} else {
 				return dictpath
 			}
 		}(),
@@ -106,18 +105,44 @@ func scan(c *cmd.Command, image api.Image) error {
 	results = append(results, result)
 	resultsLock.Unlock()
 
+	// Report Event
+	if len(result.WeakpassResults) > 0 {
+		details := []report.AlertDetail{}
+		for _, wr := range result.WeakpassResults {
+			details = append(details, report.AlertDetail{
+				WeakpassDetail: &report.WeakpassDetail{
+					Username: wr.Username,
+					Password: wr.Password,
+					Service:  report.WeakpassService(wr.PassType)},
+			})
+		}
+		reportEvent := report.ReportEvent{
+			ID:           image.ID(),
+			Time:         time.Now(),
+			Level:        report.High,
+			DetectType:   report.Image,
+			EventType:    report.Risk,
+			AlertType:    report.Weakpass,
+			AlertDetails: details,
+		}
+		err = report.DefaultReportClient().Report(reportEvent)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func init()  {
+func init() {
 	rootCmd.AddCommand(cmd.MapImageCommand(scanCmd, scan))
 	rootCmd.AddCommand(extractCmd)
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
-		Name: "veinmind-weakpass",
-		Author: "d_infinite",
+		Name:        "veinmind-weakpass",
+		Author:      "veinmind-team",
 		Description: "veinmind-weakpass scanner image weakpass",
 	}))
-	scanCmd.Flags().IntP("threads", "t" ,10, "password brute threads")
+	scanCmd.Flags().IntP("threads", "t", 10, "password brute threads")
 	scanCmd.Flags().StringP("username", "u", "", "username e.g. root")
 	scanCmd.Flags().StringP("dictpath", "d", "", "dict path e.g ./mypass.dict")
 }

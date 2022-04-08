@@ -5,6 +5,7 @@ from common import regex
 import os
 import re
 
+
 @register.register("bashrc")
 class bashrc:
     """

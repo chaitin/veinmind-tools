@@ -1,4 +1,4 @@
-FROM veinmind/base:1.0.2-stretch
+FROM veinmind/base:1.0.4-stretch
 ARG CI_GOOS
 ENV CI_GOOS $CI_GOOS
 ARG CI_GOARCH

@@ -2,12 +2,16 @@
 import register
 import click
 import jsonpickle
-import time
-import os
+import time as timep
+import os, sys
 from common import log
 from common import tools
 from veinmind import *
 from plugins import *
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
+from report import *
 
 results = []
 start = 0
@@ -18,7 +22,7 @@ image_ids = []
 @click.option('--output', default='.', help="output path e.g. /tmp")
 def cli(format, output):
     global start
-    start = time.time()
+    start = timep.time()
     pass
 
 
@@ -35,10 +39,18 @@ def scan_images(image):
         p = plugin()
         for r in p.detect(image):
             results.append(r)
+            file_stat = image.stat(r.filepath)
+            detail = AlertDetail.backdoor(backdoor_detail=BackdoorDetail(r.description, FileDetail.from_stat(r.filepath, file_stat)))
+            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                       detect_type=DetectType.Image.value,
+                                       event_type=EventType.Risk.value,
+                                       alert_type=AlertType.Backdoor.value,
+                                       alert_details=[detail])
+            report(report_event)
 
 @cli.resultcallback()
 def callback(result, format, output):
-    spend_time = time.time() - start
+    spend_time = timep.time() - start
 
     if format == "stdout":
         print("# ================================================================================================= #")
@@ -60,5 +72,5 @@ def callback(result, format, output):
 
 
 if __name__ == '__main__':
-    cli.add_info_command()
+    cli.add_info_command(manifest=command.Manifest(name="veinmind-backdoor", author="veinmind-team", description="veinmind-backdoor scan image backdoor file"))
     cli()
