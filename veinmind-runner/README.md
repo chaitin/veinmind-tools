@@ -23,6 +23,27 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 - linux/arm64
 - linux/arm
 
+## 开始之前
+
+### 安装方式一
+
+请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
+
+可以选择手动编译 `veinmind-runner`，
+或者在[Release](https://github.com/chaitin/veinmind-tools/releases)页面中找到已经编译好的 `veinmind-runner` 进行下载
+
+### 安装方式二
+
+基于平行容器的模式，获取 `veinmind-runner` 的镜像并启动
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-runner
+```
+
+或者使用项目提供的脚本启动
+```
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh
+```
+
 ## 使用
 
 1.指定镜像名称或镜像 ID 并扫描 (需要本地存在对应的镜像)
