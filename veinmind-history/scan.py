@@ -3,10 +3,12 @@ import os
 import re
 import jsonpickle
 import pytoml as toml
+from unittest import result
+import requests
 
 report_list = []
 instruct_set = ("FROM", "CMD", "RUN", "LABEL", "MAINTAINER", "EXPOSE", "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER", "WORKDIR", "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL")
-
+API_KEY = os.environ["API_KEY"]
 
 def load_rules():
     global rules
@@ -28,6 +30,26 @@ def tab_print(printstr: str):
                 print(("| " + printstr_temp + "\t|").expandtabs(100))
                 printstr_temp = ""
         print(("| " + printstr_temp + "\t|").expandtabs(100))
+
+
+def search_file_in_vt(id, key):
+    url = "https://www.virustotal.com/api/v3/files/" + id
+    headers = {
+        "Accept": "application/json",
+        "x-apikey": key
+    }
+    response = requests.request("GET", url, headers=headers)
+    json_result = response.json()
+    if 'error' in json_result.keys():
+        # print (json_result['error']['message'])
+        # print (f"File {id} is a legal file")
+        return False
+    elif 'data' in json_result.keys():
+        last_analysis_stats = json_result['data']['attributes']['last_analysis_stats']
+        if last_analysis_stats['harmless'] < last_analysis_stats['malicious']:
+            # print (f"File {id} is a malicious file")
+            return True
+    return False
 
 
 class Report():
@@ -67,6 +89,12 @@ def scan_images(image):
                     command_split = command.split()
                     if len(command_split) == 2:
                         instruct = command_split[0]
+                        if instruct == "COPY" or instruct == "ADD":
+                            if len(command_split[1].split(":")) == 2:
+                                file_id = command_split[1].split(":")[1]
+                                # print(file_id)
+                                if search_file_in_vt(file_id, API_KEY):
+                                        report.abnormal_history_list.append(created_by)
                         command_content = command_split[1]
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
@@ -76,6 +104,12 @@ def scan_images(image):
                     else:
                         instruct = command_split[0]
                         command_content = " ".join(command_split[1:])
+                        if instruct == "COPY" or instruct == "ADD":
+                            if len(command_split) > 1 and len(command_split[1].split(":")) == 2:
+                                file_id = command_split[1].split(":")[1]
+                                # print(file_id)
+                                if search_file_in_vt(file_id, API_KEY):
+                                        report.abnormal_history_list.append(created_by)
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
                                 if re.match(r["match"], command_content):

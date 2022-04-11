@@ -15,5 +15,6 @@
 # vendor/
 
 .idea
+.vscode
 test
 venv
