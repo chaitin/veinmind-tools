@@ -3,6 +3,8 @@ from veinmind import *
 import os, sys
 import re
 import pytoml as toml
+from unittest import result
+import requests
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
@@ -37,6 +39,24 @@ def tab_print(printstr: str):
         print(("| " + printstr_temp + "\t|").expandtabs(100))
 
 
+def search_file_in_vt(id, key):
+    url = "https://www.virustotal.com/api/v3/files/" + id
+    headers = {
+        "Accept": "application/json",
+        "x-apikey": key
+    }
+    response = requests.request("GET", url, headers=headers)       
+    vt_response = response.json()
+    if 'error' in vt_response.keys():
+        return vt_response, False
+    elif 'data' in vt_response.keys():
+        last_analysis_stats = vt_response['data']['attributes']['last_analysis_stats']
+        if last_analysis_stats['harmless'] < last_analysis_stats['malicious']:
+            return last_analysis_stats, True
+        else:
+            return last_analysis_stats, False
+    return {}, False
+
 @command.group()
 @command.option("--output", default="stdout", help="output format e.g. stdout/json")
 def cli(output):
@@ -68,6 +88,25 @@ def scan_images(image):
                     if len(command_split) == 2:
                         instruct = command_split[0]
                         command_content = command_split[1]
+                        if instruct == "COPY" or instruct == "ADD":
+                            if "VIRUSTOTAL_API_KEY" in os.environ.keys() and os.environ["VIRUSTOTAL_API_KEY"]:
+                                VIRUSTOTAL_API_KEY = os.environ["VIRUSTOTAL_API_KEY"]
+                                if len(command_content.split(":")) == 2:
+                                    file_id = command_content.split(":")[1]
+                                    analysis_stat, malicious_file = search_file_in_vt(file_id, VIRUSTOTAL_API_KEY)
+                                    if malicious_file:
+                                        detail = AlertDetail()
+                                        detail.history_detail = HistoryDetail(
+                                                                instruction=instruct, content=command_content,
+                                                                description=f"malicious file:{file_id}\nlast_analysis_stats:{analysis_stat}"
+                                                            )
+                                        image_report = ReportEvent(id=image.id(),
+                                                            level=Level.High.value, detect_type=DetectType.Image.value,
+                                                            event_type=EventType.Risk.value,
+                                                            alert_type=AlertType.AbnormalHistory.value,
+                                                            alert_details=[detail])
+                                        report(image_report)
+                                        break                       
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
                                 if re.match(r["match"], command_content):
@@ -86,6 +125,25 @@ def scan_images(image):
                     else:
                         instruct = command_split[0]
                         command_content = " ".join(command_split[1:])
+                        if instruct == "COPY" or instruct == "ADD":
+                            if "VIRUSTOTAL_API_KEY" in os.environ.keys() and os.environ["VIRUSTOTAL_API_KEY"]:
+                                VIRUSTOTAL_API_KEY = os.environ["VIRUSTOTAL_API_KEY"]
+                                if len(command_split) > 1 and len(command_split[1].split(":")) == 2:
+                                    file_id = command_split[1].split(":")[1]
+                                    analysis_stat, malicious_file = search_file_in_vt(file_id, VIRUSTOTAL_API_KEY)
+                                    if malicious_file:
+                                        detail = AlertDetail()
+                                        detail.history_detail = HistoryDetail(
+                                                                instruction=instruct, content=command_content,
+                                                                description=f"malicious file:{file_id}\nlast_analysis_stats:{analysis_stat}"
+                                                            )
+                                        image_report = ReportEvent(id=image.id(),
+                                                            level=Level.High.value, detect_type=DetectType.Image.value,
+                                                            event_type=EventType.Risk.value,
+                                                            alert_type=AlertType.AbnormalHistory.value,
+                                                            alert_details=[detail])
+                                        report(image_report)
+                                        break
                         for r in rules["rules"]:
                             if r["instruct"] == instruct:
                                 if re.match(r["match"], command_content):

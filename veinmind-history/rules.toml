@@ -1,9 +1,29 @@
 [[rules]]
 description = "Miner Repo"
 instruct = "RUN"
-match = '''.*(xmrig|ethminer|miner)\.git.*'''
+match = '''.*(xmrig|ethminer|miner|poclbm|hashkill|bitcoin)\.git.*'''
+
+[[rules]]
+description = "ADD Miner Repo"
+instruct = "ADD"
+match = '''.*(xmrig|ethminer|miner|poclbm|hashkill|bitcoin).*'''
+
+[[rules]]
+description = "COPY Miner Repo"
+instruct = "COPY"
+match = '''.*(xmrig|ethminer|miner|poclbm|hashkill|bitcoin).*'''
 
 [[rules]]
 description = "Unsafe Path"
 instruct = "ENV"
 match = '''PATH=.*(|:)(/tmp|/dev/shm)'''
+
+[[rules]]
+description = "Potential secret"
+instruct = "ENV"
+match = '''.*(PASSWORD|PASSWD|SECRET|ACCESS|APIKEY|KEY|API_KEY|TOKEN)=.*'''
+
+[[rules]]
+description = "Password in URL"
+instruct = "RUN"
+match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
