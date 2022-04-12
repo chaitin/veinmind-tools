@@ -15,7 +15,7 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 
 |  工具 | 功能  | 
 |---|---|
-|  [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) | 扫描宿主 |
+|  [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) | 扫描工具运行宿主 |
 |  [veinmind-malicious](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-malicious) | 扫描镜像中的恶意文件  |
 |  [veinmind-weakpass](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-weakpass)  | 扫描镜像中的弱口令  |
 |  [veinmind-sensitive](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-sensitive) | 扫描镜像中的敏感信息  |
