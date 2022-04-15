@@ -7,7 +7,7 @@ replace github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0 => ../veinmi
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/VirusTotal/vt-go v0.0.0-20211209151516-855a1e790678
-	github.com/chaitin/libveinmind v1.0.6
+	github.com/chaitin/libveinmind v1.0.7
 	github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0
 	github.com/dutchcoders/go-clamd v0.0.0-20170520113014-b970184f4d9e
 	github.com/joho/godotenv v1.4.0
