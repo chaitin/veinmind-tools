@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -61,27 +62,27 @@ var (
 
 		// Output
 		err := runnerReporter.Write(os.Stdout)
-		if err != nil{
+		if err != nil {
 			log.Error(err)
 		}
 		output, _ := cmd.Flags().GetString("output")
-		if _, err := os.Stat(output); errors.Is(err, os.ErrNotExist){
-			f , err := os.Create(output)
-			if err != nil{
+		if _, err := os.Stat(output); errors.Is(err, os.ErrNotExist) {
+			f, err := os.Create(output)
+			if err != nil {
 				log.Error(err)
-			}else{
+			} else {
 				err = runnerReporter.Write(f)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 			}
-		}else{
-			f, err := os.OpenFile(output,os.O_WRONLY, 0666)
-			if err != nil{
+		} else {
+			f, err := os.OpenFile(output, os.O_WRONLY, 0666)
+			if err != nil {
 				log.Error(err)
-			}else{
+			} else {
 				err = runnerReporter.Write(f)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 			}
@@ -92,10 +93,44 @@ var (
 )
 
 var rootCmd = &cmd.Command{}
+var listCmd = &cmd.Command{
+	Use:   "list",
+	Short: "list relevant information",
+}
+var listPluginCmd = &cmd.Command{
+	Use:   "plugin",
+	Short: "list plugin information",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ps, err := plugin.DiscoverPlugins(context.Background(), ".")
+		if err != nil {
+			return err
+		}
+
+		verbose, err := cmd.Flags().GetBool("verbose")
+		if err != nil {
+			return err
+		}
+
+		for _, p := range ps {
+			if verbose {
+				pJsonByte, err := json.MarshalIndent(p, "", "	")
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+				log.Info("\n" + string(pJsonByte))
+			} else {
+				log.Info("Plugin Name: " + p.Name)
+			}
+		}
+
+		return nil
+	},
+}
 var scanHostCmd = &cmd.Command{
-	Use:     "scan-host",
-	Short:   "perform hosted scan command",
-	PreRunE: scanPreRunE,
+	Use:      "scan-host",
+	Short:    "perform hosted scan command",
+	PreRunE:  scanPreRunE,
 	PostRunE: scanPostRunE,
 }
 var scanRegistryCmd = &cmd.Command{
@@ -287,6 +322,9 @@ func init() {
 	// Cobra init
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
+	rootCmd.AddCommand(listCmd)
+	listCmd.AddCommand(listPluginCmd)
+	listPluginCmd.Flags().BoolP("verbose", "v", false, "verbose mode")
 	scanHostCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	scanHostCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
 	scanRegistryCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")

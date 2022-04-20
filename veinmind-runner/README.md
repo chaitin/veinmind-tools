@@ -82,7 +82,12 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 - dockerd
 - containerd
 
-6.使用`glob`筛选插件
+6.使用`glob`筛选需要运行插件
 ```
 ./veinmind-runner scan-host -g "**/veinmind-malicious"
+```
+
+7.列出当前插件列表
+```
+./veinmind-runner list plugin
 ```
