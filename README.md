@@ -11,6 +11,23 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 ## 🔥 Demo
 ![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220415144819.gif)
 
+
+## 🕹️ 快速开始
+### 1. 确保机器上正确安装 docker
+### 2. 安装 [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) 镜像
+```
+docker pull veinmind/veinmind-runner:latest
+```
+### 3. 下载 [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) 平行容器启动脚本
+```
+wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-container-run.sh -O run.sh && chmod +x run.sh
+```
+### 4. 快速扫描本地镜像
+```
+./run.sh scan-host
+```
+
+
 ## 🔨 工具列表
 
 |  工具 | 功能  | 
