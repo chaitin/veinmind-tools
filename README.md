@@ -14,6 +14,9 @@ veinmind-tools 是由长亭科技自研，基于<a href="https://github.com/chai
 
 ## 🕹️ 快速开始
 ### 1. 确保机器上正确安装 docker
+```
+docker info
+```
 ### 2. 安装 [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) 镜像
 ```
 docker pull veinmind/veinmind-runner:latest
