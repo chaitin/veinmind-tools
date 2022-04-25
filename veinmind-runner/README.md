@@ -62,14 +62,14 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 3.扫描远程仓库中的`centos`镜像(不指定仓库默认为`index.docker.io`)
 
 ```
-./veinmind-runner scan-registry -r "centos"
+./veinmind-runner scan-registry centos
 ```
 
 4.扫描远程私有仓库`registry.private.net`中的`nginx`镜像，其中用户名为`admin`，密码为`password`
 
 ```
-./veinmind-runner scan-registry --address registry.private.net --reponames "nginx" \
---username admin  --password password
+./veinmind-runner scan-registry --address registry.private.net \
+--username admin  --password password nginx
 ```
 
 5.指定容器运行时类型
