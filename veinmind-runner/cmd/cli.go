@@ -88,6 +88,27 @@ var (
 			}
 		}
 
+		// Exit
+		exitcode, err := cmd.Flags().GetInt("exit-code")
+		if err != nil {
+			return err
+		}
+
+		if exitcode == 0 {
+			return nil
+		} else {
+			events, err := runnerReporter.GetEvents()
+			if err != nil {
+				return err
+			}
+
+			if len(events) > 0 {
+				os.Exit(exitcode)
+			} else {
+				return nil
+			}
+		}
+
 		return nil
 	}
 )
@@ -323,6 +344,7 @@ func init() {
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
 	rootCmd.AddCommand(listCmd)
+	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 	listCmd.AddCommand(listPluginCmd)
 	listPluginCmd.Flags().BoolP("verbose", "v", false, "verbose mode")
 	scanHostCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
