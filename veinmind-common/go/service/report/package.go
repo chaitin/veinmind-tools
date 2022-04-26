@@ -28,6 +28,7 @@ type EventType uint32
 const (
 	Risk EventType = iota
 	Invasion
+	Info
 )
 
 type AlertType uint32
@@ -39,6 +40,7 @@ const (
 	Sensitive
 	AbnormalHistory
 	Weakpass
+	Asset
 )
 
 type WeakpassService uint32
@@ -54,6 +56,7 @@ type AlertDetail struct {
 	SensitiveFileDetail *SensitveFileDetail  `json:"sensitive_file_detail,omitempty"`
 	SensitiveEnvDetail  *SensitiveEnvDetail  `json:"sensitive_env_detail,omitempty"`
 	HistoryDetail       *HistoryDetail       `json:"history_detail,omitempty"`
+	AssetDetail         *AssetDetail         `json:"asset_detail,omitempty"`
 }
 
 type FileDetail struct {
@@ -100,6 +103,28 @@ type HistoryDetail struct {
 	Instruction string `json:"instruction"`
 	Content     string `json:"content"`
 	Description string `json:"description"`
+}
+
+type AssetDetail struct {
+	Type       string `json:"type"`
+	Name       string `json:"name"`
+	Version    string `json:"version"`
+	Release    string `json:"release"`
+	Epoch      int    `json:"epoch"`
+	Arch       string `json:"arch"`
+	SrcName    string `json:"srcName"`
+	SrcVersion string `json:"srcVersion"`
+	SrcRelease string `json:"srcRelease"`
+	SrcEpoch   int    `json:"srcEpoch"`
+
+	Modularitylabel string `json:"modularitylabel"` // only for Red Hat based distributions
+
+	Indirect bool   `json:"indirect"`
+	License  string `json:"license"`
+	Layer    string `json:"layer"`
+
+	// Each package metadata have the file path, while the package from lock files does not have.
+	FilePath string `json:"filePath"`
 }
 
 type ReportEvent struct {

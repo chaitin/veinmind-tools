@@ -33,11 +33,13 @@ var (
 	toEventType = map[EventType]string{
 		Risk: "Risk",
 		Invasion: "Invasion",
+		Info: "Info",
 	}
 
 	fromEventType = map[string]EventType{
 		"Risk": Risk,
 		"Invasion": Invasion,
+		"Info": Info,
 	}
 
 	toAlertType = map[AlertType]string{
@@ -47,6 +49,7 @@ var (
 		Sensitive: "Sensitive",
 		AbnormalHistory: "AbnormalHistory",
 		Weakpass: "Weakpass",
+		Asset: "Asset",
 	}
 
 	fromAlertType = map[string]AlertType{
@@ -56,6 +59,7 @@ var (
 		"Sensitive": Sensitive,
 		"AbnormalHistory": AbnormalHistory,
 		"Weakpass": Weakpass,
+		"Asset": Asset,
 	}
 
 	toWeakpassService = map[WeakpassService]string{
