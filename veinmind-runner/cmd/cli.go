@@ -163,7 +163,6 @@ var scanRegistryCmd = &cmd.Command{
 		username, _ := cmd.Flags().GetString("username")
 		password, _ := cmd.Flags().GetString("password")
 		namespace, _ := cmd.Flags().GetString("namespace")
-		reponames, _ := cmd.Flags().GetStringSlice("reponames")
 		tags, _ := cmd.Flags().GetStringSlice("tags")
 
 		auth := &registry.Auth{}
@@ -181,14 +180,14 @@ var scanRegistryCmd = &cmd.Command{
 
 		// If no repo is specified, then query all repo through catalog
 		repos := []string{}
-		if len(reponames) == 0 {
+		if len(args) == 0 {
 			repos, err = client.GetRepos()
 			if err != nil {
 				return err
 			}
 		} else {
 			// If it doesn't start with registry, autofill registry
-			for _, r := range reponames {
+			for _, r := range args {
 				rSplit := strings.Split(r, "/")
 				rNew := ""
 				if !strings.EqualFold(rSplit[0], address) {
@@ -355,7 +354,6 @@ func init() {
 	scanRegistryCmd.Flags().StringP("username", "u", "", "username of registry")
 	scanRegistryCmd.Flags().StringP("password", "p", "", "password of registry")
 	scanRegistryCmd.Flags().StringP("namespace", "n", "", "namespace of repo")
-	scanRegistryCmd.Flags().StringSliceP("reponames", "r", []string{}, "name of repo")
 	scanRegistryCmd.Flags().StringSliceP("tags", "t", []string{"latest"}, "tags of repo")
 
 	// Service client init
