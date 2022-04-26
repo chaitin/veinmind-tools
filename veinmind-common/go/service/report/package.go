@@ -48,12 +48,12 @@ const (
 )
 
 type AlertDetail struct {
-	MaliciousFileDetail *MaliciousFileDetail `json:"malicious_file_detail"`
-	WeakpassDetail      *WeakpassDetail      `json:"weakpass_detail"`
-	BackdoorDetail      *BackdoorDetail      `json:"backdoor_detail"`
-	SensitiveFileDetail *SensitveFileDetail  `json:"sensitive_file_detail"`
-	SensitiveEnvDetail  *SensitiveEnvDetail  `json:"sensitive_env_detail"`
-	HistoryDetail       *HistoryDetail       `json:"history_detail"`
+	MaliciousFileDetail *MaliciousFileDetail `json:"malicious_file_detail,omitempty"`
+	WeakpassDetail      *WeakpassDetail      `json:"weakpass_detail,omitempty"`
+	BackdoorDetail      *BackdoorDetail      `json:"backdoor_detail,omitempty"`
+	SensitiveFileDetail *SensitveFileDetail  `json:"sensitive_file_detail,omitempty"`
+	SensitiveEnvDetail  *SensitiveEnvDetail  `json:"sensitive_env_detail,omitempty"`
+	HistoryDetail       *HistoryDetail       `json:"history_detail,omitempty"`
 }
 
 type FileDetail struct {
