@@ -545,49 +545,14 @@ paths = [
 ]
 
 [[rules]]
-id = "Bakup File"
-description = "Bakup File"
-filepath = '''.*\/.+\.(bak|swp|old)$'''
-
-[[rules]]
 id = "Desktop Services Store"
 description = "Desktop Services Store"
 filepath = ''' .*\/\.DS_Store$'''
 
 [[rules]]
-id = "Shell command history file"
-description = "Shell command history file"
-filepath = '''.*\/\.(bash_|zsh_|dash_)history$'''
-
-[[rules]]
 id = "MySQL client command history file"
 description = "MySQL client command history file"
-filepath = '''.*\/\.mysql_history$'''
-
-[[rules]]
-id = "PostgreSQL client command history file"
-description = "PostgreSQL client command history file"
-filepath = '''.*\/\.psql_history$'''
-
-[[rules]]
-id = "Ruby IRB console history file"
-description = "Ruby IRB console history file"
-filepath = '''.*\/\.irb_history$'''
-
-[[rules]]
-id = "Pidgin chat client account configuration file"
-description = "Pidgin chat client account configuration file"
-filepath = '''.*\/\.purple\/accounts\.xml$'''
-
-[[rules]]
-id = "Hexchat/XChat IRC client server list configuration file"
-description = "Hexchat/XChat IRC client server list configuration file"
-filepath = '''.*\/\.xchat2?\/servlist_?\.conf$'''
-
-[[rules]]
-id = "Irssi IRC client configuration file"
-description = "Irssi IRC client configuration file"
-filepath = '''.*\/\.irssi\/config$'''
+filepath = '''.*\/\.(mysql|psql|irb)_history$'''
 
 [[rules]]
 id = "Recon-ng web reconnaissance framework API key database"
@@ -598,11 +563,6 @@ filepath = '''.*\/\.recon-ng\/keys\.db$'''
 id = "DBeaver SQL database manager configuration file"
 description = "DBeaver SQL database manager configuration file"
 filepath = '''.*\/\.dbeaver-data-sources\.xml$'''
-
-[[rules]]
-id = "Mutt e-mail client configuration file"
-description = "Mutt e-mail client configuration file"
-filepath = '''.*\/\.muttrc$'''
 
 [[rules]]
 id = "S3cmd configuration file"
