@@ -191,9 +191,21 @@ var scanRegistryCmd = &cmd.Command{
 				rSplit := strings.Split(r, "/")
 				rNew := ""
 				if !strings.EqualFold(rSplit[0], address) {
-					rSplitNew := []string{address}
-					rSplitNew = append(rSplitNew, rSplit...)
-					rNew = strings.Join(rSplitNew, "/")
+					if len(rSplit) == 1 {
+						rNew = strings.Join([]string{address, "_", rSplit[0]}, "/")
+					} else if len(rSplit) == 2 {
+						rSplitNew := []string{address}
+						rSplitNew = append(rSplitNew, rSplit...)
+						rNew = strings.Join(rSplitNew, "/")
+					} else if len(rSplit) >= 3 {
+						if address == "index.docker.io" {
+							return errors.New("cmd: please specify registry address")
+						} else {
+							rSplitNew := []string{address}
+							rSplitNew = append(rSplitNew, rSplit...)
+							rNew = strings.Join(rSplitNew, "/")
+						}
+					}
 				} else {
 					rNew = r
 				}
