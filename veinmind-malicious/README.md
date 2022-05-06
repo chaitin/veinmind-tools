@@ -36,15 +36,9 @@ export VT_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### 安装方式二
 
-创建名为`veinmind`的网络，获取`clamav`镜像并启动
-```
-docker network create veinmind
-docker run -d --network veinmind --name clamav clamav/clamav
-```
-
 基于平行容器的模式，获取 `veinmind-malicious` 的镜像并启动
 ```
-docker run --rm -it --network veinmind --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/data -e CLAMD_HOST=clamav -e CLAMD_PORT=3310 veinmind/veinmind-malicious scan
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/data veinmind/veinmind-malicious scan
 ```
 
 或者使用项目提供的脚本启动
