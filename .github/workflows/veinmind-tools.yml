@@ -306,8 +306,6 @@ jobs:
           push: true
           platforms: |
             linux/amd64
-            linux/arm64
-            linux/386
           tags: |
             veinmind/veinmind-asset:latest
             veinmind/veinmind-asset:${{github.ref_name}}
