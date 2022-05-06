@@ -43,6 +43,11 @@ func DefaultReportClient() *reportClient {
 				ctx: ctx,
 				group: group,
 				Report: func(evt ReportEvent) error {
+					// Skip for info type event
+					if evt.EventType == Info {
+						return nil
+					}
+
 					evtBytes, err := json.MarshalIndent(evt, "", "	")
 					if err != nil {
 						return err
