@@ -316,6 +316,13 @@ func scan(c *cmd.Command, image api.Image) error {
 	} else {
 		ref = image.ID()
 	}
+
+	// Get threads value
+	t, err := c.Flags().GetInt("threads")
+	if err != nil {
+		t = 5
+	}
+
 	log.Infof("Scan image: %#v\n", ref)
 	if err := cmd.ScanImage(ctx, ps, image,
 		plugin.WithExecInterceptor(func(
@@ -332,7 +339,7 @@ func scan(c *cmd.Command, image api.Image) error {
 
 			// Next Plugin
 			return next(ctx, reg.Bind())
-		})); err != nil {
+		}), plugin.WithExecParallelism(t)); err != nil {
 		return err
 	}
 	return nil
@@ -348,6 +355,7 @@ func init() {
 	listPluginCmd.Flags().BoolP("verbose", "v", false, "verbose mode")
 	scanHostCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	scanHostCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
+	scanHostCmd.Flags().IntP("threads", "t", 5, "threads for scan action")
 	scanRegistryCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	scanRegistryCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
 	scanRegistryCmd.Flags().StringP("address", "a", "index.docker.io", "server address of registry")
@@ -355,6 +363,7 @@ func init() {
 	scanRegistryCmd.Flags().StringP("password", "p", "", "password of registry")
 	scanRegistryCmd.Flags().StringP("namespace", "n", "", "namespace of repo")
 	scanRegistryCmd.Flags().StringSliceP("tags", "t", []string{"latest"}, "tags of repo")
+	scanRegistryCmd.Flags().Int("threads", 5, "threads for scan action")
 
 	// Service client init
 	reportService = report.NewReportService()

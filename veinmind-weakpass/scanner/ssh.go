@@ -132,7 +132,7 @@ func Scan(image api.Image, opt ScanOption) (model.ScanImageResult, error) {
 	pool := tunny.NewFunc(opt.ScanThreads, func(opt interface{}) interface{} {
 		bruteOpt, ok := opt.(SSHBruteOpt)
 		if !ok {
-			return errors.New("Please use sshbruteopt")
+			return errors.New("please use sshbruteopt")
 		}
 
 		_, match := brute.SSHMatchPassword(bruteOpt.Shadow.EncryptedPassword, bruteOpt.Guess)
@@ -167,7 +167,7 @@ func Scan(image api.Image, opt ScanOption) (model.ScanImageResult, error) {
 		}
 	}
 
-	log.Info("Start Scan Image SSH Weakpass: ", imageResult.ImageName)
+	log.Info("start scan image ssh weakpass: ", imageResult.ImageName)
 
 	for _, s := range shadows {
 		// 判断是否为指定用户名
