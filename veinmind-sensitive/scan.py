@@ -21,6 +21,22 @@ def load_rules():
     global rules
     with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "rules.toml"), encoding="utf8") as f:
         rules = toml.load(f)
+    # handle level
+    for r in rules["rules"]:
+        if "level" not in r.keys():
+            r["level"] = Level.Low.value
+        else:
+            r["level"] = str2level(r["level"])
+
+def str2level(level):
+    if level == "low":
+        return Level.Low.value
+    if level == "medium":
+        return Level.Medium.value
+    if level == "high":
+        return Level.High.value
+    if level == "critical":
+        return Level.Critical.value
 
 
 def tab_print(printstr: str):
@@ -83,7 +99,7 @@ def scan_images(image):
                             detail = AlertDetail.sensitive_env(SensitiveEnvDetail(
                                 key=env_split[0], value=''.join(env_split[1:]), description="regex: " + env_regex
                             ))
-                            report_event = ReportEvent(id=image.id(), level=Level.Medium.value,
+                            report_event = ReportEvent(id=image.id(), level=r["level"],
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
                                                        alert_type=AlertType.Sensitive.value,
@@ -109,7 +125,7 @@ def scan_images(image):
                                                                                     file_detail=FileDetail.from_stat(
                                                                                         dirpath,
                                                                                         file_stat)))
-                            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                            report_event = ReportEvent(id=image.id(), level=r["level"],
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
                                                        alert_type=AlertType.Sensitive.value, alert_details=[detail])
@@ -159,7 +175,7 @@ def scan_images(image):
                                                                                     file_detail=FileDetail.from_stat(
                                                                                         filepath,
                                                                                         file_stat)))
-                            report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                            report_event = ReportEvent(id=image.id(), level=r["level"],
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
                                                        alert_type=AlertType.Sensitive.value, alert_details=[detail])
@@ -199,7 +215,7 @@ def scan_images(image):
                                     detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="match: " + match,
                                                                                             file_detail=FileDetail.from_stat(
                                                                                                 filepath, file_stat)))
-                                    report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                    report_event = ReportEvent(id=image.id(), level=r["level"],
                                                                detect_type=DetectType.Image.value,
                                                                event_type=EventType.Risk.value,
                                                                alert_type=AlertType.Sensitive.value,
@@ -213,7 +229,7 @@ def scan_images(image):
                                     detail = AlertDetail.sensitive_file(SensitiveFileDetail(description="match: " + match,
                                                                                       file_detail=FileDetail.from_stat(
                                                                                           filepath, file_stat)))
-                                    report_event = ReportEvent(id=image.id(), level=Level.High.value,
+                                    report_event = ReportEvent(id=image.id(), level=r["level"],
                                                                detect_type=DetectType.Image.value,
                                                                event_type=EventType.Risk.value,
                                                                alert_type=AlertType.Sensitive.value,
