@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
+	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
@@ -13,8 +14,8 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
+	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -159,61 +160,82 @@ var scanRegistryCmd = &cmd.Command{
 	Short:   "perform registry scan command",
 	PreRunE: scanPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		address, _ := cmd.Flags().GetString("address")
-		username, _ := cmd.Flags().GetString("username")
-		password, _ := cmd.Flags().GetString("password")
+		var (
+			err             error
+			c               registry.Client
+			veinmindRuntime api.Runtime
+		)
+
+		server, _ := cmd.Flags().GetString("server")
+		config, _ := cmd.Flags().GetString("config")
 		namespace, _ := cmd.Flags().GetString("namespace")
-		tags, _ := cmd.Flags().GetStringSlice("tags")
+		runtime, _ := cmd.Flags().GetString("runtime")
+		// tags, _ := cmd.Flags().GetStringSlice("tags")
 
-		auth := &registry.Auth{}
-		if username != "" && password != "" {
-			auth.Username = username
-			auth.Password = password
-		} else {
-			auth = nil
-		}
+		switch runtime {
+		case "docker":
+			if config == "" {
+				c, err = registry.NewRegistryDockerClient()
+			} else {
+				c, err = registry.NewRegistryDockerClient(registry.WithAuth(config))
+			}
+			if err != nil {
+				return err
+			}
 
-		client, err := registry.NewRegistryClient(address, auth)
-		if err != nil {
-			return err
+			veinmindRuntime, err = docker.New()
+			if err != nil {
+				return err
+			}
+		case "containerd":
+			c, err = registry.NewRegistryContainerdClient()
+			if err != nil {
+				return err
+			}
+
+			veinmindRuntime, err = containerd.New()
+			if err != nil {
+				return err
+			}
+		default:
+			return errors.New("runtime not match")
 		}
 
 		// If no repo is specified, then query all repo through catalog
 		repos := []string{}
 		if len(args) == 0 {
-			repos, err = client.GetRepos()
-			if err != nil {
-				return err
+			switch c := c.(type) {
+			case *registry.RegistryDockerClient:
+				repos, err = c.GetRepos(server)
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			// If it doesn't start with registry, autofill registry
 			for _, r := range args {
-				rSplit := strings.Split(r, "/")
-				rNew := ""
-				if !strings.EqualFold(rSplit[0], address) {
-					rSplitNew := []string{address}
-					rSplitNew = append(rSplitNew, rSplit...)
-					rNew = strings.Join(rSplitNew, "/")
-				} else {
-					rNew = r
+				rParse, err := reference.Parse(r)
+				if err != nil {
+					log.Error(err)
+					continue
 				}
-				repos = append(repos, rNew)
+
+				repos = append(repos, rParse.String())
 			}
 		}
 
 		if namespace != "" {
 			namespaceMaps := map[string][]string{}
 			for _, repo := range repos {
-				repoSplit := strings.Split(repo, "/")
-				if len(repoSplit) >= 3 {
-					namespace := repoSplit[1]
-					namespaceMaps[namespace] = append(namespaceMaps[namespace], repo)
-				} else if len(repoSplit) == 2 {
-					namespace := repoSplit[0]
-					namespaceMaps[namespace] = append(namespaceMaps[namespace], repo)
-				} else if len(repoSplit) == 1 {
-					namespaceMaps["_"] = append(namespaceMaps["_"], repo)
+				rNamed, err := reference.ParseNamed(repo)
+				if err != nil {
+					log.Error(err)
+					continue
 				}
+
+				p := reference.Path(rNamed)
+				ns := strings.Split(p, "/")[0]
+				namespaceMaps[ns] = append(namespaceMaps[ns], repo)
 			}
 
 			_, ok := namespaceMaps[namespace]
@@ -224,81 +246,92 @@ var scanRegistryCmd = &cmd.Command{
 			}
 		}
 
-		if len(tags) > 0 {
-			reposTemp := []string{}
-			for _, repo := range repos {
-				rtags, err := client.GetRepoTags(repo)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-
-				for _, t1 := range rtags {
-					for _, t2 := range tags {
-						if strings.EqualFold(t1, t2) {
-							repoSplit := strings.Split(repo, ":")
-							if len(repoSplit) == 1 {
-								repoSplit = append(repoSplit, t1)
-								repoWithTag := strings.Join(repoSplit, ":")
-								reposTemp = append(reposTemp, repoWithTag)
-							}
-						}
-					}
-				}
-			}
-			repos = reposTemp
-		}
-
-		d, err := docker.New()
-		if err != nil {
-			return err
-		}
-		defer func() {
-			d.Close()
-		}()
-
 		for _, repo := range repos {
 			log.Infof("Start pull image: %#v\n", repo)
-			r, err := client.Pull(repo)
-			if err != nil {
-				log.Errorf("Pull image error: %#v\n", err.Error())
-				continue
-			}
-
-			_, err = ioutil.ReadAll(r)
+			r, err := c.Pull(repo)
 			if err != nil {
 				log.Errorf("Pull image error: %#v\n", err.Error())
 				continue
 			}
 			log.Infof("Pull image success: %#v\n", repo)
 
-			if strings.Contains(repo, "index.docker.io") {
-				repo = strings.Replace(repo, "index.docker.io/", "", 1)
-			}
-			ids, err := d.FindImageIDs(repo)
-			defer func() {
-				for _, id := range ids {
-					_, err := client.Remove(id)
-					if err != nil {
-						log.Error(err)
-					}
-					log.Infof("Remove image success: %#v\n", repo)
+			var (
+				rNamed reference.Named
+			)
+
+			switch c.(type) {
+			case *registry.RegistryDockerClient:
+				rNamed, err = reference.ParseDockerRef(r)
+				if err != nil {
+					log.Error(err)
+					continue
 				}
-			}()
 
-			if len(ids) > 0 {
-				for _, id := range ids {
-					image, err := d.OpenImageByID(id)
-					if err != nil {
-						log.Error(err)
-						continue
+				domain := reference.Domain(rNamed)
+				if domain == "index.docker.io" || domain == "docker.io" {
+					repo = reference.Path(rNamed)
+					if (strings.Split(repo, "/")[0] == "library" || strings.Split(repo, "/")[0] == "_") && len(strings.Split(repo, "/")) >= 2 {
+						repo = strings.Join(strings.Split(repo, "/")[1:], "")
+					}
+				}
+			case *registry.RegistryContainerdClient:
+				repo = r
+			}
+
+			ids, err := veinmindRuntime.FindImageIDs(repo)
+			switch c.(type) {
+			case *registry.RegistryDockerClient:
+				if len(ids) > 0 {
+					for _, id := range ids {
+						image, err := veinmindRuntime.OpenImageByID(id)
+						if err != nil {
+							log.Error(err)
+							continue
+						}
+
+						err = scan(cmd, image)
+						if err != nil {
+							log.Error(err)
+							continue
+						}
 					}
 
-					err = scan(cmd, image)
-					if err != nil {
-						log.Error(err)
-						continue
+					for _, id := range ids {
+						err = c.Remove(id)
+						if err != nil {
+							log.Error(err)
+						} else {
+							log.Infof("Remove image success: %#v\n", repo)
+						}
 					}
+				}
+			case *registry.RegistryContainerdClient:
+				image, err := veinmindRuntime.OpenImageByID(r)
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+
+				var (
+					repoRef string
+				)
+				repoRefs, err := image.RepoRefs()
+				if len(repoRefs) > 0 {
+					repoRef = repoRefs[0]
+				} else {
+					repoRef = image.ID()
+				}
+
+				err = scan(cmd, image)
+				if err != nil {
+					log.Error(err)
+				}
+
+				err = c.Remove(repoRef)
+				if err != nil {
+					log.Error(err)
+				} else {
+					log.Infof("Remove image success: %#v\n", repo)
 				}
 			}
 		}
@@ -356,11 +389,11 @@ func init() {
 	scanHostCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	scanHostCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
 	scanHostCmd.Flags().IntP("threads", "t", 5, "threads for scan action")
+	scanRegistryCmd.Flags().StringP("runtime", "r", "docker", "specifies the runtime of registry client to use")
 	scanRegistryCmd.Flags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	scanRegistryCmd.Flags().StringP("output", "o", "report.json", "output filepath of report")
-	scanRegistryCmd.Flags().StringP("address", "a", "index.docker.io", "server address of registry")
-	scanRegistryCmd.Flags().StringP("username", "u", "", "username of registry")
-	scanRegistryCmd.Flags().StringP("password", "p", "", "password of registry")
+	scanRegistryCmd.Flags().StringP("server", "s", "index.docker.io", "server address of registry")
+	scanRegistryCmd.Flags().StringP("config", "c", "", "auth config path")
 	scanRegistryCmd.Flags().StringP("namespace", "n", "", "namespace of repo")
 	scanRegistryCmd.Flags().StringSliceP("tags", "t", []string{"latest"}, "tags of repo")
 	scanRegistryCmd.Flags().Int("threads", 5, "threads for scan action")
