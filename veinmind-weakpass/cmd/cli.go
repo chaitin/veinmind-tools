@@ -17,9 +17,11 @@ import (
 	"sync"
 	"text/tabwriter"
 	"time"
+	"sort"
 )
 
 var results = []model.ScanImageResult{}
+var app_type = []string{}
 var resultsLock sync.Mutex
 var scanStart = time.Now()
 
@@ -59,6 +61,7 @@ var scanCmd = &cmd.Command{
 				for _, w := range r.WeakpassResults {
 					fmt.Fprintln(tabw, "| Username: ", w.Username, "\t")
 					fmt.Fprintln(tabw, "| Password: ", w.Password, "\t")
+					fmt.Fprintln(tabw, "| Filepath: ", w.Filepath, "\t")
 				}
 				fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
 			}
@@ -68,8 +71,40 @@ var scanCmd = &cmd.Command{
 	},
 }
 
+
+func app_in(target string, str_array []string) bool {
+	sort.Strings(str_array)
+	index := sort.SearchStrings(str_array, target)
+	if index < len(str_array) && str_array[index] == target { 
+		return true
+	}
+	return false
+}
+ 
+func report_event(result model.ScanImageResult,image api.Image) error {
+	details := []report.AlertDetail{}
+		for _, wr := range result.WeakpassResults {
+			details = append(details, report.AlertDetail{
+				WeakpassDetail: &report.WeakpassDetail{
+					Username: wr.Username,
+					Password: wr.Password,
+					Service:  report.WeakpassService(wr.PassType)},
+			})
+		}
+		reportEvent := report.ReportEvent{
+			ID:           image.ID(),
+			Time:         time.Now(),
+			Level:        report.High,
+			DetectType:   report.Image,
+			EventType:    report.Risk,
+			AlertType:    report.Weakpass,
+			AlertDetails: details,
+		}
+		err := report.DefaultReportClient().Report(reportEvent)
+		return err
+}
 func scan(c *cmd.Command, image api.Image) error {
-	result, err := scanner.Scan(image, scanner.ScanOption{
+	opt :=  scanner.ScanOption{
 		ScanThreads: func() int {
 			threads, err := c.Flags().GetInt("threads")
 			if err != nil {
@@ -94,40 +129,33 @@ func scan(c *cmd.Command, image api.Image) error {
 				return dictpath
 			}
 		}(),
-	})
-
-	if err != nil {
-		log.Error(err)
-		return nil
 	}
-
-	resultsLock.Lock()
-	results = append(results, result)
-	resultsLock.Unlock()
-
-	// Report Event
-	if len(result.WeakpassResults) > 0 {
-		details := []report.AlertDetail{}
-		for _, wr := range result.WeakpassResults {
-			details = append(details, report.AlertDetail{
-				WeakpassDetail: &report.WeakpassDetail{
-					Username: wr.Username,
-					Password: wr.Password,
-					Service:  report.WeakpassService(wr.PassType)},
-			})
-		}
-		reportEvent := report.ReportEvent{
-			ID:           image.ID(),
-			Time:         time.Now(),
-			Level:        report.High,
-			DetectType:   report.Image,
-			EventType:    report.Risk,
-			AlertType:    report.Weakpass,
-			AlertDetails: details,
-		}
-		err = report.DefaultReportClient().Report(reportEvent)
+	if app_in("tomcat",app_type) {
+		result_tomcat, err := scanner.ScanTomcat(image,opt)
 		if err != nil {
-			return err
+			log.Error(err)
+			return nil
+		}
+		resultsLock.Lock()
+		results = append(results, result_tomcat)
+		resultsLock.Unlock()
+		if len(result_tomcat.WeakpassResults) > 0 {
+			report_event(result_tomcat,image)
+		}
+		
+	}
+	
+	if app_in("ssh",app_type){
+		result_ssh, err := scanner.Scan(image,opt)
+		if err != nil {
+			log.Error(err)
+			return nil
+		}
+		resultsLock.Lock()
+		results = append(results, result_ssh)
+		resultsLock.Unlock()
+		if len(result_ssh.WeakpassResults) > 0 {
+			report_event(result_ssh,image)
 		}
 	}
 
@@ -145,6 +173,7 @@ func init() {
 	scanCmd.Flags().IntP("threads", "t", 10, "password brute threads")
 	scanCmd.Flags().StringP("username", "u", "", "username e.g. root")
 	scanCmd.Flags().StringP("dictpath", "d", "", "dict path e.g ./mypass.dict")
+	scanCmd.Flags().StringSliceVarP(&app_type,"apptype","a",[]string{"ssh","tomcat"},"find weakpass in these app eg ssh")
 }
 
 func main() {

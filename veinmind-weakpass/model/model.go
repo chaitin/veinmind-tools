@@ -4,12 +4,15 @@ type WeakpassType int
 
 const (
 	SSH WeakpassType = iota
+	TOMCAT 
 )
 
 func (self *WeakpassType) ToString() string {
 	switch *self {
 	case SSH:
 		return "SSH"
+	case TOMCAT:
+		return "TOMCAT"
 	}
 
 	return ""
@@ -35,4 +38,7 @@ type WeakpassResult struct {
 
 	// 弱口令
 	Password string
+
+	// 弱口令位置
+	Filepath string
 }
