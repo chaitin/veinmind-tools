@@ -6,6 +6,7 @@ replace github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0 => ../veinmi
 
 require (
 	github.com/Jeffail/tunny v0.1.4
+	github.com/beevik/etree v1.1.0
 	github.com/chaitin/libveinmind v1.0.7
 	github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0
 	github.com/sirupsen/logrus v1.8.1

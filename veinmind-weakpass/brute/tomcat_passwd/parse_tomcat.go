@@ -1,30 +1,39 @@
 package tomcat_passwd
 
 import (
+	"github.com/beevik/etree"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io"
-	"regexp"
 )
-type Tomcat struct{
+
+type Tomcat struct {
 	Filepath string
 	Username string
 	Password string
-	Role string
+	Role     string
 }
+
 // 需要考虑用户是否提供tomcat的目录,如果不提供需要自己找
 func ParseTomcatFile(tomcatFile io.Reader) (tomcats []Tomcat, err error) {
-	var content string
-	if text, err := io.ReadAll(tomcatFile); err == nil {
-		content = string(text)
+	doc := etree.NewDocument()
+	if _, err := doc.ReadFrom(tomcatFile); err != nil {
+		log.Error(err)
 	}
-	t := Tomcat{} 
-	// user 标签下是否有这三个属性,如果不全要按行进行匹配,每次匹配一个属性即可
-	reg := regexp.MustCompile(`<user username="(?s:(.*?))" password="(?s:(.*?))" roles="(?s:(.*?))"/>`)
-	result := reg.FindAllStringSubmatch(content, -1)
-	for _, text := range result {
-		t.Username = text[1]
-		t.Password = text[2]
-		t.Role = text[3]
-		tomcats = append(tomcats,t)
-    }
+	root := doc.SelectElement("tomcat-users")
+	if root == nil {
+		log.Error("config file formate error")
+	}
+	token := root.FindElements("user")
+	if token == nil {
+		log.Error("config file formate error")
+	}
+	t := Tomcat{}
+	for _, res := range token {
+		t.Username = res.SelectAttr("username").Value
+		t.Password = res.SelectAttr("password").Value
+		t.Role = res.SelectAttr("roles").Value
+		tomcats = append(tomcats, t)
+	}
+
 	return tomcats, nil
 }

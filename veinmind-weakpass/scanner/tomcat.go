@@ -6,17 +6,16 @@ import (
 	"github.com/Jeffail/tunny"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute/tomcat_passwd"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-	"fmt"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute/tomcat_passwd"
 )
-
 
 func init() {
 	// 初始化字典
@@ -31,24 +30,23 @@ func init() {
 	}
 }
 
-
 type TomcatBruteOpt struct {
 	Tomcat tomcat_passwd.Tomcat
-	Guess string
+	Guess  string
 }
 
-func mergeArr(a, b []tomcat_passwd.Tomcat,c string) []tomcat_passwd.Tomcat {
+func mergeArr(tomcats, tomcat []tomcat_passwd.Tomcat, path string) []tomcat_passwd.Tomcat {
 	var arr []tomcat_passwd.Tomcat
-	for _, i := range a {
-	   arr = append(arr, i)
+	for _, i := range tomcats {
+		arr = append(arr, i)
 	}
-	for _, j := range b {
-		j.Filepath = c
-	   arr = append(arr, j)
+	for _, j := range tomcat {
+		j.Filepath = path
+		arr = append(arr, j)
 	}
 	return arr
- }
- 
+}
+
 func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) {
 	// 设置镜像报告信息
 	imageResult := model.ScanImageResult{}
@@ -73,32 +71,33 @@ func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) 
 		imageName = imageNameSplit[0]
 	}
 	// 寻找config_user.xml,会不会有两个这样的文件,如果有是否都需要遍历
-	var tomcat_passwd_files []string 
-	image.Walk("/", func (path string, info os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Printf("ERROR: %v", err)
-			return err
-		}
+	var TomcatPasswdFiles []string
+	image.Walk("/", func(path string, info os.FileInfo, err error) error {
 		if info.Name() == "tomcat-users.xml" {
-			parent_len := len(path)-16-5
-			//fmt.Printf(path[:parent_len] + "bin/catalina-tasks.xml")
-			info,err = image.Stat(path[:parent_len]+"bin/catalina-tasks.xml")
-			if err == nil{
-				tomcat_passwd_files = append(tomcat_passwd_files,path)
+			dir, _ := filepath.Split(path)
+			dir = strings.TrimRight(dir, "/")
+			dir, _ = filepath.Split(dir)
+			info, err = image.Stat(dir + "bin/catalina-tasks.xml")
+			if err != nil {
+				return nil
 			}
+			TomcatPasswdFiles = append(TomcatPasswdFiles, path)
 		}
 		return nil
 	})
 	var tomcats []tomcat_passwd.Tomcat
-	for _,tomcat_passwd_file := range tomcat_passwd_files{
-		file, err := image.Open(tomcat_passwd_file)
+	for _, TomcatPasswdFile := range TomcatPasswdFiles {
+		file, err := image.Open(TomcatPasswdFile)
 		if err != nil {
 			return model.ScanImageResult{}, err
 		}
-		tomcat,err := tomcat_passwd.ParseTomcatFile(file)
-		tomcats = mergeArr(tomcats,tomcat,tomcat_passwd_file)
-	}	
-	
+		tomcat, err := tomcat_passwd.ParseTomcatFile(file)
+		if err != nil {
+			return model.ScanImageResult{}, err
+		}
+		tomcats = mergeArr(tomcats, tomcat, TomcatPasswdFile)
+	}
+
 	// 检测结果
 	var weakpassResultsLock sync.Mutex
 	var weakpassResults []model.WeakpassResult

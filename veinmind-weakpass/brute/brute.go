@@ -13,10 +13,10 @@ func SSHMatchPassword(encrypt string, guess string) (string, bool) {
 	return pwd.Match([]string{guess})
 }
 
-func TomcatMatchPassword(tomcat_passwd string, guess string) (string ,bool){
+func TomcatMatchPassword(tomcat_passwd string, guess string) (string, bool) {
 	if tomcat_passwd == guess {
-		return guess,true
-	}else{
-		return "",false
+		return guess, true
+	} else {
+		return "", false
 	}
 }

@@ -4,7 +4,7 @@ type WeakpassType int
 
 const (
 	SSH WeakpassType = iota
-	TOMCAT 
+	TOMCAT
 )
 
 func (self *WeakpassType) ToString() string {
