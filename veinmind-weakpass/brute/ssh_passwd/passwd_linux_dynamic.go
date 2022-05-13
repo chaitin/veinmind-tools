@@ -1,4 +1,3 @@
-//go:build dynamic
 // +build dynamic
 
 package ssh_passwd
