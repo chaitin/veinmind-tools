@@ -7,11 +7,10 @@ import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute/tomcat"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/brute/redis"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -23,19 +22,18 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	scanner := bufio.NewScanner(passDictFile)
 	for scanner.Scan() {
 		passDict = append(passDict, scanner.Text())
 	}
 }
 
-type TomcatBruteOpt struct {
-	Tomcat tomcat.Tomcat
-	Guess  string
+type RedisBruteOpt struct {
+	Redis redis.Redis
+	Guess string
 }
 
-func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) {
+func ScanRedis(image api.Image, opt ScanOption) (model.ScanImageResult, error) {
 	// 设置镜像报告信息
 	imageResult := model.ScanImageResult{}
 
@@ -59,37 +57,32 @@ func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) 
 		imageName = imageNameSplit[0]
 	}
 	// 寻找config_user.xml,会不会有两个这样的文件,如果有是否都需要遍历
-	var TomcatPasswdFiles = []string{"/usr/local/tomcat/conf/tomcat-users.xml"}
-	_, err = image.Stat(TomcatPasswdFiles[0])
-	if err != nil {
-		TomcatPasswdFiles = TomcatPasswdFiles[1:]
-		image.Walk("/", func(path string, info os.FileInfo, err error) error {
-			if info.Name() == "tomcat-users.xml" {
-				dir := filepath.Dir(path)
-				dir = filepath.Dir(path)
-				info, err = image.Stat(dir + "bin/catalina-tasks.xml")
-				if err != nil {
-					return nil
-				}
-				TomcatPasswdFiles = append(TomcatPasswdFiles, path)
-			}
-			return nil
-		})
-	}
-	var tomcats []tomcat.Tomcat
-	for _, TomcatPasswdFile := range TomcatPasswdFiles {
-		file, err := image.Open(TomcatPasswdFile)
+	var RedisPasswdFiles = []string{"/etc/redis.conf", "/etc/redis/redis.conf"}
+	// image.Walk("/", func(path string, info os.FileInfo, err error) error {
+	// 	if info.Name() == "redis.conf" {
+	// 		RedisPasswdFiles = append(RedisPasswdFiles, path)
+	// 	}
+	// 	return nil
+	// })
+	var rediss []redis.Redis
+	for _, RedisPasswdFile := range RedisPasswdFiles {
+		_, err := image.Stat(RedisPasswdFile)
+		if err != nil {
+			continue
+		}
+		log.Error(RedisPasswdFile)
+		file, err := image.Open(RedisPasswdFile)
 		if err != nil {
 			return model.ScanImageResult{}, err
 		}
-		tomcat, err := tomcat.ParseTomcatFile(file)
+		redis, err := redis.ParseRedisFile(file)
 		if err != nil {
 			return model.ScanImageResult{}, err
 		}
-		for _, i := range tomcat {
-			i.Filepath = TomcatPasswdFile
+		for _, i := range redis {
+			i.Filepath = RedisPasswdFile
 		}
-		tomcats = append(tomcats, tomcat...)
+		rediss = append(rediss, redis...)
 	}
 
 	// 检测结果
@@ -100,7 +93,7 @@ func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) 
 	pool := tunny.NewFunc(opt.ScanThreads, func(opt interface{}) interface{} {
 		bruteOpt, ok := opt.(TomcatBruteOpt)
 		if !ok {
-			return errors.New("please use tomcatbruteopt")
+			return errors.New("please use redisbruteopt")
 		}
 
 		_, match := brute.TomcatMatchPassword(bruteOpt.Tomcat.Username, bruteOpt.Guess)
@@ -136,25 +129,18 @@ func ScanTomcat(image api.Image, opt ScanOption) (model.ScanImageResult, error) 
 		}
 	}
 
-	log.Info("start scan image tomcat weakpass: ", imageResult.ImageName)
+	log.Info("start scan image redis weakpass: ", imageResult.ImageName)
 
-	for _, s := range tomcats {
-		// 判断是否为指定用户名
-		if opt.Username != "" {
-			if s.Username != opt.Username {
-				continue
-			}
-		}
-
+	for _, s := range rediss {
 		for _, guess := range passDict {
 			// 动态替换弱口令字典中的宏
 			if imageName != "" {
 				guess = strings.Replace(guess, "${image_name}", imageName, -1)
 			}
 
-			match, err := pool.ProcessTimed(TomcatBruteOpt{
-				Tomcat: s,
-				Guess:  guess,
+			match, err := pool.ProcessTimed(RedisBruteOpt{
+				Redis: s,
+				Guess: guess,
 			}, 5*time.Second)
 
 			if err != nil {

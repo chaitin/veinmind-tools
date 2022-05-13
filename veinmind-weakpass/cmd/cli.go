@@ -19,12 +19,6 @@ import (
 	"time"
 )
 
-type report_type struct {
-	result model.ScanImageResult
-	image  api.Image
-}
-
-var reportEvents = []report_type{}
 var results = []model.ScanImageResult{}
 var app_type = []string{}
 var resultsLock sync.Mutex
@@ -147,7 +141,6 @@ func scan(c *cmd.Command, image api.Image) error {
 				result_ssh, err := scanner.Scan(image, opt)
 				if err != nil {
 					log.Error(err)
-					return nil
 				}
 				resultsLock.Lock()
 				results = append(results, result_ssh)
@@ -156,10 +149,22 @@ func scan(c *cmd.Command, image api.Image) error {
 					report_event(result_ssh, image)
 				}
 			}
+		case "redis":
+			{
+				result_redis, err := scanner.ScanRedis(image, opt)
+				if err != nil {
+					log.Error(err)
+				}
+				resultsLock.Lock()
+				results = append(results, result_redis)
+				resultsLock.Unlock()
+				if len(result_redis.WeakpassResults) > 0 {
+					report_event(result_redis, image)
+				}
+			}
 		default:
 			{
-				log.Error("try specify the app name")
-				os.Exit(1)
+				log.Error("try specify the app name: ", app)
 			}
 		}
 

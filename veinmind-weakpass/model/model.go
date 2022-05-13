@@ -5,6 +5,7 @@ type WeakpassType int
 const (
 	SSH WeakpassType = iota
 	TOMCAT
+	REDIS
 )
 
 func (self *WeakpassType) ToString() string {
@@ -13,6 +14,8 @@ func (self *WeakpassType) ToString() string {
 		return "SSH"
 	case TOMCAT:
 		return "TOMCAT"
+	case REDIS:
+		return "REDIS"
 	}
 
 	return ""

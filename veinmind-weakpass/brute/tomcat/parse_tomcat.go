@@ -1,8 +1,8 @@
-package tomcat_passwd
+package tomcat
 
 import (
+	"errors"
 	"github.com/beevik/etree"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io"
 )
 
@@ -13,19 +13,18 @@ type Tomcat struct {
 	Role     string
 }
 
-// 需要考虑用户是否提供tomcat的目录,如果不提供需要自己找
 func ParseTomcatFile(tomcatFile io.Reader) (tomcats []Tomcat, err error) {
 	doc := etree.NewDocument()
 	if _, err := doc.ReadFrom(tomcatFile); err != nil {
-		log.Error(err)
+		return tomcats, err
 	}
 	root := doc.SelectElement("tomcat-users")
 	if root == nil {
-		log.Error("config file formate error")
+		return tomcats, errors.New("config file format error")
 	}
 	token := root.FindElements("user")
 	if token == nil {
-		log.Error("config file formate error")
+		return tomcats, errors.New("config file format error")
 	}
 	t := Tomcat{}
 	for _, res := range token {
