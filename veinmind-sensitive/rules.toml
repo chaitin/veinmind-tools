@@ -577,6 +577,51 @@ match = '''\d{3}-\d{2}-\d{4}'''
 level = 'low'
 
 [[rules]]
+id = "Potential default password"
+description = "Potential default password"
+match = '''(?i).*p[a4@][s$][s$]w[o0]rd([#!@]?(123)?)?'''
+
+[[rules]]
+id = "Potential default password"
+description = "Potential default password"
+match = '''(?i).*ch[a@]ngeme'''
+
+[[rules]]
+id = "Potential default password"
+description = "Potential default password"
+match = '''(?i).*1q2w3e4r'''
+
+[[rules]]
+id = "Potential default password"
+description = "Potential default password"
+match = '''(?i).*admin\d{1,4}'''
+
+[[rules]]
+id = "Potential default password"
+description = "Potential default password"
+match = '''(?i).*[!1]qaz[@2]wsx'''
+
+[[rules]]
+id = "Potential password"
+description = "Potential password"
+match = '''(?i).*(password|passwd|pwd|passphrase|secret)[\s\t]*[:=][\s\t]*[\'\"]?[0-9a-z\-_@#!%\^\?\*&\$~]{4,}[\'\"]?'''
+
+[[rules]]
+id = "Potential password"
+description = "Potential password"
+match = '''(?i).*(<[^(><.)]?(password)[^(><.)]?>[^(><.)]+</[^(><.)]?(password)[^(><.)]?>)'''
+
+[[rules]]
+id = "Potential password"
+description = "Potential password"
+match = '''(?i).*(<[^(><.)]?(passphrase)[^(><.)]?>[^(><.)]+</[^(><.)]?(passphrase)[^(><.)]?>)'''
+
+[[rules]]
+id = "Suspicious comment"
+description = "Suspicious comment"
+match = '''(?i).*(//|/\\*|\\*|#|--).{0,4}(BUG|HACK|FIXME|TODO|SORRY|TEMPORARY|TMP)'''
+
+[[rules]]
 id = "Version Control File"
 description = "Version Control File"
 filepath = '''.*\/\.(git|svn)$'''
