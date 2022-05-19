@@ -65,11 +65,22 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ./veinmind-runner scan-registry centos
 ```
 
-4.扫描远程私有仓库`registry.private.net`中的`nginx`镜像，其中用户名为`admin`，密码为`password`
+4.扫描远程私有仓库中的镜像`registry.private.net/library/nginx`镜像，其中`auth.toml`为认证信息配置文件，里面包含了对应的认证信息
 
 ```
-./veinmind-runner scan-registry --address registry.private.net \
---username admin  --password password nginx
+./veinmind-runner scan-registry -c auth.toml registry.private.net/library/nginx
+```
+
+`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
+```
+[[auths]]
+	registry = "index.docker.io"
+	username = "admin"
+	password = "password"
+[[auths]]
+	registry = "registry.private.net"
+	username = "admin"
+	password = "password"
 ```
 
 5.指定容器运行时类型
