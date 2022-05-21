@@ -15,7 +15,20 @@ var (
 	defaultClient     *reportClient
 )
 
-func DefaultReportClient() *reportClient {
+// PluginOption use for plugin standalone version (without host)
+type PluginOption func(r *reportClient) (*reportClient, error)
+
+func WithDisableLog() PluginOption {
+	return func(r *reportClient) (*reportClient, error) {
+		r.Report = func(event ReportEvent) error {
+			return nil
+		}
+
+		return r, nil
+	}
+}
+
+func DefaultReportClient(pOpts ...PluginOption) *reportClient {
 	defaultOnce.Do(func() {
 		hasService := false
 		if service.Hosted() {
@@ -43,11 +56,6 @@ func DefaultReportClient() *reportClient {
 				ctx: ctx,
 				group: group,
 				Report: func(evt ReportEvent) error {
-					// Skip for info type event
-					if evt.EventType == Info {
-						return nil
-					}
-
 					evtBytes, err := json.MarshalIndent(evt, "", "	")
 					if err != nil {
 						return err
@@ -55,6 +63,16 @@ func DefaultReportClient() *reportClient {
 					log.Warn(string(evtBytes))
 					return nil
 				},
+			}
+
+			for _, opt := range pOpts {
+				d, err := opt(defaultClient)
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+
+				defaultClient = d
 			}
 		}
 	})
