@@ -73,6 +73,9 @@ github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/chaitin/libveinmind v1.0.4 h1:pn4ow8JHTwTDNygieawEGk9k+r0MIEBYuUfVuzz73pk=
 github.com/chaitin/libveinmind v1.0.4/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
+github.com/chaitin/libveinmind v1.0.7/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
+github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220519060236-8e2e62c000b9 h1:XG1J/H9RbBmXFw16RiCLFkO1Ee++8czk2oJ55P1ADUI=
+github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220519060236-8e2e62c000b9/go.mod h1:UdK75T5EhRBbCIaeJzjA3b9kly3uvTvzYITDzwHPQTA=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
