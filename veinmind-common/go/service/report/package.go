@@ -14,6 +14,7 @@ const (
 	Medium
 	High
 	Critical
+	None
 )
 
 type DetectType uint32
@@ -41,6 +42,7 @@ const (
 	AbnormalHistory
 	Weakpass
 	Asset
+	Basic
 )
 
 type WeakpassService uint32
@@ -57,6 +59,7 @@ type AlertDetail struct {
 	SensitiveEnvDetail  *SensitiveEnvDetail  `json:"sensitive_env_detail,omitempty"`
 	HistoryDetail       *HistoryDetail       `json:"history_detail,omitempty"`
 	AssetDetail         *AssetDetail         `json:"asset_detail,omitempty"`
+	BasicDetail         *BasicDetail         `json:"basic_detail,omitempty"`
 }
 
 type FileDetail struct {
@@ -125,6 +128,17 @@ type AssetDetail struct {
 
 	// Each package metadata have the file path, while the package from lock files does not have.
 	FilePath string `json:"filePath"`
+}
+
+type BasicDetail struct {
+	Repository  string   `json:"repository"`
+	Tag         string   `json:"tag"`
+	CreatedTime int64    `json:"created_time"`
+	Env         []string `json:"env"`
+	Entrypoint  string   `json:"entrypoint"`
+	Cmd         string   `json:"cmd"`
+	WorkingDir  string   `json:"working_dir"`
+	Author      string   `json:"author"`
 }
 
 type ReportEvent struct {

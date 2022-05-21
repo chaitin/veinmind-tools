@@ -11,6 +11,7 @@ var (
 		Medium: "Medium",
 		High: "High",
 		Critical: "Critical",
+		None: "None",
 	}
 
 	fromLevel = map[string]Level{
@@ -18,6 +19,7 @@ var (
 		"Medium": Medium,
 		"High": High,
 		"Critical": Critical,
+		"None": None,
 	}
 
 	toDetectType = map[DetectType]string{
@@ -50,6 +52,7 @@ var (
 		AbnormalHistory: "AbnormalHistory",
 		Weakpass: "Weakpass",
 		Asset: "Asset",
+		Basic: "Basic",
 	}
 
 	fromAlertType = map[string]AlertType{
@@ -60,6 +63,7 @@ var (
 		"AbnormalHistory": AbnormalHistory,
 		"Weakpass": Weakpass,
 		"Asset": Asset,
+		"Basic": Basic,
 	}
 
 	toWeakpassService = map[WeakpassService]string{
