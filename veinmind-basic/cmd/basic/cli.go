@@ -8,7 +8,6 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-basic/pkg/ref"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -63,8 +62,8 @@ func scan(c *cmd.Command, image api.Image) error {
 					Tag:         tag,
 					CreatedTime: oci.Created.Unix(),
 					Env:         oci.Config.Env,
-					Entrypoint:  strings.Join(oci.Config.Entrypoint, " "),
-					Cmd:         strings.Join(oci.Config.Cmd, " "),
+					Entrypoint:  oci.Config.Entrypoint,
+					Cmd:         oci.Config.Cmd,
 					WorkingDir:  oci.Config.WorkingDir,
 					Author:      oci.Author,
 				},

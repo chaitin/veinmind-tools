@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/chaitin/libveinmind v1.0.7
-	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220521082545-07d913846be6
+	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220525035625-1ae574e6f82c
 	github.com/distribution/distribution v2.8.1+incompatible
 	github.com/pkg/errors v0.8.1
 )
