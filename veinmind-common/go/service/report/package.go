@@ -135,8 +135,8 @@ type BasicDetail struct {
 	Tag         string   `json:"tag"`
 	CreatedTime int64    `json:"created_time"`
 	Env         []string `json:"env"`
-	Entrypoint  string   `json:"entrypoint"`
-	Cmd         string   `json:"cmd"`
+	Entrypoint  []string `json:"entrypoint"`
+	Cmd         []string `json:"cmd"`
 	WorkingDir  string   `json:"working_dir"`
 	Author      string   `json:"author"`
 }
