@@ -3,7 +3,7 @@ module github.com/chaitin/veinmind-tools/veinmind-basic
 go 1.17
 
 require (
-	github.com/chaitin/libveinmind v1.0.7
+	github.com/chaitin/libveinmind v1.1.0
 	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220526023645-674f9dea184f
 	github.com/distribution/distribution v2.8.1+incompatible
 	github.com/pkg/errors v0.8.1

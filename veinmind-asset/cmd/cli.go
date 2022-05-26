@@ -1,9 +1,6 @@
 package main
 
 import (
-	"os"
-	"time"
-
 	"github.com/aquasecurity/fanal/types"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -14,6 +11,8 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-asset/utils"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/spf13/cobra"
+	"os"
+	"time"
 )
 
 var results = []model.ScanImageResult{}

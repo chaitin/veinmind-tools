@@ -36,13 +36,6 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 	var artifactOpt artifact.Option
 	var analysisOpt analyzer.AnalysisOptions
 
-	// 忽略存在seek的jar扫描和go binary扫描
-	// artifactOpt.DisabledAnalyzers = []analyzer.Type{
-	disableType := []analyzer.Type{
-		analyzer.TypeJar,
-		analyzer.TypeGoBinary,
-	}
-
 	var result []types.BlobInfo
 	ag := analyzer.NewAnalyzerGroup(artifactOpt.AnalyzerGroup, artifactOpt.DisabledAnalyzers)
 
@@ -63,10 +56,10 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 						if err != nil {
 							return nil, err
 						}
-						return AtempFile{file, nil}, nil
+						return file, nil
 					}
 
-					ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, disableType, analysisOpt)
+					ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
 					return nil
 				})
 				wg.Wait()
@@ -104,10 +97,10 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 				if err != nil {
 					return nil, err
 				}
-				return AtempFile{file, nil}, nil
+				return file, nil
 			}
 
-			ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, disableType, analysisOpt)
+			ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
 			return nil
 		})
 		wg.Wait()

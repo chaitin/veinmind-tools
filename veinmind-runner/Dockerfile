@@ -1,4 +1,4 @@
-FROM veinmind/go1.16:1.0.5-stretch as builder
+FROM veinmind/go1.16:1.1.0-stretch as builder
 WORKDIR /build
 COPY . .
 RUN sed -i 's/\.\.\/veinmind-common/\.\/veinmind-common/g' go.mod
@@ -10,7 +10,7 @@ FROM veinmind/veinmind-sensitive:latest as sensitive
 FROM veinmind/veinmind-history:latest as history
 FROM veinmind/veinmind-backdoor:latest as backdoor
 
-FROM veinmind/python3:1.0.5-stretch as release
+FROM veinmind/python3:1.1.0-stretch as release
 WORKDIR /tool
 COPY --from=builder /build/veinmind-runner .
 COPY --from=weakpass /tool/veinmind-weakpass .

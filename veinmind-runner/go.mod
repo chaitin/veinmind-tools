@@ -7,7 +7,7 @@ replace github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0 => ../veinmi
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/chaitin/libveinmind v1.0.7
+	github.com/chaitin/libveinmind v1.1.0
 	github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0
 	github.com/containerd/containerd v1.6.4
 	github.com/distribution/distribution v2.8.1+incompatible
