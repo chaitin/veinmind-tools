@@ -5,7 +5,6 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-basic/pkg/ref"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"os"
 	"time"
@@ -20,27 +19,10 @@ var (
 )
 
 func scan(c *cmd.Command, image api.Image) error {
-	// get image reference
-	var (
-		repository string
-		tag        string
-	)
-
 	refs, err := image.RepoRefs()
 	if err != nil {
 		// no reference image will report ans use sha256 fill repo field
 		log.Error(err)
-	} else {
-		for _, r := range refs {
-			repoT, tagT, err := ref.ParseReference(r)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			repository, tag = repoT, tagT
-			break
-		}
 	}
 
 	oci, err := image.OCISpecV1()
@@ -58,8 +40,7 @@ func scan(c *cmd.Command, image api.Image) error {
 		AlertDetails: []report.AlertDetail{
 			{
 				BasicDetail: &report.BasicDetail{
-					Repository:  repository,
-					Tag:         tag,
+					References:  refs,
 					CreatedTime: oci.Created.Unix(),
 					Env:         oci.Config.Env,
 					Entrypoint:  oci.Config.Entrypoint,
