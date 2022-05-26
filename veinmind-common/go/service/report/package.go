@@ -131,8 +131,7 @@ type AssetDetail struct {
 }
 
 type BasicDetail struct {
-	Repository  string   `json:"repository"`
-	Tag         string   `json:"tag"`
+	References  []string `json:"references"`
 	CreatedTime int64    `json:"created_time"`
 	Env         []string `json:"env"`
 	Entrypoint  []string `json:"entrypoint"`
