@@ -8,11 +8,14 @@ import (
 	"path"
 )
 
-//go:embed pass.dict
+//go:embed pass.dict redis.dict tomcat.dict ssh.dict
 var EmbedFS embed.FS
 
 func ExtractAll() {
 	extract("pass.dict")
+	extract("tomcat.dict")
+	extract("redis.dict")
+	extract("ssh.dict")
 }
 
 // extract

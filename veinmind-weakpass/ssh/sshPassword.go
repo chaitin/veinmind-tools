@@ -1,3 +1,4 @@
+// +build static	
 package ssh
 
 // #include <stdlib.h>

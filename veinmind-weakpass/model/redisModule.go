@@ -4,6 +4,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict"
 )
 
 type Redis struct {
@@ -15,6 +16,7 @@ func (this *Redis) Name() string {
 }
 func (this *Redis) Init(conf Config) error {
 	this.Module.Init(conf)
+	this.specialDict = dict.Redisdict
 	return nil
 }
 func (this *Redis) ParsePasswdInfo(redisFile io.Reader) (rediss []PasswdInfo, err error) {

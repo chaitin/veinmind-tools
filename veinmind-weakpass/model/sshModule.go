@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/ssh"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict"
 	"io"
 	"strings"
 )
@@ -14,6 +15,7 @@ type Ssh struct {
 
 func (this *Ssh) Init(conf Config) (err error) {
 	this.Module.Init(conf)
+	this.specialDict = dict.Sshdict
 	return nil
 }
 

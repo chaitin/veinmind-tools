@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -76,6 +76,7 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 		ModuleResult, err := utils.StartModule(conf, image, strings.ToTitle(app))
 		if err != nil {
 			log.Warn(err)
+			continue
 		}
 		results = append(results, ModuleResult)
 	}
@@ -94,10 +95,10 @@ func init() {
 	scanCmd.Flags().IntP("threads", "t", 10, "password brute threads")
 	scanCmd.Flags().StringP("username", "u", "", "username e.g. root")
 	scanCmd.Flags().StringP("dictpath", "d", "", "dict path e.g. ./mypass.dict")
-	scanCmd.Flags().StringSliceVarP(&appType, "apptype", "a", []string{"ssh", "tomcat"}, "find weakpass in these app e.g. ssh")
+	scanCmd.Flags().StringSliceVarP(&appType, "apptype", "a", []string{"ssh", "tomcat","redis"}, "find weakpass in these app e.g. ssh")
 }
 
-func Start() {
+func main() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

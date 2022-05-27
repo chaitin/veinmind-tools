@@ -24,10 +24,13 @@ type IModule interface {
 	MatchPasswd(passwd string, guess string) bool
 
 	// 爆破密码
-	BrutePasswd(config Config, PasswdInfos []PasswdInfo, dicts []string, fn func(password, guess string) bool) ([]WeakpassResult, error)
+	BrutePasswd(PasswdInfos []PasswdInfo, dicts []string, fn func(password, guess string) bool) ([]WeakpassResult, error)
 
 	// 获取模块默认路径
 	GetFilePath() []string
+
+	// 获取特定的字典
+	GetSpecialDict() []string
 
 	// 生成报告
 	GenerateReport(weakpassResults []WeakpassResult) (report.ReportEvent, error)
@@ -37,11 +40,16 @@ type Module struct {
 	conf       Config
 	name       string
 	filePath   []string
+	specialDict []string
 	passwdType PasswordType
 }
 
 func (this *Module) Name() string {
 	return this.name
+}
+
+func (this *Module) GetSpecialDict() []string {
+	return this.specialDict
 }
 
 func (this *Module) GetFilePath() []string {
@@ -57,8 +65,8 @@ func (this *Module) ParsePasswdInfo(file io.Reader) ([]PasswdInfo, error) {
 	panic("Module.ParsePasswdInfo() not implemented yet")
 }
 
-func (this *Module) BrutePasswd(config Config, PasswdInfos []PasswdInfo, dicts []string, fn func(password, guess string) bool) (weakpassResults []WeakpassResult, err error) {
-
+func (this *Module) BrutePasswd(PasswdInfos []PasswdInfo, dicts []string, fn func(password, guess string) bool) (weakpassResults []WeakpassResult, err error) {
+	config := this.conf
 	var weakpassResultsLock sync.Mutex
 	// initial the concurrency pool
 	pool := tunny.NewFunc(config.Thread, func(opt interface{}) interface{} {
@@ -106,10 +114,11 @@ func (this *Module) BrutePasswd(config Config, PasswdInfos []PasswdInfo, dicts [
 			}
 		}
 	}
-
-	_, err = this.GenerateReport(weakpassResults)
-	if err != nil {
-		log.Warn("Report failed")
+	if len(weakpassResults) > 0{
+		_, err = this.GenerateReport(weakpassResults)
+		if err != nil {
+			log.Warn("Report failed! cause ",err)
+		}
 	}
 	return weakpassResults, nil
 

@@ -79,6 +79,8 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 
 	// 从配置文件中扩展字典
 	var finalDict = []string{}
+	// 加载模块对应的字典
+	finalDict = append(finalDict,mod.GetSpecialDict()...)
 	baseDict := dict.Passdict
 	if conf.Dictpath != "" {
 		f, err := os.Open(conf.Dictpath)
@@ -107,9 +109,14 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 	pathes := mod.GetFilePath()
 	for _, path := range pathes {
 		var tmp = model.PasswdInfo{}
+		_, err := os.Stat(path)
+		if err != nil {
+			// log.Warn(err)
+			continue
+		}
 		file, err := image.Open(path)
 		if err != nil {
-			log.Warn(fmt.Sprintf("%s config file doesn't exist in image: %s!", path, result.ImageName))
+			log.Warn(err)
 			continue
 		}
 		err = mod.Init(conf)
@@ -130,7 +137,7 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 			Passwdinfos = append(Passwdinfos, tmp)
 		}
 		// 开始密码爆破
-		weakpass, err := mod.BrutePasswd(conf, Passwdinfos, finalDict, mod.MatchPasswd)
+		weakpass, err := mod.BrutePasswd(Passwdinfos, finalDict, mod.MatchPasswd)
 
 		if err != nil {
 			log.Warn(err)

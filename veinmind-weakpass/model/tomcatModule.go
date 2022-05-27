@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/beevik/etree"
 	"io"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict"
 )
 
 type Tomcat struct {
@@ -12,6 +13,7 @@ type Tomcat struct {
 
 func (this *Tomcat) Init(conf Config) (err error) {
 	err = this.Module.Init(conf)
+	this.specialDict = dict.Tomcatdict
 	return err
 }
 
