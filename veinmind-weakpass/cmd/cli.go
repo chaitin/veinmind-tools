@@ -73,11 +73,11 @@ var scanCmd = &cmd.Command{
 func scan(c *cmd.Command, image api.Image) (err error) {
 	conf := utils.GetConfig(c)
 	for _, app := range appType {
-		TomcatResult, err := utils.StartModule(conf, image, strings.ToTitle(app))
+		ModuleResult, err := utils.StartModule(conf, image, strings.ToTitle(app))
 		if err != nil {
 			log.Warn(err)
 		}
-		results = append(results, TomcatResult)
+		results = append(results, ModuleResult)
 	}
 	return nil
 }
