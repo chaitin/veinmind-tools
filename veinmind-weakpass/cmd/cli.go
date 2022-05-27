@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -6,20 +6,21 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/scanner"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/utils"
 	"github.com/spf13/cobra"
 	_ "net/http/pprof"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"text/tabwriter"
 	"time"
 )
 
 var results = []model.ScanImageResult{}
+var appType = []string{}
 var resultsLock sync.Mutex
 var scanStart = time.Now()
 
@@ -48,7 +49,7 @@ var scanCmd = &cmd.Command{
 				weakpassTotal += len(r.WeakpassResults)
 			}
 		}
-		fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassTotal), "\t")
+		fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassImageTotal), "\t")
 		fmt.Fprintln(tabw, "| Weakpass Total: ", strconv.Itoa(weakpassTotal), "\t")
 		fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
 
@@ -59,82 +60,30 @@ var scanCmd = &cmd.Command{
 				for _, w := range r.WeakpassResults {
 					fmt.Fprintln(tabw, "| Username: ", w.Username, "\t")
 					fmt.Fprintln(tabw, "| Password: ", w.Password, "\t")
+					fmt.Fprintln(tabw, "| Filepath: ", w.Filepath, "\t")
 				}
 				fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
 			}
 		}
-		fmt.Fprintln(tabw, "# ============================================================================================ #\n")
+		fmt.Fprintln(tabw, "# ============================================================================================ #")
 		tabw.Flush()
 	},
 }
 
-func scan(c *cmd.Command, image api.Image) error {
-	result, err := scanner.Scan(image, scanner.ScanOption{
-		ScanThreads: func() int {
-			threads, err := c.Flags().GetInt("threads")
-			if err != nil {
-				return 10
-			} else {
-				return threads
-			}
-		}(),
-		Username: func() string {
-			username, err := c.Flags().GetString("username")
-			if err != nil {
-				return ""
-			} else {
-				return username
-			}
-		}(),
-		Dictpath: func() string {
-			dictpath, err := c.Flags().GetString("dictpath")
-			if err != nil {
-				return ""
-			} else {
-				return dictpath
-			}
-		}(),
-	})
-
-	if err != nil {
-		log.Error(err)
-		return nil
-	}
-
-	resultsLock.Lock()
-	results = append(results, result)
-	resultsLock.Unlock()
-
-	// Report Event
-	if len(result.WeakpassResults) > 0 {
-		details := []report.AlertDetail{}
-		for _, wr := range result.WeakpassResults {
-			details = append(details, report.AlertDetail{
-				WeakpassDetail: &report.WeakpassDetail{
-					Username: wr.Username,
-					Password: wr.Password,
-					Service:  report.WeakpassService(wr.PassType)},
-			})
-		}
-		reportEvent := report.ReportEvent{
-			ID:           image.ID(),
-			Time:         time.Now(),
-			Level:        report.High,
-			DetectType:   report.Image,
-			EventType:    report.Risk,
-			AlertType:    report.Weakpass,
-			AlertDetails: details,
-		}
-		err = report.DefaultReportClient().Report(reportEvent)
+func scan(c *cmd.Command, image api.Image) (err error) {
+	conf := utils.GetConfig(c)
+	for _, app := range appType {
+		TomcatResult, err := utils.StartModule(conf, image, strings.ToTitle(app))
 		if err != nil {
-			return err
+			log.Warn(err)
 		}
+		results = append(results, TomcatResult)
 	}
-
 	return nil
 }
 
 func init() {
+
 	rootCmd.AddCommand(cmd.MapImageCommand(scanCmd, scan))
 	rootCmd.AddCommand(extractCmd)
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
@@ -144,10 +93,11 @@ func init() {
 	}))
 	scanCmd.Flags().IntP("threads", "t", 10, "password brute threads")
 	scanCmd.Flags().StringP("username", "u", "", "username e.g. root")
-	scanCmd.Flags().StringP("dictpath", "d", "", "dict path e.g ./mypass.dict")
+	scanCmd.Flags().StringP("dictpath", "d", "", "dict path e.g. ./mypass.dict")
+	scanCmd.Flags().StringSliceVarP(&appType, "apptype", "a", []string{"ssh", "tomcat"}, "find weakpass in these app e.g. ssh")
 }
 
-func main() {
+func Start() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

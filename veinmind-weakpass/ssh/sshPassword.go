@@ -1,6 +1,4 @@
-// +build static
-
-package ssh_passwd
+package ssh
 
 // #include <stdlib.h>
 // #include <unistd.h>
@@ -30,40 +28,40 @@ import (
 
 var ErrMalformed = errors.New("ssh_passwd: malformed entry")
 
-// PasswordMethod represents the entryption method.
-type PasswordMethod uint8
+// SSHPasswordMethod represents the entryption method.
+type SSHPasswordMethod uint8
 
 const (
-	// Password stored inside shadow file. Can only appear
+	// SSHPassword stored inside shadow file. Can only appear
 	// inside ssh_passwd.Passwd.
-	Shadowed PasswordMethod = iota
+	Shadowed SSHPasswordMethod = iota
 
 	// User is locked and cannot login.
 	Locked
 
 	// User does not have a password.
-	NoPassword
+	NoSSHPassword
 
-	// Password encrypted with MD5. (=1)
+	// SSHPassword encrypted with MD5. (=1)
 	MD5
 
-	// Password encrypted with blowfish. (=2/2a)
+	// SSHPassword encrypted with blowfish. (=2/2a)
 	Blowfish
 
-	// Password encrypted with SHA256. (=5)
+	// SSHPassword encrypted with SHA256. (=5)
 	SHA256
 
-	// Password encrypted with SHA512. (=6)
+	// SSHPassword encrypted with SHA512. (=6)
 	SHA512
 
 	// NT-Hash (actually MD4)
 	NTHash
 )
 
-// Password represents the data field inside.
-type Password struct {
+// SSHPassword represents the data field inside.
+type SSHPassword struct {
 	// Method of current password.
-	Method PasswordMethod
+	Method SSHPasswordMethod
 
 	// MethodString of the current password.
 	MethodString string
@@ -79,7 +77,7 @@ type Password struct {
 var regexpKey = regexp.MustCompile("[A-Za-z0-9./]+")
 
 // Parse the password from the password field.
-func ParsePassword(pass *Password, phrase string) error {
+func ParseSSHPassword(pass *SSHPassword, phrase string) error {
 	// Eliminate the case that the password is shadow
 	// and locked.
 	switch phrase {
@@ -90,7 +88,7 @@ func ParsePassword(pass *Password, phrase string) error {
 		pass.Method = Locked
 		return nil
 	case "":
-		pass.Method = NoPassword
+		pass.Method = NoSSHPassword
 		return nil
 	default: // Continue on parsing.
 	}
@@ -139,21 +137,21 @@ func ParsePassword(pass *Password, phrase string) error {
 
 // Match tests whether one of your guesses matches one of the given
 // password. It can only be used for weak password detection purpose.
-func (pw *Password) Match(guesses []string) (string, bool) {
+func (pw *SSHPassword) Match(guesses []string) bool {
 	// You must not attempt to match shadow or locked password.
 	if pw.Method == Shadowed || pw.Method == Locked {
-		return "", false
+		return false
 	}
 
 	// Match only empty guesses. (Though we should only guess
 	// password with empty key checking.
-	if pw.Method == NoPassword {
+	if pw.Method == NoSSHPassword {
 		for _, guess := range guesses {
 			if guess == "" {
-				return "", true
+				return true
 			}
 		}
-		return "", false
+		return false
 	}
 
 	salt := fmt.Sprintf("$%s$%s", pw.MethodString, pw.Salt)
@@ -162,10 +160,10 @@ func (pw *Password) Match(guesses []string) (string, bool) {
 		hash := []byte(fmt.Sprintf("%s%s", salt, pw.Hash))
 		for _, guess := range guesses {
 			if bcrypt.CompareHashAndPassword(hash, []byte(guess)) == nil {
-				return guess, true
+				return true
 			}
 		}
-		return "", false
+		return false
 	}
 	// Attempt to encrypt the password.
 	saltCString := C.CString(salt)
@@ -178,8 +176,8 @@ func (pw *Password) Match(guesses []string) (string, bool) {
 		i := C.passwd_match(saltCString, srcCString, dstCString)
 		C.free(unsafe.Pointer(srcCString))
 		if i == C.int(1) {
-			return guess, true
+			return true
 		}
 	}
-	return "", false
+	return false
 }
