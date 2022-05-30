@@ -7,7 +7,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/embed"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/module"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/utils"
 	"github.com/spf13/cobra"
 	_ "net/http/pprof"
@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-var results = []model.ScanImageResult{}
+var results = []module.ScanImageResult{}
 var appType = []string{}
 var resultsLock sync.Mutex
 var scanStart = time.Now()

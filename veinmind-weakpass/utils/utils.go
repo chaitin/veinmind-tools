@@ -8,7 +8,7 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/veinmind-weakpass/module"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,8 +32,8 @@ func GetImageName(image api.Image) (imageName string, err error) {
 	return imageName, nil
 }
 
-func GetConfig(c *cmd.Command) model.Config {
-	opt := model.Config{
+func GetConfig(c *cmd.Command) module.Config {
+	opt := module.Config{
 		Thread: func() int {
 			threads, err := c.Flags().GetInt("threads")
 			if err != nil {
@@ -62,17 +62,17 @@ func GetConfig(c *cmd.Command) model.Config {
 	return opt
 }
 
-func StartModule(conf model.Config, image api.Image, modulename string) (results model.ScanImageResult, err error) {
+func StartModule(conf module.Config, image api.Image, modulename string) (results module.ScanImageResult, err error) {
 
 	// 初始化一个镜像扫描结果
-	result := model.ScanImageResult{}
+	result := module.ScanImageResult{}
 	result.ImageName, err = GetImageName(image)
 	result.ImageID = image.ID()
 
 	// 创建一个扫描模块
-	mod, err := model.GetModuleByName(modulename)
+	mod, err := module.GetModuleByName(modulename)
 	if err != nil {
-		return model.ScanImageResult{}, err
+		return module.ScanImageResult{}, err
 	}
 
 	log.Info(fmt.Sprintf("scan %s weakpass in %s", mod.Name(), result.ImageName))
@@ -85,30 +85,34 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 	if conf.Dictpath != "" {
 		f, err := os.Open(conf.Dictpath)
 		if err != nil {
-			return model.ScanImageResult{}, errors.New("Dictpath not found")
+			return module.ScanImageResult{}, errors.New("Dictpath not found")
 		}
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
 			baseDict = append(baseDict, scanner.Text())
 		}
 	}
-	// 处理密码字典中的宏
+	finalDict = append(finalDict,baseDict...)
+
+	// 根据模块名处理密码字典中的宏
+	mod.ProcessDict(finalDict,modulename)
+
+	// 根据镜像名称处理密码字典中的宏
 	imageName, err := GetImageName(image)
 	if err != nil {
-		return model.ScanImageResult{}, err
+		return module.ScanImageResult{}, err
 	}
-	for _, guess := range baseDict {
+	for i, guess := range finalDict {
 		// 动态替换弱口令字典中的宏
 		if imageName != "" {
-			guess = strings.Replace(guess, "${image_name}", imageName, -1)
+			finalDict[i] = strings.Replace(guess, "${image_name}", imageName, -1)
 		}
-		finalDict = append(finalDict, guess)
 	}
 
 	// 从提供的默认路径中爆破
 	pathes := mod.GetFilePath()
 	for _, path := range pathes {
-		var tmp = model.PasswdInfo{}
+		var tmp = module.PasswdInfo{}
 		_, err := os.Stat(path)
 		if err != nil {
 			// log.Warn(err)
@@ -124,7 +128,7 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 			log.Error(err)
 			continue
 		}
-		var Passwdinfos []model.PasswdInfo = []model.PasswdInfo{}
+		var Passwdinfos []module.PasswdInfo = []module.PasswdInfo{}
 		PasswdinfosTmp, err := mod.ParsePasswdInfo(file)
 		if err != nil {
 			log.Warn(fmt.Sprintf("%s format error!", filepath.Base(path)))
@@ -150,7 +154,7 @@ func StartModule(conf model.Config, image api.Image, modulename string) (results
 		return result, nil
 	} else {
 		//镜像中没有该项服务
-		return model.ScanImageResult{}, errors.New(fmt.Sprintf("%s doesn't exists in %s", mod.Name(), result.ImageName))
+		return module.ScanImageResult{}, errors.New(fmt.Sprintf("%s doesn't exists in %s", mod.Name(), result.ImageName))
 	}
 
 }
