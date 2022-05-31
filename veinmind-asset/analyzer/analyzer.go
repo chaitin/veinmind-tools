@@ -2,7 +2,6 @@ package analyzer
 
 import (
 	"context"
-	"io"
 	"io/fs"
 	"sync"
 
@@ -14,18 +13,9 @@ import (
 	"github.com/aquasecurity/fanal/types"
 	dio "github.com/aquasecurity/go-dep-parser/pkg/io"
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/libveinmind/go/containerd"
-	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/veinmind-tools/veinmind-asset/model"
 	"golang.org/x/sync/semaphore"
 )
-
-// TODO 目前api.File 缺失seek方法，导致某些fanal内存在的seek函数无法使用。
-// 目前在base_dirs排除了这部分路径
-type AtempFile struct {
-	api.File
-	io.Seeker
-}
 
 func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 
@@ -38,91 +28,125 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 
 	var result []types.BlobInfo
 	ag := analyzer.NewAnalyzerGroup(artifactOpt.AnalyzerGroup, artifactOpt.DisabledAnalyzers)
+	var wg sync.WaitGroup
+	res := new(analyzer.AnalysisResult)
 
-	switch v := image.(type) {
-	case *docker.Image:
-		dockerImage := v
-		// TODO 增加缓存机制
-		for index := 0; index < dockerImage.NumLayers(); index++ {
-			layer, err := dockerImage.OpenLayer(index)
-			var wg sync.WaitGroup
-			res := new(analyzer.AnalysisResult)
-			if err == nil {
-				layerID := layer.ID()
-				// 根目录开始walk
-				layer.Walk("/", func(path string, info fs.FileInfo, err error) error {
-					open := func() (dio.ReadSeekCloserAt, error) {
-						file, err := layer.Open(path)
-						if err != nil {
-							return nil, err
-						}
-						return file, nil
-					}
-
-					ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
-					return nil
-				})
-				wg.Wait()
-				res.Sort()
-
-				// 将layer扫描结果转化为blobinfo方便Merge
-				blobInfo := types.BlobInfo{
-					SchemaVersion:   types.BlobJSONSchemaVersion,
-					Digest:          "",
-					DiffID:          layerID,
-					OS:              res.OS,
-					Repository:      res.Repository,
-					PackageInfos:    res.PackageInfos,
-					Applications:    res.Applications,
-					SystemFiles:     res.SystemInstalledFiles,
-					OpaqueDirs:      []string{},
-					WhiteoutFiles:   []string{},
-					CustomResources: res.CustomResources,
-
-					// For Red Hat
-					BuildInfo: res.BuildInfo,
-				}
-
-				result = append(result, blobInfo)
+	image.Walk("/", func(path string, info fs.FileInfo, err error) error {
+		open := func() (dio.ReadSeekCloserAt, error) {
+			file, err := image.Open(path)
+			if err != nil {
+				return nil, err
 			}
+			return file, nil
 		}
-	case *containerd.Image:
-		containerdImage := v
-		imageID := containerdImage.ID()
-		var wg sync.WaitGroup
-		res := new(analyzer.AnalysisResult)
-		containerdImage.Walk("/", func(path string, info fs.FileInfo, err error) error {
-			open := func() (dio.ReadSeekCloserAt, error) {
-				file, err := containerdImage.Open(path)
-				if err != nil {
-					return nil, err
-				}
-				return file, nil
-			}
 
-			ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
-			return nil
-		})
-		wg.Wait()
-		res.Sort()
-		blobInfo := types.BlobInfo{
-			SchemaVersion:   types.BlobJSONSchemaVersion,
-			Digest:          "",
-			DiffID:          imageID,
-			OS:              res.OS,
-			Repository:      res.Repository,
-			PackageInfos:    res.PackageInfos,
-			Applications:    res.Applications,
-			SystemFiles:     res.SystemInstalledFiles,
-			OpaqueDirs:      []string{},
-			WhiteoutFiles:   []string{},
-			CustomResources: res.CustomResources,
+		ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
+		return nil
+	})
+	wg.Wait()
+	res.Sort()
+	blobInfo := types.BlobInfo{
+		SchemaVersion:   types.BlobJSONSchemaVersion,
+		Digest:          "",
+		OS:              res.OS,
+		Repository:      res.Repository,
+		PackageInfos:    res.PackageInfos,
+		Applications:    res.Applications,
+		SystemFiles:     res.SystemInstalledFiles,
+		OpaqueDirs:      []string{},
+		WhiteoutFiles:   []string{},
+		CustomResources: res.CustomResources,
 
-			// For Red Hat
-			BuildInfo: res.BuildInfo,
-		}
-		result = append(result, blobInfo)
+		// For Red Hat
+		BuildInfo: res.BuildInfo,
 	}
+
+	result = append(result, blobInfo)
+
+	//switch v := image.(type) {
+	//case *docker.Image:
+	//	dockerImage := v
+	//	// TODO 增加缓存机制
+	//	for index := 0; index < dockerImage.NumLayers(); index++ {
+	//		layer, err := dockerImage.OpenLayer(index)
+	//		var wg sync.WaitGroup
+	//		res := new(analyzer.AnalysisResult)
+	//		if err == nil {
+	//			layerID := layer.ID()
+	//			// 根目录开始walk
+	//			layer.Walk("/", func(path string, info fs.FileInfo, err error) error {
+	//				open := func() (dio.ReadSeekCloserAt, error) {
+	//					file, err := layer.Open(path)
+	//					if err != nil {
+	//						return nil, err
+	//					}
+	//					return file, nil
+	//				}
+	//
+	//				ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
+	//				return nil
+	//			})
+	//			wg.Wait()
+	//			res.Sort()
+	//
+	//			// 将layer扫描结果转化为blobinfo方便Merge
+	//			blobInfo := types.BlobInfo{
+	//				SchemaVersion:   types.BlobJSONSchemaVersion,
+	//				Digest:          "",
+	//				DiffID:          layerID,
+	//				OS:              res.OS,
+	//				Repository:      res.Repository,
+	//				PackageInfos:    res.PackageInfos,
+	//				Applications:    res.Applications,
+	//				SystemFiles:     res.SystemInstalledFiles,
+	//				OpaqueDirs:      []string{},
+	//				WhiteoutFiles:   []string{},
+	//				CustomResources: res.CustomResources,
+	//
+	//				// For Red Hat
+	//				BuildInfo: res.BuildInfo,
+	//			}
+	//
+	//			result = append(result, blobInfo)
+	//		}
+	//	}
+	//case *containerd.Image:
+	//	containerdImage := v
+	//	imageID := containerdImage.ID()
+	//	var wg sync.WaitGroup
+	//	res := new(analyzer.AnalysisResult)
+	//	containerdImage.Walk("/", func(path string, info fs.FileInfo, err error) error {
+	//		open := func() (dio.ReadSeekCloserAt, error) {
+	//			file, err := containerdImage.Open(path)
+	//			if err != nil {
+	//				return nil, err
+	//			}
+	//			return file, nil
+	//		}
+	//
+	//		ag.AnalyzeFile(ctx, &wg, limit, res, "", path, info, open, nil, analysisOpt)
+	//		return nil
+	//	})
+	//	wg.Wait()
+	//	res.Sort()
+	//	blobInfo := types.BlobInfo{
+	//		SchemaVersion:   types.BlobJSONSchemaVersion,
+	//		Digest:          "",
+	//		DiffID:          imageID,
+	//		OS:              res.OS,
+	//		Repository:      res.Repository,
+	//		PackageInfos:    res.PackageInfos,
+	//		Applications:    res.Applications,
+	//		SystemFiles:     res.SystemInstalledFiles,
+	//		OpaqueDirs:      []string{},
+	//		WhiteoutFiles:   []string{},
+	//		CustomResources: res.CustomResources,
+	//
+	//		// For Red Hat
+	//		BuildInfo: res.BuildInfo,
+	//	}
+	//	result = append(result, blobInfo)
+	//}
 	artifactDetail := applier.ApplyLayers(result)
 	return parseResults(image, artifactDetail)
 }
