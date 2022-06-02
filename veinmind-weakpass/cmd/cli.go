@@ -48,7 +48,7 @@ var scanCmd = &cmd.Command{
 				weakpassTotal += len(r.WeakpassResults)
 			}
 		}
-		fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassTotal), "\t")
+		fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassImageTotal), "\t")
 		fmt.Fprintln(tabw, "| Weakpass Total: ", strconv.Itoa(weakpassTotal), "\t")
 		fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
 
