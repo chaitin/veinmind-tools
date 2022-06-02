@@ -248,8 +248,8 @@ github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/chaitin/libveinmind v1.0.7/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
 github.com/chaitin/libveinmind v1.1.0 h1:yqFpO1euqZGytN1wDPXJJ5hSAnbMGa5wb3ojf4yDLrQ=
 github.com/chaitin/libveinmind v1.1.0/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
-github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220526023645-674f9dea184f h1:hix53aJ0ujb23HN7U526T6t1d+8tkuhgx9ZPEAQwmPY=
-github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220526023645-674f9dea184f/go.mod h1:UdK75T5EhRBbCIaeJzjA3b9kly3uvTvzYITDzwHPQTA=
+github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b h1:H0ZMz4yuJ8WmDVIY3UoG4r3CWmzlfgrKsP7wwIc6nS0=
+github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b/go.mod h1:UdK75T5EhRBbCIaeJzjA3b9kly3uvTvzYITDzwHPQTA=
 github.com/checkpoint-restore/go-criu/v4 v4.1.0/go.mod h1:xUQBLp4RLc5zJtWY++yjOoMoB5lihDt7fai+75m+rGw=
 github.com/checkpoint-restore/go-criu/v5 v5.0.0/go.mod h1:cfwC0EG7HMUenopBsUf9d89JlCLQIfgVcNsNN0t6T2M=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=

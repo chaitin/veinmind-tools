@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/aquasecurity/fanal/types"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
@@ -61,84 +60,85 @@ func scan(c *cmd.Command, image api.Image) error {
 
 	results = append(results, res)
 
-	// result event
-	if res.PackageTotal > 0 || res.ApplicationTotal > 0 {
-		details := []report.AlertDetail{}
-		for _, pkg := range res.Packages {
-			details = append(details, report.AlertDetail{
-				AssetDetail: &report.AssetDetail{
-					Type:            "os-pkg",
-					Name:            pkg.Name,
-					Version:         pkg.Version,
-					Release:         pkg.Release,
-					Epoch:           pkg.Epoch,
-					Arch:            pkg.Arch,
-					SrcName:         pkg.SrcName,
-					SrcVersion:      pkg.SrcVersion,
-					SrcRelease:      pkg.SrcRelease,
-					SrcEpoch:        pkg.SrcEpoch,
-					Modularitylabel: pkg.Modularitylabel,
-					Indirect:        pkg.Indirect,
-					License:         pkg.License,
-					Layer: func() string {
-						if pkg.Layer != (types.Layer{}) {
-							return pkg.Layer.DiffID
-						} else {
-							return ""
-						}
-					}(),
-					FilePath: pkg.FilePath,
-				},
-			})
-		}
-		for _, info := range res.Applications {
-			for _, lib := range info.Libraries {
-				details = append(details, report.AlertDetail{
-					AssetDetail: &report.AssetDetail{
-						Type:            info.Type,
-						Name:            lib.Name,
-						Version:         lib.Version,
-						Release:         lib.Release,
-						Epoch:           lib.Epoch,
-						Arch:            lib.Arch,
-						SrcName:         lib.SrcName,
-						SrcVersion:      lib.SrcVersion,
-						SrcRelease:      lib.SrcRelease,
-						SrcEpoch:        lib.SrcEpoch,
-						Modularitylabel: lib.Modularitylabel,
-						Indirect:        lib.Indirect,
-						License:         lib.License,
-						Layer: func() string {
-							if lib.Layer != (types.Layer{}) {
-								return lib.Layer.DiffID
-							} else {
-								return ""
-							}
-						}(),
-						FilePath: func() string {
-							if lib.FilePath != "" {
-								return lib.FilePath
-							} else {
-								return info.FilePath
-							}
-						}(),
-					},
+	assetDetail := &report.AssetDetail{
+		OS: report.AssetOSDetail{
+			Family: res.ImageOSInfo.Family,
+			Name:   res.ImageOSInfo.Family,
+			Eosl:   res.ImageOSInfo.Eosl,
+		},
+		PackageInfos: func() []report.AssetPackageDetails {
+			assetPackageDetailsList := []report.AssetPackageDetails{}
+			assetPackageDetails := []report.AssetPackageDetail{}
+
+			for _, pkgInfo := range res.PackageInfos {
+				for _, pkg := range pkgInfo.Packages {
+					assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
+						Name:       pkg.Name,
+						Version:    pkg.Version,
+						Release:    pkg.Release,
+						Epoch:      pkg.Epoch,
+						Arch:       pkg.Arch,
+						SrcName:    pkg.SrcName,
+						SrcEpoch:   pkg.SrcEpoch,
+						SrcRelease: pkg.SrcRelease,
+						SrcVersion: pkg.SrcVersion,
+					})
+				}
+				assetPackageDetailsList = append(assetPackageDetailsList, report.AssetPackageDetails{
+					FilePath: pkgInfo.FilePath,
+					Packages: assetPackageDetails,
 				})
+				assetPackageDetails = []report.AssetPackageDetail{}
 			}
-		}
-		reportEvent := report.ReportEvent{
-			ID:           image.ID(),
-			Time:         time.Now(),
-			Level:        report.Low,
-			DetectType:   report.Image,
-			EventType:    report.Info,
-			AlertType:    report.Asset,
-			AlertDetails: details,
-		}
-		err = report.DefaultReportClient().Report(reportEvent)
-		if err != nil {
-			return err
-		}
+
+			return assetPackageDetailsList
+		}(),
+		Applications: func() []report.AssetApplicationDetails {
+			assetApplicationDetailsList := []report.AssetApplicationDetails{}
+			assetPackageDetails := []report.AssetPackageDetail{}
+
+			for _, app := range res.Applications {
+				for _, pkg := range app.Libraries {
+					assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
+						Name:       pkg.Name,
+						Version:    pkg.Version,
+						Release:    pkg.Release,
+						Epoch:      pkg.Epoch,
+						Arch:       pkg.Arch,
+						SrcName:    pkg.SrcName,
+						SrcEpoch:   pkg.SrcEpoch,
+						SrcRelease: pkg.SrcRelease,
+						SrcVersion: pkg.SrcVersion,
+					})
+				}
+				assetApplicationDetailsList = append(assetApplicationDetailsList, report.AssetApplicationDetails{
+					Type:     app.Type,
+					FilePath: app.FilePath,
+					Packages: assetPackageDetails,
+				})
+				assetPackageDetails = []report.AssetPackageDetail{}
+			}
+
+			return assetApplicationDetailsList
+		}(),
+	}
+
+	reportEvent := report.ReportEvent{
+		ID:         image.ID(),
+		Time:       time.Now(),
+		Level:      report.None,
+		DetectType: report.Image,
+		EventType:  report.Info,
+		AlertType:  report.Asset,
+		AlertDetails: []report.AlertDetail{
+			{
+				AssetDetail: assetDetail,
+			},
+		},
+	}
+	err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -149,7 +149,7 @@ func init() {
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
 		Name:        "veinmind-asset",
 		Author:      "veinmind-team",
-		Description: "veinmind-asset scanner image os/pkg/app/ info",
+		Description: "veinmind-asset scanner image os/pkg/app info",
 	}))
 	scanCmd.Flags().Int64P("threads", "t", 10, "scan file threads")
 	scanCmd.Flags().StringP("format", "f", "stdout", "epxort file format")

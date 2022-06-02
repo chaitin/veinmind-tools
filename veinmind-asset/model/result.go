@@ -10,13 +10,13 @@ type ScanImageResult struct {
 	ImageID string
 
 	// 系统信息
-	ImageInfo types.OS
+	ImageOSInfo types.OS
 
 	// 系统pkg总数
 	PackageTotal int
 
 	// 系统pkg详情
-	Packages []types.Package
+	PackageInfos []types.PackageInfo
 
 	// 应用依赖总数
 	ApplicationTotal int
