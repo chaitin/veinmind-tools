@@ -50,8 +50,10 @@ func OutputStdout(verbose bool, pkgType string, results []model.ScanImageResult)
 			fmt.Fprintln(tabwBody, "+", Repeat("-", (tab+2)*4), "+")
 			fmt.Fprintln(tabwBody, "| Package Type", "\t", "Package Name", "\t", "Package Version", "\t", "Package File", "\t")
 			if pkgType == "all" || pkgType == "os" {
-				for _, pkg := range r.Packages {
-					fmt.Fprintln(tabwBody, "|", "os-pkg", "\t", Limit(pkg.Name, tab), "\t", Limit(pkg.Version, tab), "\t", Limit(pkg.FilePath, tab), "\t")
+				for _, pkgInfo := range r.PackageInfos {
+					for _, pkg := range pkgInfo.Packages {
+						fmt.Fprintln(tabwBody, "|", "os-pkg", "\t", Limit(pkg.Name, tab), "\t", Limit(pkg.Version, tab), "\t", Limit(pkg.FilePath, tab), "\t")
+					}
 				}
 			}
 			for _, info := range r.Applications {
@@ -132,15 +134,17 @@ func OutputCSV(res []model.ScanImageResult) error {
 
 	w.Write([]string{"ImageID", "ImageName", "OSFamily", "OSName", "Type", "Name", "Version", "FilePath"})
 	for _, r := range res {
-		for _, pkg := range r.Packages {
-			err := w.Write([]string{r.ImageID, r.ImageName, r.ImageInfo.Family, r.ImageInfo.Name, "os-pkg", pkg.Name, pkg.Version, pkg.FilePath})
-			if err != nil {
-				return err
+		for _, pkgInfo := range r.PackageInfos {
+			for _, pkg := range pkgInfo.Packages {
+				err := w.Write([]string{r.ImageID, r.ImageName, r.ImageOSInfo.Family, r.ImageOSInfo.Name, "os-pkg", pkg.Name, pkg.Version, pkg.FilePath})
+				if err != nil {
+					return err
+				}
 			}
 		}
 		for _, info := range r.Applications {
 			for _, lib := range info.Libraries {
-				err := w.Write([]string{r.ImageID, r.ImageName, r.ImageInfo.Family, r.ImageInfo.Name, info.Type, lib.Name, lib.Version, lib.FilePath})
+				err := w.Write([]string{r.ImageID, r.ImageName, r.ImageOSInfo.Family, r.ImageOSInfo.Name, info.Type, lib.Name, lib.Version, lib.FilePath})
 				if err != nil {
 					return err
 				}
