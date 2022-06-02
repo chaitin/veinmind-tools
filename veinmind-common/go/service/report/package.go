@@ -109,8 +109,8 @@ type HistoryDetail struct {
 }
 
 type AssetDetail struct {
-	OS           AssetOSDetail         `json:"os"`
-	PackageInfos []AssetPackageDetails `json:"package_infos"`
+	OS           AssetOSDetail             `json:"os"`
+	PackageInfos []AssetPackageDetails     `json:"package_infos"`
 	Applications []AssetApplicationDetails `json:"applications"`
 }
 

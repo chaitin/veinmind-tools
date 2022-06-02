@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-
 type AnalysisResult struct {
 	Category      string `json:"category"`
 	EngineName    string `json:"engine_name"`
@@ -19,31 +18,31 @@ type AnalysisResult struct {
 	Result        string `json:"result"`
 }
 
-var client = func() *vt.Client{
+var client = func() *vt.Client {
 	apiKey := os.Getenv("VT_API_KEY")
 	if apiKey == "" {
 		return nil
-	}else{
+	} else {
 		c := vt.NewClient(apiKey)
 		return c
 	}
 }()
 
-func Active() bool{
+func Active() bool {
 	if client == nil {
 		return false
-	}else{
+	} else {
 		return true
 	}
 }
 
-func ScanSHA256(ctx context.Context, sha256 string)([]av.ScanResult, error){
+func ScanSHA256(ctx context.Context, sha256 string) ([]av.ScanResult, error) {
 	retCommon := []av.ScanResult{}
 	done := make(chan struct{})
 
 	if client == nil {
 		return nil, errors.New("Virustotal Client Init Failed")
-	}else{
+	} else {
 		// 获取分析结果
 		go func() {
 			vtFile, err := client.GetObject(vt.URL("files/%s", sha256))
@@ -76,8 +75,8 @@ func ScanSHA256(ctx context.Context, sha256 string)([]av.ScanResult, error){
 				if analysisResult.Category == "malicious" {
 					commonResult := av.ScanResult{
 						Description: analysisResult.Result,
-						Method: analysisResult.Method,
-						EngineName: analysisResult.EngineName,
+						Method:      analysisResult.Method,
+						EngineName:  analysisResult.EngineName,
 						IsMalicious: true,
 					}
 
@@ -90,9 +89,9 @@ func ScanSHA256(ctx context.Context, sha256 string)([]av.ScanResult, error){
 	}
 
 	select {
-	case <- ctx.Done():
+	case <-ctx.Done():
 		return retCommon, nil
-	case <- done:
+	case <-done:
 		return retCommon, nil
 	}
 }

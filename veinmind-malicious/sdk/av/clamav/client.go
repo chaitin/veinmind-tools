@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var client = func() *clamd.Clamd{
+var client = func() *clamd.Clamd {
 	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
 	c := clamd.NewClamd(CLAMD_ADDRESS)
 	return c
@@ -18,10 +18,10 @@ var client = func() *clamd.Clamd{
 func Active() bool {
 	if client == nil {
 		return false
-	}else{
+	} else {
 		if client.Ping() != nil {
 			return false
-		}else{
+		} else {
 			return true
 		}
 	}
@@ -55,10 +55,10 @@ func ScanStream(stream io.Reader) ([]av.ScanResult, error) {
 	retCommon := []av.ScanResult{}
 	for _, r := range ret {
 		commonResult := av.ScanResult{
-			EngineName: "ClamAV",
+			EngineName:  "ClamAV",
 			Description: r.Description,
 			IsMalicious: true,
-			Method: "blacklist",
+			Method:      "blacklist",
 		}
 
 		retCommon = append(retCommon, commonResult)
