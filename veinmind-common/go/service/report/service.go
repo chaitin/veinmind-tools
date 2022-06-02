@@ -9,7 +9,6 @@ import (
 const Namespace = "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 const BufferSize = 1 << 8
 
-
 type ReportService struct {
 	EventChannel chan ReportEvent
 }
@@ -20,7 +19,7 @@ type reportClient struct {
 	Report func(ReportEvent) error
 }
 
-func (s *ReportService) Report(evt ReportEvent){
+func (s *ReportService) Report(evt ReportEvent) {
 	s.EventChannel <- evt
 }
 

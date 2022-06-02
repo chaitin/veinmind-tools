@@ -7,63 +7,63 @@ import (
 
 var (
 	toLevel = map[Level]string{
-		Low: "Low",
-		Medium: "Medium",
-		High: "High",
+		Low:      "Low",
+		Medium:   "Medium",
+		High:     "High",
 		Critical: "Critical",
-		None: "None",
+		None:     "None",
 	}
 
 	fromLevel = map[string]Level{
-		"Low": Low,
-		"Medium": Medium,
-		"High": High,
+		"Low":      Low,
+		"Medium":   Medium,
+		"High":     High,
 		"Critical": Critical,
-		"None": None,
+		"None":     None,
 	}
 
 	toDetectType = map[DetectType]string{
-		Image: "Image",
+		Image:     "Image",
 		Container: "Container",
 	}
 
 	fromDetectType = map[string]DetectType{
-		"Image": Image,
+		"Image":     Image,
 		"Container": Container,
 	}
 
 	toEventType = map[EventType]string{
-		Risk: "Risk",
+		Risk:     "Risk",
 		Invasion: "Invasion",
-		Info: "Info",
+		Info:     "Info",
 	}
 
 	fromEventType = map[string]EventType{
-		"Risk": Risk,
+		"Risk":     Risk,
 		"Invasion": Invasion,
-		"Info": Info,
+		"Info":     Info,
 	}
 
 	toAlertType = map[AlertType]string{
-		Vulnerability: "Vulnerability",
-		MaliciousFile: "MaliciousFile",
-		Backdoor: "Backdoor",
-		Sensitive: "Sensitive",
+		Vulnerability:   "Vulnerability",
+		MaliciousFile:   "MaliciousFile",
+		Backdoor:        "Backdoor",
+		Sensitive:       "Sensitive",
 		AbnormalHistory: "AbnormalHistory",
-		Weakpass: "Weakpass",
-		Asset: "Asset",
-		Basic: "Basic",
+		Weakpass:        "Weakpass",
+		Asset:           "Asset",
+		Basic:           "Basic",
 	}
 
 	fromAlertType = map[string]AlertType{
-		"Vulnerability": Vulnerability,
-		"MaliciousFile": MaliciousFile,
-		"Backdoor": Backdoor,
-		"Sensitive": Sensitive,
+		"Vulnerability":   Vulnerability,
+		"MaliciousFile":   MaliciousFile,
+		"Backdoor":        Backdoor,
+		"Sensitive":       Sensitive,
 		"AbnormalHistory": AbnormalHistory,
-		"Weakpass": Weakpass,
-		"Asset": Asset,
-		"Basic": Basic,
+		"Weakpass":        Weakpass,
+		"Asset":           Asset,
+		"Basic":           Basic,
 	}
 
 	toWeakpassService = map[WeakpassService]string{
@@ -75,7 +75,7 @@ var (
 	}
 )
 
-func (l Level) MarshalJSON()([]byte, error){
+func (l Level) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	buffer.WriteString(toLevel[l])
 	buffer.WriteString(`"`)
@@ -100,7 +100,7 @@ func (l *Level) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (d DetectType) MarshalJSON()([]byte, error){
+func (d DetectType) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	buffer.WriteString(toDetectType[d])
 	buffer.WriteString(`"`)
@@ -125,7 +125,7 @@ func (d *DetectType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (e EventType) MarshalJSON()([]byte, error){
+func (e EventType) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	buffer.WriteString(toEventType[e])
 	buffer.WriteString(`"`)
@@ -150,7 +150,7 @@ func (e *EventType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (a AlertType) MarshalJSON()([]byte, error){
+func (a AlertType) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	buffer.WriteString(toAlertType[a])
 	buffer.WriteString(`"`)
@@ -175,7 +175,7 @@ func (a *AlertType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (w WeakpassService) MarshalJSON()([]byte, error){
+func (w WeakpassService) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	buffer.WriteString(toWeakpassService[w])
 	buffer.WriteString(`"`)

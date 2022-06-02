@@ -30,7 +30,7 @@ var scanStart = time.Now()
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
-	Use: "extract",
+	Use:   "extract",
 	Short: "Extract config file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		embed.ExtractAll()
@@ -38,7 +38,7 @@ var extractCmd = &cmd.Command{
 	},
 }
 var scanCmd = &cmd.Command{
-	Use: "scan",
+	Use:   "scan",
 	Short: "Scan image malicious files",
 	PostRun: func(cmd *cobra.Command, args []string) {
 		// 计算扫描数据
@@ -65,7 +65,6 @@ var scanCmd = &cmd.Command{
 	},
 }
 
-
 func scan(_ *cmd.Command, image api.Image) error {
 	result, err := malicious.Scan(image)
 	if err != nil {
@@ -80,9 +79,9 @@ func scan(_ *cmd.Command, image api.Image) error {
 	// result event
 	if result.MaliciousFileCount > 0 {
 		details := []reportService.AlertDetail{}
-		for _, l := range result.Layers{
+		for _, l := range result.Layers {
 			if len(l.MaliciousFileInfos) > 0 {
-				for _, mr := range l.MaliciousFileInfos{
+				for _, mr := range l.MaliciousFileInfos {
 					f, err := image.Open(mr.RelativePath)
 					if err != nil {
 						log.Error(err)
@@ -98,29 +97,29 @@ func scan(_ *cmd.Command, image api.Image) error {
 
 					details = append(details, reportService.AlertDetail{
 						MaliciousFileDetail: &reportService.MaliciousFileDetail{
-							Engine: mr.Engine,
+							Engine:        mr.Engine,
 							MaliciousName: mr.Description,
 							FileDetail: reportService.FileDetail{
 								Path: mr.RelativePath,
 								Perm: fStat.Mode(),
 								Size: fStat.Size(),
-								Gid: int64(fSys.Gid),
-								Uid: int64(fSys.Uid),
+								Gid:  int64(fSys.Gid),
+								Uid:  int64(fSys.Uid),
 								Ctim: fSys.Ctim.Sec,
 								Mtim: fSys.Mtim.Sec,
 								Atim: fSys.Atim.Sec,
 							},
 						},
-					},)
+					})
 				}
 			}
 		}
 		reportEvent := reportService.ReportEvent{
-			ID: image.ID(),
-			Level: reportService.High,
-			DetectType: reportService.Image,
-			EventType: reportService.Risk,
-			AlertType: reportService.MaliciousFile,
+			ID:           image.ID(),
+			Level:        reportService.High,
+			DetectType:   reportService.Image,
+			EventType:    reportService.Risk,
+			AlertType:    reportService.MaliciousFile,
 			AlertDetails: details,
 		}
 		err = reportService.DefaultReportClient().Report(reportEvent)
@@ -136,8 +135,8 @@ func init() {
 	rootCmd.AddCommand(cmd.MapImageCommand(scanCmd, scan))
 	rootCmd.AddCommand(extractCmd)
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
-		Name: "veinmind-malicious",
-		Author: "veinmind-team",
+		Name:        "veinmind-malicious",
+		Author:      "veinmind-team",
 		Description: "veinmind-malicious scanner image malicious file",
 	}))
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")

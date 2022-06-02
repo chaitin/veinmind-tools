@@ -32,11 +32,11 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 		return scanReport, nil
 	}
 
-	refs , err := image.RepoRefs()
+	refs, err := image.RepoRefs()
 	var imageRef string
 	if err == nil && len(refs) > 0 {
 		imageRef = refs[0]
-	}else{
+	} else {
 		imageRef = image.ID()
 	}
 	common.Log.Info("Scan Image: ", imageRef)
@@ -140,7 +140,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 					hash := sha256.New()
 					fileSha256 := hex.EncodeToString(hash.Sum(fileByte))
 
-					virustotalContext, _ := context.WithTimeout(context.Background(), 10 * time.Millisecond)
+					virustotalContext, _ := context.WithTimeout(context.Background(), 10*time.Millisecond)
 					if virustotal.Active() {
 						vtResults, err := virustotal.ScanSHA256(virustotalContext, fileSha256)
 						if err == nil && vtResults != nil && len(vtResults) > 0 {
@@ -159,13 +159,11 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 							description = description + r.Description + ","
 							engine[r.EngineName] = true
 						}
-						for e, _ := range engine{
+						for e := range engine {
 							engineName = e + ","
 						}
 						engineName = strings.TrimRight(engineName, ",")
 						description = strings.TrimRight(description, ",")
-
-
 
 						scanReport.MaliciousFileCount++
 
@@ -180,7 +178,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 						stat := info.Sys().(*syscall.Stat_t)
 
 						result := model.MaliciousFileInfo{
-							Engine: engineName,
+							Engine:       engineName,
 							RelativePath: path,
 							FileName:     info.Name(),
 							FileSize:     bytefmt.ByteSize(uint64(info.Size())),

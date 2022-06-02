@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	defaultOnce       sync.Once
-	defaultError      error
-	defaultClient     *reportClient
+	defaultOnce   sync.Once
+	defaultError  error
+	defaultClient *reportClient
 )
 
 // PluginOption use for plugin standalone version (without host)
@@ -40,20 +40,20 @@ func DefaultReportClient(pOpts ...PluginOption) *reportClient {
 		}
 
 		if hasService {
-			var report func(ReportEvent) (error)
+			var report func(ReportEvent) error
 			service.GetService(Namespace, "report", &report)
 			group, ctx := errgroup.WithContext(context.Background())
 
 			defaultClient = &reportClient{
-				ctx: ctx,
-				group: group,
+				ctx:    ctx,
+				group:  group,
 				Report: report,
 			}
 		} else {
 			group, ctx := errgroup.WithContext(context.Background())
 
 			defaultClient = &reportClient{
-				ctx: ctx,
+				ctx:   ctx,
 				group: group,
 				Report: func(evt ReportEvent) error {
 					evtBytes, err := json.MarshalIndent(evt, "", "	")

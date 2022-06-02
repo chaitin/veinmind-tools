@@ -1,3 +1,4 @@
+//go:build static
 // +build static
 
 package ssh_passwd
