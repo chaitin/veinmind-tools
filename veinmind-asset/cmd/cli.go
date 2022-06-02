@@ -63,7 +63,7 @@ func scan(c *cmd.Command, image api.Image) error {
 	assetDetail := &report.AssetDetail{
 		OS: report.AssetOSDetail{
 			Family: res.ImageOSInfo.Family,
-			Name:   res.ImageOSInfo.Family,
+			Name:   res.ImageOSInfo.Name,
 			Eosl:   res.ImageOSInfo.Eosl,
 		},
 		PackageInfos: func() []report.AssetPackageDetails {
