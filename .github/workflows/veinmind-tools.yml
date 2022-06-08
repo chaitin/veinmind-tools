@@ -10,17 +10,17 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./veinmind-backdoor && rm -rf ./veinmind-backdoor/veinmind-common/go
-          cd veinmind-backdoor
+          cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
+          cd ./plugins/python/veinmind-backdoor
           tar -cvzf veinmind-backdoor.tar.gz *
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-backdoor.tar.gz
-          path: ./veinmind-backdoor/veinmind-backdoor.tar.gz
+          path: ./plugins/python/veinmind-backdoor/veinmind-backdoor.tar.gz
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./veinmind-backdoor/veinmind-backdoor.tar.gz
+          files: ./plugins/python/veinmind-backdoor/veinmind-backdoor.tar.gz
   package-veinmind-sensitive:
     runs-on: ubuntu-latest
     steps:
@@ -30,17 +30,17 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./veinmind-sensitive && rm -rf ./veinmind-sensitive/veinmind-common/go
-          cd veinmind-sensitive
+          cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
+          cd ./plugins/python/veinmind-sensitive
           tar -cvzf veinmind-sensitive.tar.gz *
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-sensitive.tar.gz
-          path: ./veinmind-sensitive/veinmind-sensitive.tar.gz
+          path: ./plugins/python/veinmind-sensitive/veinmind-sensitive.tar.gz
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./veinmind-sensitive/veinmind-sensitive.tar.gz
+          files: ./plugins/python/veinmind-sensitive/veinmind-sensitive.tar.gz
   package-veinmind-history:
     runs-on: ubuntu-latest
     steps:
@@ -50,17 +50,17 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./veinmind-history && rm -rf ./veinmind-history/veinmind-common/go
-          cd veinmind-history
+          cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
+          cd ./plugins/python/veinmind-history
           tar -cvzf veinmind-history.tar.gz *
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-history.tar.gz
-          path: ./veinmind-history/veinmind-history.tar.gz
+          path: ./plugins/python/veinmind-history/veinmind-history.tar.gz
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./veinmind-history/veinmind-history.tar.gz
+          files: ./plugins/python/veinmind-history/veinmind-history.tar.gz
   build-amd64-veinmind-malicious:
     runs-on: ubuntu-18.04
     container:
@@ -70,36 +70,36 @@ jobs:
       CI_GOARCH: amd64
     steps:
       - uses: actions/checkout@v2
-      - run: cd veinmind-malicious && /bin/bash -x ../scripts/build/build_veinmind_malicious_amd64.sh
+      - run: cd ./plugins/go/veinmind-malicious && /bin/bash -x scripts/build_veinmind_malicious_amd64.sh
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-malicious-amd64
-          path: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          path: ./plugins/go/veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          files: ./plugins/go/veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-static-veinmind-weakpass:
     runs-on: ubuntu-18.04
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
-      TAGS: "community,static"
+      TAGS: "static"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
           go-version: '1.16.1'
       - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
-      - run: cd veinmind-weakpass && /bin/bash -x ../scripts/build/build_veinmind_weakpass_amd64.sh
+      - run: cd ./plugins/go/veinmind-weakpass && /bin/bash -x script/build_veinmind_weakpass_amd64.sh
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-weakpass-amd64
-          path: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          path: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          files: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-dynamic-veinmind-weakpass:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
@@ -108,14 +108,14 @@ jobs:
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
-      TAGS: "community,dynamic"
+      TAGS: "dynamic"
     steps:
       - uses: actions/checkout@v2
-      - run: cd veinmind-weakpass && /bin/bash -x ../scripts/build/build_veinmind_weakpass_amd64.sh
+      - run: cd ./plugins/go/veinmind-weakpass && /bin/bash -x script/build_veinmind_weakpass_amd64.sh
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-weakpass-amd64-dynamic
-          path: ./veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          path: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-veinmind-asset:
     runs-on: ubuntu-18.04
     env:
@@ -127,11 +127,11 @@ jobs:
         with:
           go-version: '1.18.1'
       - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
-      - run: cd veinmind-asset && /bin/bash -x ../scripts/build/build_veinmind_asset_amd64.sh
+      - run: cd ./plugins/go/veinmind-asset && /bin/bash -x script/build_veinmind_asset_amd64.sh
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-asset-amd64
-          path: ./veinmind-asset/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-asset_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          path: ./plugins/go/veinmind-asset/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-asset_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-veinmind-runner:
     runs-on: ubuntu-latest
     env:
@@ -144,15 +144,15 @@ jobs:
         with:
           go-version: '1.16.1'
       - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
-      - run: cd veinmind-runner && /bin/bash -x ../scripts/build/build_veinmind_runner_amd64.sh
+      - run: cd veinmind-runner && /bin/bash -x script/build_veinmind_runner_amd64.sh
       - uses: actions/download-artifact@v2
         with:
           name: veinmind-weakpass-amd64
       - run: |
-          mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} ./veinmind-weakpass/veinmind-weakpass
+          mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-weakpass
           mv ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner-entrypoint
           rm -rf ./veinmind-runner && mv veinmind-runner-entrypoint veinmind-runner
-          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-weakpass/veinmind-weakpass veinmind-sensitive veinmind-history veinmind-backdoor
+          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-weakpass ./plugins/python/veinmind-sensitive ./plugins/python/veinmind-history ./plugins/python/veinmind-backdoor
       - uses: actions/upload-artifact@v2
         with:
           name: veinmind-runner.tar.gz
@@ -166,7 +166,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-backdoor && rm -rf ./veinmind-backdoor/veinmind-common/go
+      - run: cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -183,13 +183,13 @@ jobs:
           tags: |
             veinmind/veinmind-backdoor:latest
             veinmind/veinmind-backdoor:${{github.ref_name}}
-          context: ./veinmind-backdoor
+          context: ./plugins/python/veinmind-backdoor
   push-veinmind-sensitive:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-sensitive && rm -rf ./veinmind-sensitive/veinmind-common/go
+      - run: cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -206,13 +206,13 @@ jobs:
           tags: |
             veinmind/veinmind-sensitive:latest
             veinmind/veinmind-sensitive:${{github.ref_name}}
-          context: ./veinmind-sensitive
+          context: ./plugins/python/veinmind-sensitive
   push-veinmind-history:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-history && rm -rf ./veinmind-history/veinmind-common/go
+      - run: cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -229,7 +229,7 @@ jobs:
           tags: |
             veinmind/veinmind-history:latest
             veinmind/veinmind-history:${{github.ref_name}}
-          context: ./veinmind-history
+          context: ./plugins/python/veinmind-history
   push-veinmind-malicious:
     if: startsWith(github.ref, 'refs/tags/')
     needs: build-amd64-veinmind-malicious
@@ -242,7 +242,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: veinmind-malicious-amd64
-      - run: mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} ./veinmind-malicious
+      - run: mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} ./plugins/go/veinmind-malicious
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -255,7 +255,7 @@ jobs:
           tags: |
             veinmind/veinmind-malicious:latest
             veinmind/veinmind-malicious:${{github.ref_name}}
-          context: ./veinmind-malicious
+          context: ./plugins/go/veinmind-malicious
           build-args: |
             CI_GOOS=${{env.CI_GOOS}}
             CI_GOARCH=${{env.CI_GOARCH}}
@@ -268,7 +268,7 @@ jobs:
       CI_GOARCH: amd64
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-weakpass && rm -rf ./veinmind-weakpass/veinmind-common/python
+      - run: cp -r ./veinmind-common ./plugins/go/veinmind-weakpass && rm -rf ./plugins/go/veinmind-weakpass/veinmind-common/python
       - uses: actions/download-artifact@v2
         with:
           name: veinmind-weakpass-amd64-dynamic
@@ -285,7 +285,7 @@ jobs:
           tags: |
             veinmind/veinmind-weakpass:latest
             veinmind/veinmind-weakpass:${{github.ref_name}}
-          context: ./veinmind-weakpass
+          context: ./plugins/go/veinmind-weakpass
           build-args: |
             CI_GOOS=${{env.CI_GOOS}}
             CI_GOARCH=${{env.CI_GOARCH}}
@@ -294,7 +294,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-asset && rm -rf ./veinmind-asset/veinmind-common/python
+      - run: cp -r ./veinmind-common ./plugins/go/veinmind-asset && rm -rf ./plugins/go/veinmind-asset/veinmind-common/python
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -309,7 +309,7 @@ jobs:
           tags: |
             veinmind/veinmind-asset:latest
             veinmind/veinmind-asset:${{github.ref_name}}
-          context: ./veinmind-asset
+          context: ./plugins/go/veinmind-asset
   push-veinmind-runner:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04

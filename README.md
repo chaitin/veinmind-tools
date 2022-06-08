@@ -42,12 +42,12 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 |  工具 | 功能  | 
 |---|---|
 |  [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) | 扫描工具运行宿主 |
-|  [veinmind-malicious](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-malicious) | 扫描镜像中的恶意文件  |
-|  [veinmind-weakpass](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-weakpass)  | 扫描镜像中的弱口令  |
-|  [veinmind-sensitive](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-sensitive) | 扫描镜像中的敏感信息  |
-|  [veinmind-backdoor](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-backdoor) | 扫描镜像中的后门 |
-|  [veinmind-history](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-history) | 扫描镜像中的异常历史命令 |
-|  [veinmind-asset](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-asset) | 扫描镜像中的资产信息 |
+|  [veinmind-malicious](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-malicious) | 扫描镜像中的恶意文件  |
+|  [veinmind-weakpass](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-weakpass)  | 扫描镜像中的弱口令  |
+|  [veinmind-sensitive](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-sensitive) | 扫描镜像中的敏感信息  |
+|  [veinmind-backdoor](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-backdoor) | 扫描镜像中的后门 |
+|  [veinmind-history](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-history) | 扫描镜像中的异常历史命令 |
+|  [veinmind-asset](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-asset) | 扫描镜像中的资产信息 |
     
 PS: 目前所有工具均已支持平行容器的方式运行
 

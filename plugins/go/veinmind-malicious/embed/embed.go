@@ -2,7 +2,7 @@ package embed
 
 import (
 	"embed"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -40,17 +40,17 @@ func extract(epath string) {
 	// extract docker-compose config
 	composeYamlBytes, err := EmbedFile.ReadFile(epath)
 	if err != nil {
-		common.Log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if _, err := os.Stat(path.Dir(epath)); os.IsNotExist(err) {
 		err = os.Mkdir(path.Dir(epath), 0755)
 		if err != nil {
-			common.Log.Fatal(err)
+			log.Fatal(err)
 		}
 	}
 	err = ioutil.WriteFile(epath, composeYamlBytes, 0755)
 	if err != nil {
-		common.Log.Fatal(err)
+		log.Fatal(err)
 	}
 }

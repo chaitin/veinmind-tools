@@ -12,7 +12,6 @@ import (
 	_ "github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/embed"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/scanner/malicious"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common/report"
 	"github.com/spf13/cobra"
 	_ "net/http/pprof"
@@ -68,7 +67,7 @@ var scanCmd = &cmd.Command{
 func scan(_ *cmd.Command, image api.Image) error {
 	result, err := malicious.Scan(image)
 	if err != nil {
-		common.Log.Error(err)
+		log.Error(err)
 		return nil
 	}
 

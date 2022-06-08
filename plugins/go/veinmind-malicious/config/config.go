@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/embed"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	"github.com/joho/godotenv"
 	"os"
 	"strings"
@@ -12,12 +12,12 @@ func init() {
 	// 加载配置
 	f, err := embed.Open("scripts/.env")
 	if err != nil {
-		common.Log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	env, err := godotenv.Parse(f)
 	if err != nil {
-		common.Log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	currentEnv := map[string]bool{}
