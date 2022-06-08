@@ -1,20 +1,5 @@
 package model
 
-type WeakpassType int
-
-const (
-	SSH WeakpassType = iota
-)
-
-func (self *WeakpassType) ToString() string {
-	switch *self {
-	case SSH:
-		return "SSH"
-	}
-
-	return ""
-}
-
 type ScanImageResult struct {
 	// 镜像名称
 	ImageName string
@@ -22,17 +7,40 @@ type ScanImageResult struct {
 	// 镜像ID
 	ImageID string
 
+	// 服务名称
+	ServiceName string
+
 	// 弱口令结果
 	WeakpassResults []WeakpassResult
 }
 
+// 弱密码相关信息
 type WeakpassResult struct {
-	// 弱口令类型
-	PassType WeakpassType
-
-	// 弱口令账户
 	Username string
-
-	// 弱口令
 	Password string
+	Filepath string
+}
+
+// 从文件中解析出来的相关信息
+type Record struct {
+	Username string
+	Password string
+	// 除用户名密码外, 有些模块有其他属性
+	// 可以记录在此map中
+	Attributes map[string]string
+}
+
+// cli命令中与爆破相关的配置信息
+type Config struct {
+	Thread   int
+	Username string
+	Dictpath string
+}
+
+// tunny 需要的密码爆破相关的信息
+// Guess 碰撞的密码
+// Records 模块配置文件中提取的密码信息
+type BruteOption struct {
+	Records Record
+	Guess   string
 }

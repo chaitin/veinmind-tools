@@ -69,15 +69,28 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
 ```
 ./veinmind-weakpass scan -d ./pass.dict
 ```
+6.指定自定义扫描的服务
+```
+./veinmind-weakpass scan -a ssh,mysql,redis
+```
+- 目前已经支持的服务
 
-6.解压默认字典到本地磁盘
+    | serverName | version |
+    |:----------:|:-------:|
+    |     ssh    |   all   |
+    |    mysql   |   8.X   |
+    |    redis   |   all   |
+    |   tomcat   |   all   |
+
+7.解压默认字典到本地磁盘
 ```
 ./veinmind-weakpass extract
 ```
 
 ## 演示
-1.扫描指定镜像名称 `weakpass`
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220127151043.png)
-
-2.扫描所有镜像
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220127151350.png)
+1.扫描指定镜像名称 `test` 的所有服务
+![](../docs/veinmind-weakpass/weakpasscandemo1.png)
+2.扫描指定镜像名称 `test` 的 `ssh` 服务
+![](../docs/veinmind-weakpass/weakpasscandemo2.png)
+2.扫描所有镜像的 `ssh` 服务
+![](../docs/veinmind-weakpass/weakpasscandemo3.png)
