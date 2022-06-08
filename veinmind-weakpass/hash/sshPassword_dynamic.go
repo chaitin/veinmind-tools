@@ -1,14 +1,14 @@
-//go:build static
-// +build static
+//go:build dynamic
+// +build dynamic
 
-package ssh_passwd
+package hash
 
 // #include <stdlib.h>
 // #include <unistd.h>
 // #include <string.h>
 // #define __USE_GNU 1
 // #include <crypt.h>
-// #cgo LDFLAGS: -Wl,-Bstatic -lcrypt -Wl,-Bdynamic
+// #cgo LDFLAGS: -lcrypt
 //
 // static int passwd_match
 // (const char* salt, const char* src, const char* dst) {
