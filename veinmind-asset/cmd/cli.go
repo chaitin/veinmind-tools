@@ -51,6 +51,13 @@ var scanCmd = &cmd.Command{
 }
 
 func scan(c *cmd.Command, image api.Image) error {
+	defer func() {
+		err := image.Close()
+		if err != nil {
+			log.Error(err)
+		}
+	}()
+
 	threads, _ := c.Flags().GetInt64("threads")
 	res, err := scanner.ScanImage(image, threads)
 	if err != nil {
