@@ -89,8 +89,8 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
 
 ## 演示
 1.扫描指定镜像名称 `test` 的所有服务
-![](../docs/veinmind-weakpass/weakpasscandemo1.png)
+![](../../../docs/veinmind-weakpass/weakpasscandemo1.png)
 2.扫描指定镜像名称 `test` 的 `ssh` 服务
-![](../docs/veinmind-weakpass/weakpasscandemo2.png)
+![](../../../docs/veinmind-weakpass/weakpasscandemo2.png)
 2.扫描所有镜像的 `ssh` 服务
-![](../docs/veinmind-weakpass/weakpasscandemo3.png)
+![](../../../docs/veinmind-weakpass/weakpasscandemo3.png)
