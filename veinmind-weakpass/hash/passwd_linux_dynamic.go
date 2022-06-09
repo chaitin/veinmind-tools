@@ -1,7 +1,7 @@
 //go:build dynamic
 // +build dynamic
 
-package ssh_passwd
+package hash
 
 // #include <stdlib.h>
 // #include <unistd.h>
@@ -23,10 +23,11 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"regexp"
 	"strings"
 	"unsafe"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var ErrMalformed = errors.New("ssh_passwd: malformed entry")
