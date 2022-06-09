@@ -9,12 +9,12 @@ import (
 	"encoding/hex"
 	veinmindcommon "github.com/chaitin/libveinmind/go"
 	docker "github.com/chaitin/libveinmind/go/docker"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/clamav"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/av/virustotal"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	fs "io/fs"
 	"io/ioutil"
 	"net"
@@ -28,7 +28,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
-		common.Log.Info(image.ID(), " Has been detected")
+		log.Info(image.ID(), " Has been detected")
 		return scanReport, nil
 	}
 
@@ -39,7 +39,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 	} else {
 		imageRef = image.ID()
 	}
-	common.Log.Info("Scan Image: ", imageRef)
+	log.Info("Scan Image: ", imageRef)
 
 	// 判断是否可以获取 Layer
 	switch v := image.(type) {
@@ -49,7 +49,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 			// 获取 Layer ID
 			layerID, err := dockerImage.GetLayerDiffID(i)
 			if err != nil {
-				common.Log.Error("Get LayerID Error: ", err)
+				log.Error("Get LayerID Error: ", err)
 				continue
 			}
 
@@ -64,38 +64,38 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 					MaliciousFileInfos: reportLayer.MaliciousFileInfos,
 				}
 				scanReport.Layers = append(scanReport.Layers, reportLayerCopy)
-				common.Log.Info("Skip Scan Layer: ", layerID)
+				log.Info("Skip Scan Layer: ", layerID)
 				continue
 			} else {
 				l, err := dockerImage.OpenLayer(i)
 				if err != nil {
-					common.Log.Error(err)
+					log.Error(err)
 				}
 
-				common.Log.Info("Start Scan Layer: ", l.ID())
+				log.Info("Start Scan Layer: ", l.ID())
 				l.Walk("/", func(path string, info fs.FileInfo, err error) error {
 					// 部分情况下ELF解析会产生panic
 					defer func() {
 						if err := recover(); err != nil {
-							common.Log.Error(err)
+							log.Error(err)
 						}
 					}()
 
 					// 处理错误
 					if err != nil {
-						common.Log.Debug(err)
+						log.Debug(err)
 						return nil
 					}
 
 					// 判断文件类型，跳过特定类型文件
 					if (info.Mode() & (os.ModeDevice | os.ModeNamedPipe | os.ModeSocket | os.ModeCharDevice | os.ModeDir)) != 0 {
-						common.Log.Debug("Skip: ", path)
+						log.Debug("Skip: ", path)
 						return nil
 					}
 
 					// 忽略软链接, PS: 全局扫描终究会扫到实际的文件
 					if (info.Mode() & os.ModeSymlink) != 0 {
-						common.Log.Debug("Skip: ", path)
+						log.Debug("Skip: ", path)
 						return nil
 					}
 
@@ -103,7 +103,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 
 					f, err := l.Open(path)
 					if err != nil {
-						common.Log.Debug(err)
+						log.Debug(err)
 						return nil
 					}
 
@@ -114,7 +114,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 					// 判断是否是ELF文件，如果不是则跳过
 					_, err = elf.NewFile(f)
 					if _, ok := err.(*elf.FormatError); ok {
-						common.Log.Debug("Skip File: ", path)
+						log.Debug("Skip File: ", path)
 						return nil
 					} else if err != nil {
 						return nil
@@ -127,10 +127,10 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 						results, err = clamav.ScanStream(f)
 						if err != nil {
 							if _, ok := err.(*net.OpError); ok {
-								common.Log.Error(err)
+								log.Error(err)
 							} else {
 								//TODO: 告知使用者其他Err
-								common.Log.Debug(err)
+								log.Debug(err)
 							}
 						}
 					}
@@ -149,7 +149,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 					}
 
 					if len(results) > 0 {
-						common.Log.Warn("Find malicious file: ", path)
+						log.Warn("Find malicious file: ", path)
 
 						// 假设有多个结果，直接拼接 description
 						description := ""
@@ -190,7 +190,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 						reportLayer.MaliciousFileInfos = append(reportLayer.MaliciousFileInfos, result)
 					}
 					for _, r := range results {
-						common.Log.Warn(r)
+						log.Warn(r)
 					}
 					return nil
 				})
@@ -208,7 +208,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 	if err == nil && oci != nil {
 		scanReport.ImageCreatedAt = oci.Created.Format("2006-01-02 15:04:05")
 	} else {
-		common.Log.Error(err)
+		log.Error(err)
 	}
 
 	repoRefs, err := image.RepoRefs()
@@ -219,7 +219,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 	}
 
 	// 存储结果
-	common.Log.Info("Store Scan Report: ", image.ID())
+	log.Info("Store Scan Report: ", image.ID())
 	database.GetDbInstance().Create(&scanReport)
 	for _, layerReport := range scanReport.Layers {
 		l := layerReport

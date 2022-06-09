@@ -1,9 +1,9 @@
 package database
 
 import (
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	_ "github.com/chaitin/veinmind-tools/veinmind-malicious/config"
 	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/sdk/common"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"os"
@@ -25,12 +25,12 @@ func GetDbInstance() *gorm.DB {
 		if _, err := os.Stat(databasePathDir); os.IsNotExist(err) {
 			err := os.Mkdir(databasePathDir, 0755)
 			if err != nil {
-				common.Log.Fatal(err)
+				log.Fatal(err)
 			}
 		}
 		ist, err := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
 		if err != nil {
-			common.Log.Fatal(err)
+			log.Fatal(err)
 		}
 
 		instance = ist
@@ -46,6 +46,6 @@ func init() {
 func Migrate() {
 	err := GetDbInstance().AutoMigrate(model.MaliciousFileInfo{}, model.ReportData{}, model.ReportImage{}, model.ReportLayer{})
 	if err != nil {
-		common.Log.Error(err)
+		log.Error(err)
 	}
 }
