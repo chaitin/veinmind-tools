@@ -2,7 +2,7 @@ import enum
 import time as timep
 import jsonpickle
 import json
-import os, stat
+import os, stat, pwd, grp
 from veinmind import service, log
 
 _namespace = "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
@@ -51,17 +51,21 @@ class FileDetail():
     path = ""
     perm = 0
     size = 0
+    gname = ""
     gid = 0
+    uname = ""
     uid = 0
     ctim = 0
     mtim = 0
     atim = 0
 
-    def __init__(self, path, perm, size, gid, uid, ctim, mtim, atim) -> None:
+    def __init__(self, path, perm, size, gid, uid, ctim, mtim, atim, gname, uname) -> None:
         self.path = path
         self.perm = perm
         self.size = size
+        self.gname = gname
         self.gid = gid
+        self.uname = uname
         self.uid = uid
         self.ctim = ctim
         self.mtim = mtim
@@ -71,7 +75,7 @@ class FileDetail():
     def from_stat(cls, path, file_stat):
         return cls(path=path, perm=stat.S_IMODE(file_stat.st_mode), size=file_stat.st_size, gid=file_stat.st_gid,
                    uid=file_stat.st_uid, ctim=int(file_stat.st_ctime), mtim=int(file_stat.st_mtime),
-                   atim=int(file_stat.st_atime))
+                   atim=int(file_stat.st_atime), uname=pwd.getpwuid(file_stat.st_uid).pw_name, gname=grp.getgrgid(file_stat.st_gid).gr_name)
 
 
 class HistoryDetail():
@@ -86,23 +90,31 @@ class HistoryDetail():
 
 
 class SensitiveFileDetail(FileDetail):
-    description = ""
+    rule_id = 0
+    rule_name = ""
+    rule_description = ""
 
-    def __init__(self, description, file_detail):
-        self.description = description
+    def __init__(self, rule_id ,rule_name ,rule_description, file_detail):
+        self.rule_id = rule_id
+        self.rule_name = rule_name
+        self.rule_description = rule_description
         super().__init__(file_detail.path, file_detail.perm, file_detail.size, file_detail.gid, file_detail.uid,
-                         file_detail.ctim, file_detail.mtim, file_detail.atim)
+                         file_detail.ctim, file_detail.mtim, file_detail.atim, file_detail.uname, file_detail.gname)
 
 
 class SensitiveEnvDetail():
     key = ""
     value = ""
-    description = ""
+    rule_id = 0
+    rule_name = ""
+    rule_description = ""
 
-    def __init__(self, key, value, description):
+    def __init__(self, key, value, rule_id ,rule_name ,rule_description):
         self.key = key
         self.value = value
-        self.description = description
+        self.rule_id = rule_id
+        self.rule_name = rule_name
+        self.rule_description = rule_description
 
 
 class BackdoorDetail(FileDetail):
@@ -111,7 +123,7 @@ class BackdoorDetail(FileDetail):
     def __init__(self, description, file_detail):
         self.description = description
         super().__init__(file_detail.path, file_detail.perm, file_detail.size, file_detail.gid, file_detail.uid,
-                         file_detail.ctim, file_detail.mtim, file_detail.atim)
+                         file_detail.ctim, file_detail.mtim, file_detail.atim, file_detail.uname, file_detail.gname)
 
 
 class AlertDetail:

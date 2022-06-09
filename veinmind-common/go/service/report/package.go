@@ -63,14 +63,16 @@ type AlertDetail struct {
 }
 
 type FileDetail struct {
-	Path string      `json:"path"`
-	Perm os.FileMode `json:"perm"`
-	Size int64       `json:"size"`
-	Gid  int64       `json:"gid"`
-	Uid  int64       `json:"uid"`
-	Ctim int64       `json:"ctim"`
-	Mtim int64       `json:"mtim"`
-	Atim int64       `json:"atim"`
+	Path  string      `json:"path"`
+	Perm  os.FileMode `json:"perm"`
+	Size  int64       `json:"size"`
+	Gname string      `json:"gname"`
+	Gid   int64       `json:"gid"`
+	Uid   int64       `json:"uid"`
+	Uname string      `json:"uname"`
+	Ctim  int64       `json:"ctim"`
+	Mtim  int64       `json:"mtim"`
+	Atim  int64       `json:"atim"`
 }
 
 type MaliciousFileDetail struct {
@@ -93,13 +95,17 @@ type BackdoorDetail struct {
 
 type SensitveFileDetail struct {
 	FileDetail
-	Description string `json:"description"`
+	RuleID          string `json:"rule_id"`
+	RuleName        string `json:"rule_name"`
+	RuleDescription string `json:"rule_description"`
 }
 
 type SensitiveEnvDetail struct {
 	Key         string `json:"key"`
 	Value       string `json:"value"`
-	Description string `json:"description"`
+	RuleID          string `json:"rule_id"`
+	RuleName        string `json:"rule_name"`
+	RuleDescription string `json:"rule_description"`
 }
 
 type HistoryDetail struct {
