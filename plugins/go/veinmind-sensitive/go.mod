@@ -2,12 +2,11 @@ module github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive
 
 go 1.18
 
-replace github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0 => ../../../veinmind-common/go
 
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/chaitin/libveinmind v1.1.0
-	github.com/chaitin/veinmind-tools/veinmind-common/go v1.0.0
+	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220613062319-ac5c6e55bfe4
 	github.com/stretchr/testify v1.7.0
 )
 
