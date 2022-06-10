@@ -95,7 +95,7 @@ type BackdoorDetail struct {
 
 type SensitveFileDetail struct {
 	FileDetail
-	RuleID          string `json:"rule_id"`
+	RuleID          int64 `json:"rule_id"`
 	RuleName        string `json:"rule_name"`
 	RuleDescription string `json:"rule_description"`
 }
@@ -103,7 +103,7 @@ type SensitveFileDetail struct {
 type SensitiveEnvDetail struct {
 	Key         string `json:"key"`
 	Value       string `json:"value"`
-	RuleID          string `json:"rule_id"`
+	RuleID          int64 `json:"rule_id"`
 	RuleName        string `json:"rule_name"`
 	RuleDescription string `json:"rule_description"`
 }
