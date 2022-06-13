@@ -11,6 +11,7 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 	reportService "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/spf13/cobra"
 	"io/fs"
 	"io/ioutil"
 	"strings"
@@ -21,6 +22,9 @@ var (
 	scanCommand = &cmd.Command{
 		Use:   "scan image sensitive info",
 		Short: "scan image sensitive info",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			rule.Init()
+		},
 	}
 )
 

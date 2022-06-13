@@ -127,7 +127,7 @@ func SingletonConf() *SensitiveConfig {
 	return sensitiveConfig
 }
 
-func init() {
+func Init() {
 	confE, err := loadConfigFromService()
 	if err != nil {
 		log.Error(err)
