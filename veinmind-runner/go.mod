@@ -3,10 +3,10 @@ module github.com/chaitin/veinmind-tools/veinmind-runner
 go 1.16
 
 require (
-	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220526023645-674f9dea184f
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/chaitin/libveinmind v1.1.0
+	github.com/chaitin/libveinmind v1.1.1
+	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220526023645-674f9dea184f
 	github.com/containerd/containerd v1.6.4
 	github.com/distribution/distribution v2.8.1+incompatible
 	github.com/docker/cli v20.10.12+incompatible

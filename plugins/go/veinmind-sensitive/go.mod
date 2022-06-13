@@ -5,7 +5,7 @@ go 1.18
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/chaitin/libveinmind v1.1.0
+	github.com/chaitin/libveinmind v1.1.1
 	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220613063517-3eccbd12e414
 	github.com/stretchr/testify v1.7.0
 )

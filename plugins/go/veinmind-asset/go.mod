@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/aquasecurity/fanal v0.0.0-20220424145104-2e3e0044128c
 	github.com/aquasecurity/go-dep-parser v0.0.0-20220422134844-880747206031
-	github.com/chaitin/libveinmind v1.1.0
+	github.com/chaitin/libveinmind v1.1.1
 	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

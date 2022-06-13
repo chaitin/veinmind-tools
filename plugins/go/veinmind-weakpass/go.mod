@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Jeffail/tunny v0.1.4
 	github.com/beevik/etree v1.1.0
-	github.com/chaitin/libveinmind v1.1.0
+	github.com/chaitin/libveinmind v1.1.1
 	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b
 	github.com/spf13/cobra v1.3.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
