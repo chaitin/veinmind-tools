@@ -14,7 +14,7 @@ import (
 
 type SensitiveConfig struct {
 	WhiteList SensitiveWhiteList `json:"white_list" ,toml:"white_list"`
-	Rules     []SensitiveRule    `json:"sensitiveConfig" ,toml:"sensitiveConfig"`
+	Rules     []SensitiveRule    `json:"rules" ,toml:"rules"`
 }
 
 type SensitiveWhiteList struct {

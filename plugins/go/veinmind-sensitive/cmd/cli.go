@@ -50,6 +50,7 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 					if err != nil {
 						log.Error(err)
 					}
+					return nil
 				}
 			}
 		}
@@ -104,6 +105,7 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 						if err != nil {
 							log.Error(err)
 						}
+						return nil
 					}
 				}
 
@@ -116,6 +118,7 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 						if err != nil {
 							log.Error(err)
 						}
+						return nil
 					}
 				}
 			}

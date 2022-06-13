@@ -2,25 +2,24 @@ module github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive
 
 go 1.18
 
-
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/chaitin/libveinmind v1.1.1
 	github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220613063517-3eccbd12e414
+	github.com/gabriel-vasile/mimetype v1.4.0
+	github.com/gobwas/glob v0.2.3
+	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
-	github.com/spf13/cobra v1.3.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
