@@ -128,18 +128,18 @@ func SingletonConf() *SensitiveConfig {
 }
 
 func Init() {
-	confE, err := loadConfigFromService()
+	confFromService, err := loadConfigFromService()
 	if err != nil {
 		log.Error(err)
-	} else {
-		sensitiveConfig = confE
-	}
 
-	confE, err = loadConfigFromEmbed()
-	if err != nil {
-		log.Error(err)
+		confFromEmbed, err := loadConfigFromEmbed()
+		if err != nil {
+			log.Error(err)
+		} else {
+			sensitiveConfig = confFromEmbed
+		}
 	} else {
-		sensitiveConfig = confE
+		sensitiveConfig = confFromService
 	}
 
 	if sensitiveConfig == nil {
