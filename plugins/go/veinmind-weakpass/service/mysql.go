@@ -4,9 +4,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/pkg/innodb"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/pkg/innodb"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
 type mysqlService struct {

@@ -11,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/chaitin/veinmind-tools/veinmind-asset/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-asset/model"
 )
 
 const (

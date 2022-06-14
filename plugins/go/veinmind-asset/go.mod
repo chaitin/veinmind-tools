@@ -1,4 +1,4 @@
-module github.com/chaitin/veinmind-tools/veinmind-asset
+module github.com/chaitin/veinmind-tools/plugins/go/veinmind-asset
 
 go 1.18
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/hash"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/hash"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
 // 对于每一个服务,需要对应一个爆破方法

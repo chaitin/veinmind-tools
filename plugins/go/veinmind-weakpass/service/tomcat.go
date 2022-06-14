@@ -6,7 +6,7 @@ import (
 
 	"github.com/beevik/etree"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
 type tomcatService struct {

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
 type SshService struct {

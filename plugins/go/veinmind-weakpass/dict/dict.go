@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict/embed"
 )
 
 var DictMap = make(map[string][]string, 10)
