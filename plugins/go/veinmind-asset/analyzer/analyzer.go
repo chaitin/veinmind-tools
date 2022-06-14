@@ -12,7 +12,7 @@ import (
 	"github.com/aquasecurity/fanal/types"
 	dio "github.com/aquasecurity/go-dep-parser/pkg/io"
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/veinmind-tools/veinmind-asset/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-asset/model"
 	"golang.org/x/sync/semaphore"
 )
 

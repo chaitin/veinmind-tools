@@ -2,8 +2,8 @@ package database
 
 import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	_ "github.com/chaitin/veinmind-tools/veinmind-malicious/config"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
+	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"os"

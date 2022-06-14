@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
 	"github.com/joho/godotenv"
 	"os"
 	"strings"

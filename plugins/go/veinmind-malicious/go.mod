@@ -1,4 +1,4 @@
-module github.com/chaitin/veinmind-tools/veinmind-malicious
+module github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious
 
 go 1.16
 

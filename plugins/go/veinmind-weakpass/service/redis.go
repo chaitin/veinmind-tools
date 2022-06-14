@@ -4,7 +4,7 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
 type redisService struct {

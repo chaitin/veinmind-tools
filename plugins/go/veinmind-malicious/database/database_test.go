@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/chaitin/veinmind-tools/veinmind-malicious/database/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"testing"
 )
 

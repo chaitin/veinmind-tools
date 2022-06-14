@@ -1,4 +1,4 @@
-module github.com/chaitin/veinmind-tools/veinmind-basic
+module github.com/chaitin/veinmind-tools/plugins/go/veinmind-basic
 
 go 1.17
 

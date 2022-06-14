@@ -11,9 +11,9 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/dict/embed"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/model"
-	"github.com/chaitin/veinmind-tools/veinmind-weakpass/utils"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/utils"
 
 	"github.com/spf13/cobra"
 )
