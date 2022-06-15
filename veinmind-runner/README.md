@@ -102,3 +102,11 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 ./veinmind-runner list plugin
 ```
+
+8.指定容器运行时路径
+```
+./veinmind-runner scan-host --docker-data-root [your_path]
+```
+```
+./veinmind-runner scan-host --containerd-root [your_path]
+```

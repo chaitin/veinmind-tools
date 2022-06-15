@@ -135,7 +135,7 @@ var listPluginCmd = &cmd.Command{
 
 		for _, p := range ps {
 			if verbose {
-				pJsonByte, err := json.MarshalIndent(p, "", "	")
+				pJsonByte, err := json.MarshalIndent(p.Manifest, "", "	")
 				if err != nil {
 					log.Error(err)
 					continue
