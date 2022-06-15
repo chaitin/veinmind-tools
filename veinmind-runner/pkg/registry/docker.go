@@ -98,6 +98,11 @@ func NewRegistryDockerClient(opts ...Option) (Client, error) {
 		c.auth = auth
 	}
 
+	// Double check
+	if c.auth == nil {
+		c.auth = make(map[string]Auth)
+	}
+
 	// Options handle
 	for _, opt := range opts {
 		cNew, err := opt(c)
@@ -255,10 +260,16 @@ func (client *RegistryDockerClient) Pull(repo string) (string, error) {
 	var closer io.ReadCloser
 	if token == "" {
 		closer, err = c.ImagePull(client.ctx, repo, dockertypes.ImagePullOptions{})
+		if err != nil {
+			return "", err
+		}
 	} else {
 		closer, err = c.ImagePull(client.ctx, repo, dockertypes.ImagePullOptions{
 			RegistryAuth: token,
 		})
+		if err != nil {
+			return "", err
+		}
 	}
 
 	_, err = ioutil.ReadAll(closer)
