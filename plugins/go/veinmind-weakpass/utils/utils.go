@@ -23,12 +23,7 @@ func GetImageName(image api.Image) (imageName string, err error) {
 		return "unknown", err
 	}
 	if len(repoRefs) >= 1 {
-		repoRefSplit := strings.Split(repoRefs[0], "/")
-		imageName = repoRefSplit[len(repoRefSplit)-1]
-		imageNameSplit := strings.Split(imageName, "@")
-		imageName = imageNameSplit[0]
-		imageNameSplit = strings.Split(imageName, ":")
-		imageName = imageNameSplit[0]
+		imageName = repoRefs[0]
 	} else {
 		imageName = image.ID()
 	}
@@ -81,7 +76,7 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 
 	// 获取对应模块的filepaths
 	filepaths := mod.FilePath()
-	log.Info(fmt.Sprintf("start to scan %s in image %s", modname, imagename))
+	log.Info(fmt.Sprintf("start to scan %s weakpass: %s", modname, imagename))
 	// 开始从路径中爆破密码
 	WeakpassResults := []model.WeakpassResult{}
 	for _, path := range filepaths {
