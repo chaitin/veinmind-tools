@@ -12,6 +12,7 @@ import (
 	reportService "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/spf13/cobra"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"strings"
@@ -69,12 +70,6 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 		}
 		defer f.Close()
 
-		fb, err := ioutil.ReadAll(f)
-		if err != nil {
-			log.Error(err)
-			return nil
-		}
-
 		m, err := mimetype.DetectReader(f)
 		if err != nil {
 			log.Error(err)
@@ -82,44 +77,55 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 			if strings.HasPrefix(m.String(), "text/") {
 				mimeMatch = true
 			} else {
-				mimeMatch = false
+				for mime, _ := range conf.MIMEMap {
+					if m.String() == mime {
+						mimeMatch = true
+					}
+				}
 			}
 		}
 
+		var fb []byte
+		if mimeMatch {
+			_, err = f.Seek(0, io.SeekStart)
+			if err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			fb, err = ioutil.ReadAll(f)
+			if err != nil {
+				log.Error(err)
+			}
+		} else {
+			return nil
+		}
+
 		for _, r := range conf.Rules {
-			// match mime
-			if r.MIME != "" {
-				if r.MIME == m.String() {
-					mimeMatch = true
+			// match content
+			if r.MatchRegex != nil && r.MatchRegex.Match(fb) {
+				evt, err := report.GenerateSensitiveFileEvent(path, r, info, image)
+				if err != nil {
+					log.Error(err)
+				} else {
+					err = reportService.DefaultReportClient().Report(*evt)
+					if err != nil {
+						log.Error(err)
+					}
+					return nil
 				}
 			}
 
-			if mimeMatch {
-				// match content
-				if r.MatchRegex != nil && r.MatchRegex.Match(fb) {
-					evt, err := report.GenerateSensitiveFileEvent(path, r, info, image)
+			if r.MatchContains != "" && bytes.Contains(fb, []byte(r.MatchContains)) {
+				evt, err := report.GenerateSensitiveFileEvent(path, r, info, image)
+				if err != nil {
+					log.Error(err)
+				} else {
+					err = reportService.DefaultReportClient().Report(*evt)
 					if err != nil {
 						log.Error(err)
-					} else {
-						err = reportService.DefaultReportClient().Report(*evt)
-						if err != nil {
-							log.Error(err)
-						}
-						return nil
 					}
-				}
-
-				if r.MatchContains != "" && bytes.Contains(fb, []byte(r.MatchContains)) {
-					evt, err := report.GenerateSensitiveFileEvent(path, r, info, image)
-					if err != nil {
-						log.Error(err)
-					} else {
-						err = reportService.DefaultReportClient().Report(*evt)
-						if err != nil {
-							log.Error(err)
-						}
-						return nil
-					}
+					return nil
 				}
 			}
 		}

@@ -15,6 +15,7 @@ import (
 type SensitiveConfig struct {
 	WhiteList SensitiveWhiteList `json:"white_list" ,toml:"white_list"`
 	Rules     []SensitiveRule    `json:"rules" ,toml:"rules"`
+	MIMEMap   map[string]bool
 }
 
 type SensitiveWhiteList struct {
@@ -95,6 +96,10 @@ func compileRule() error {
 		return errors.New("rules: can't compile rule because sensitiveConfig is nil")
 	}
 
+	if sensitiveConfig.MIMEMap == nil {
+		sensitiveConfig.MIMEMap = make(map[string]bool)
+	}
+
 	for i, rule := range sensitiveConfig.Rules {
 		if rule.Match != "" {
 			if strings.HasPrefix(rule.Match, "$contains:") {
@@ -113,10 +118,13 @@ func compileRule() error {
 			r, err := regexp.Compile(rule.Filepath)
 			if err != nil {
 				log.Error(err)
-				continue
+			} else {
+				sensitiveConfig.Rules[i].FilepathRegexp = r
 			}
+		}
 
-			sensitiveConfig.Rules[i].FilepathRegexp = r
+		if rule.MIME != "" {
+			sensitiveConfig.MIMEMap[rule.MIME] = true
 		}
 	}
 
