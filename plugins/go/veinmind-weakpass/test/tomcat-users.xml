@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+    <role rolename="tomcat"/>
+    <role rolename="role1"/>
+    <!-- 注释中的用户不应该被记录 -->
+    <!-- <user username="tomcat" password="tomcat" roles="tomcat"/> -->
+    <user username="both" password="tomcat" roles="tomcat,role1"/>
+    <user username="role1" password="tomcat" roles="role1"/>
+</tomcat-users>
