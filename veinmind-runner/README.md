@@ -37,7 +37,7 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 基于平行容器的模式，获取 `veinmind-runner` 的镜像并启动
 ```
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' \
--v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
+-v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
 ```
 
 或者使用项目提供的脚本启动
@@ -109,4 +109,39 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 ```
 ./veinmind-runner scan-host --containerd-root [your_path]
+```
+9.支持 docker 镜像阻断功能
+```bash
+# first
+./veinmind-runner authz -a authz.toml 
+# second
+dockerd --authorization-plugin=veinmind-broker
+```
+其中`authz.toml`,包含如下字段
+|  | **字段名**           | **字段属性** | **含义**  |
+|----------|-------------------|----------|---------|
+| policy   | action            | string   | 需要监控的行为 |
+|          | enabled_plugins   | []string | 使用哪些插件  |
+|          | plugin_params     | []string | 各个插件的参数 |
+|          | risk_level_filter | []string | 风险等级    |
+|          | block             | bool     | 是否阻断    |
+|          | alert             | bool     | 是否报警    |
+| log      | report_log_path   | string   | 插件扫描日志  |
+|          | authz_log_path    | string   | 阻断服务日志  |
+
+- action 原则上支持[DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/)所提供的操作接口
+- 如下的配置表示：当 `创建容器` 时，使用 `veinmind-weakpass` 插件扫描`ssh`服务，如果发现有弱密码存在，并且风险等级为 `High` 则阻止此操作，并发出警告。最终将扫描结果存放至`report.log`,将阻断结果存放至`authz.log`。
+
+```toml
+[log]
+report_log_path = "report.log"
+authz_log_path = "authz.log"
+
+[[policys]]
+action = "container_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_paramas = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
 ```

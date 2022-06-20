@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/request"
 	"github.com/distribution/distribution/reference"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/config/configfile"
@@ -188,30 +189,67 @@ func (client *RegistryDockerClient) GetRepoTags(repo string, options ...remote.O
 	return remote.List(repoR, options...)
 }
 
-func (client *RegistryDockerClient) GetRepos(address string, options ...remote.Option) (repos []string, err error) {
-	options = append(options, client.options...)
+func (client *RegistryDockerClient) GetRepos(address string, options ...request.Option) (repos []string, err error) {
 	var auth Auth
 	if v, ok := client.auth[address]; ok {
 		auth = v
 	}
 
 	if auth.Username != "" && auth.Password != "" {
-		options = append(options, remote.WithAuth(&authn.Basic{
+		options = append(options, request.WithAuth(&authn.Basic{
 			Username: auth.Username,
 			Password: auth.Password,
 		}))
 	}
 
-	regsitry, err := name.NewRegistry(address)
+	r, err := name.NewRegistry(address)
 	if err != nil {
 		return nil, err
+	}
+
+	// select version to auth (some registry catalog api doesn't support v2 auth, e.g. harbor)
+	var (
+		v1 bool
+		v2 bool
+	)
+
+	_, err = remote.CatalogPage(r, "", 1, remote.WithAuth(&authn.Basic{
+		Username: auth.Username,
+		Password: auth.Password,
+	}))
+	if err != nil {
+		v2 = false
+	} else {
+		v2 = true
+	}
+
+	_, err = request.CatalogPageV1(r, "", 1, options...)
+	if err != nil {
+		v1 = false
+	} else {
+		v1 = true
 	}
 
 	last := ""
 	for {
 		reposTemp := []string{}
-		reposTemp, err = remote.CatalogPage(regsitry, last, 10000, options...)
-		if err != nil {
+		switch {
+		case v2:
+			reposTemp, err = remote.CatalogPage(r, last, 10000, remote.WithAuth(&authn.Basic{
+				Username: auth.Username,
+				Password: auth.Password,
+			}))
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			break
+		case v1:
+			reposTemp, err = request.CatalogPageV1(r, last, 10000, options...)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 			break
 		}
 
@@ -222,6 +260,15 @@ func (client *RegistryDockerClient) GetRepos(address string, options ...remote.O
 		}
 
 		last = reposTemp[len(reposTemp)-1]
+	}
+
+	// handle registry address
+	for i, repo := range repos {
+		if strings.HasPrefix(repo, r.RegistryStr()) {
+			continue
+		}
+		repoT := strings.Join([]string{r.RegistryStr(), repo}, "/")
+		repos[i] = repoT
 	}
 
 	return repos, err

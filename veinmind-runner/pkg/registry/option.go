@@ -16,7 +16,29 @@ func WithAuth(path string) Option {
 			return nil, err
 		}
 
+		// filter abnormal registry address
+		for index, a := range authConfig.Auths {
+			filterAddress, err := filterRegistryScheme(a.Registry)
+			if err != nil {
+				continue
+			}
+
+			authConfig.Auths[index].Registry = filterAddress
+		}
+
 		err = c.Auth(*authConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		return c, nil
+	}
+}
+func WithAuthField(auth Auth) Option {
+	authConfig := &AuthConfig{
+		Auths: []Auth{auth}}
+	return func(c Client) (Client, error) {
+		err := c.Auth(*authConfig)
 		if err != nil {
 			return nil, err
 		}

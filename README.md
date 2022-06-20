@@ -12,7 +12,9 @@
 <img src="https://img.shields.io/badge/go report-A+-brightgreen.svg" />
 
 <p align="center"> veinmind-tools 是由长亭科技自研，基于 <a href="https://github.com/chaitin/libveinmind">veinmind-sdk</a> 打造的容器安全工具集 </p>
+<p align="center"> veinmind, 中文名为<b>问脉</b>，寓意 <b>容器安全见筋脉，望闻问切治病害。</b> 旨在成为云原生领域的一剂良方 </p>
 </p>
+<p align="center"> 中文文档 | <a href="README.en.md">English</a> </p>
 
 ## 🔥 Demo
 ![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220415144819.gif)
@@ -39,15 +41,15 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 ## 🔨 工具列表
 
-|  工具 | 功能  | 
-|---|---|
-|  [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) | 扫描工具运行宿主 |
-|  [veinmind-malicious](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-malicious) | 扫描镜像中的恶意文件  |
-|  [veinmind-weakpass](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-weakpass)  | 扫描镜像中的弱口令  |
-|  [veinmind-sensitive](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-sensitive) | 扫描镜像中的敏感信息  |
-|  [veinmind-backdoor](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-backdoor) | 扫描镜像中的后门 |
-|  [veinmind-history](https://github.com/chaitin/veinmind-tools/tree/master/plugins/python/veinmind-history) | 扫描镜像中的异常历史命令 |
-|  [veinmind-asset](https://github.com/chaitin/veinmind-tools/tree/master/plugins/go/veinmind-asset) | 扫描镜像中的资产信息 |
+| 工具                                                                                                     | 功能  | 
+|--------------------------------------------------------------------------------------------------------|---|
+| [veinmind-runner](veinmind-runner/README.md)                                                                     | 扫描工具运行宿主 |
+| [veinmind-malicious](plugins/go/veinmind-malicious)     | 扫描镜像中的恶意文件  |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass)  | 扫描镜像中的弱口令  |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive) | 扫描镜像中的敏感信息  |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor) | 扫描镜像中的后门 |
+| [veinmind-history](plugins/python/veinmind-history) | 扫描镜像中的异常历史命令 |
+| [veinmind-asset](plugins/go/veinmind-asset)      | 扫描镜像中的资产信息 |
     
 PS: 目前所有工具均已支持平行容器的方式运行
 
