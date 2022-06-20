@@ -155,7 +155,7 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 
 	// Report
 	if len(WeakpassResults) > 0 {
-		err = GenerateReport(WeakpassResults)
+		err = GenerateReport(WeakpassResults, image)
 		if err != nil {
 			log.Error(err)
 		}
@@ -166,7 +166,7 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 
 }
 
-func GenerateReport(weakpassResults []model.WeakpassResult) (err error) {
+func GenerateReport(weakpassResults []model.WeakpassResult, image api.Image) (err error) {
 	details := []report.AlertDetail{}
 	for _, wr := range weakpassResults {
 		details = append(details, report.AlertDetail{
@@ -178,6 +178,7 @@ func GenerateReport(weakpassResults []model.WeakpassResult) (err error) {
 	}
 	if len(details) > 0 {
 		Reportevent := report.ReportEvent{
+			ID:           image.ID(),
 			Time:         time.Now(),
 			Level:        report.High,
 			DetectType:   report.Image,
