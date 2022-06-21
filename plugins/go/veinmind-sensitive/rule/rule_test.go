@@ -1,9 +1,9 @@
 package rule
 
 import (
-	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/embed"
+	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"regexp"
@@ -883,5 +883,19 @@ func TestSensitiveRuleUnmarshall2(t *testing.T) {
 }
 
 func TestRule2(t *testing.T) {
-	fmt.Println(regexp.MatchString(`.*\/\.(git|svn)$`, "/var/www/html/.git"))
+	m, err := regexp.MatchString(`.*\/\.(git|svn)$`, "/var/www/html/.git")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.True(t, m)
+}
+
+func TestRule3(t *testing.T) {
+	g, err := glob.Compile(`/etc/ImageMagick-6/mime.xml`)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, g.Match("/etc/ImageMagick-6/mime.xml"), true)
 }

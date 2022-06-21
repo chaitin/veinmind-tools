@@ -2,9 +2,13 @@ package report
 
 import (
 	api "github.com/chaitin/libveinmind/go"
+	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/group"
+	"github.com/chaitin/veinmind-common-go/passwd"
+	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
-	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"io/fs"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -43,6 +47,32 @@ func GenerateSensitiveFileEvent(path string, rule rule.SensitiveRule, info fs.Fi
 	fDetail, err := file2FileDetail(info, path)
 	if err != nil {
 		return nil, err
+	}
+
+	// parse passwd info
+	entries, err := passwd.ParseImagePasswd(image)
+	if err != nil {
+		log.Error(err)
+	} else {
+		for _, e := range entries {
+			if strconv.FormatInt(fDetail.Uid, 10) == e.Uid {
+				fDetail.Uname = e.Username
+				break
+			}
+		}
+	}
+
+	// parse group info
+	gEntries, err := group.ParseImageGroup(image)
+	if err != nil {
+		log.Error(err)
+	} else {
+		for _, ge := range gEntries {
+			if strconv.FormatInt(fDetail.Gid, 10) == ge.Gid {
+				fDetail.Gname = ge.GroupName
+				break
+			}
+		}
 	}
 
 	r := &report.ReportEvent{
