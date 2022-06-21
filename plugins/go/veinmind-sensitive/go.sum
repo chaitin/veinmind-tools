@@ -70,11 +70,10 @@ github.com/census-instrumentation/opencensus-proto v0.3.0/go.mod h1:f6KPmirojxKA
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/chaitin/libveinmind v1.1.0/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
 github.com/chaitin/libveinmind v1.1.1 h1:DoMJXAjw3xzOHcrAiBBQpbqudsumw5pGfRQko6f6USc=
 github.com/chaitin/libveinmind v1.1.1/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
-github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220613063517-3eccbd12e414 h1:ujJum/6Ar5v7KkOaSE439ec7lTWrzI+7xZioLK94MjY=
-github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220613063517-3eccbd12e414/go.mod h1:XuQlQhwrGaUR0MXhnoV11A+a3stsnKc7A/ii50BM52E=
+github.com/chaitin/veinmind-common-go v1.0.2 h1:TSaxpe+/1Uwsq2Mj3OsWFwn1tPu8zImZKyuDeMHZXws=
+github.com/chaitin/veinmind-common-go v1.0.2/go.mod h1:/meV6N1DYdWT8FuSRzpRCJ0PugVU9LXcsJIxWde6KDE=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
@@ -291,6 +290,7 @@ github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FI
 github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
