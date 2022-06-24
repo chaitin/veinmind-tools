@@ -12,6 +12,7 @@
 <img src="https://img.shields.io/badge/go report-A+-brightgreen.svg" />
 
 <p align="center"> veinmind-tools 是由长亭科技自研，基于 <a href="https://github.com/chaitin/libveinmind">veinmind-sdk</a> 打造的容器安全工具集 </p>
+<p align="center"> veinmind, 中文名为<b>问脉</b>，寓意 <b>容器安全见筋脉，望闻问切治病害。</b> 旨在成为云原生领域的一剂良方 </p>
 </p>
 
 ## 🔥 Demo
