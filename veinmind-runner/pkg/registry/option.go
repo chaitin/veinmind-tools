@@ -24,3 +24,14 @@ func WithAuth(path string) Option {
 		return c, nil
 	}
 }
+
+func WithAuthConfig(authConfig *AuthConfig) Option {
+	return func(c Client) (Client, error) {
+		err := c.Auth(*authConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		return c, nil
+	}
+}

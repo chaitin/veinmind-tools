@@ -1,0 +1,30 @@
+[[policys]]
+action = "PUSH_ARTIFACT"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policys]]
+action = "PULL_ARTIFACT"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[log]
+report_log_path = "report.log"
+authz_log_path = "webhook.log"
+
+[docker_auth]
+registry = "10.9.33.98"
+username = "webhook"
+password = "ASDqwe123"
+
+[harbor_auth]
+registry = "10.9.33.98"
+username = "webhook"
+password = "ASDqwe123"
+
+
+
