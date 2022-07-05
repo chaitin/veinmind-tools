@@ -37,7 +37,7 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 基于平行容器的模式，获取 `veinmind-runner` 的镜像并启动
 ```
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' \
--v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
+-v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
 ```
 
 或者使用项目提供的脚本启动
