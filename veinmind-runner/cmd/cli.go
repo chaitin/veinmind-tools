@@ -12,22 +12,37 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
+const (
+	resourceDirectoryPath = "./resource"
+)
+
 var (
-	ps             []*plugin.Plugin
-	ctx            context.Context
-	runnerReporter *reporter.Reporter
-	reportService  *report.ReportService
-	scanPreRunE    = func(c *cobra.Command, args []string) error {
-		// Discover Plugins
+	ps                    []*plugin.Plugin
+	ctx                   context.Context
+	runnerReporter        *reporter.Reporter
+	reportService         *report.ReportService
+	parallelContainerMode = container.InContainer()
+	scanPreRunE           = func(c *cobra.Command, args []string) error {
+		// create resource directory if not exist
+		if _, err := os.Open(resourceDirectoryPath); os.IsNotExist(err) {
+			err = os.Mkdir(resourceDirectoryPath, 0600)
+			if err != nil {
+				return err
+			}
+		}
+
+		// discover plugins
 		ctx = c.Context()
 		glob, err := c.Flags().GetString("glob")
 		if err == nil && glob != "" {
@@ -42,10 +57,10 @@ var (
 			log.Infof("Discovered plugin: %#v\n", p.Name)
 		}
 
-		// Reporter Channel Listen
+		// reporter channel listen
 		go runnerReporter.Listen()
 
-		// Event Channel Listen
+		// event channel listen
 		go func() {
 			for {
 				select {
@@ -67,6 +82,9 @@ var (
 			log.Error(err)
 		}
 		output, _ := cmd.Flags().GetString("output")
+		if parallelContainerMode {
+			output = filepath.Join(resourceDirectoryPath, output)
+		}
 		if _, err := os.Stat(output); errors.Is(err, os.ErrNotExist) {
 			f, err := os.Create(output)
 			if err != nil {
@@ -171,6 +189,10 @@ var scanRegistryCmd = &cmd.Command{
 		namespace, _ := cmd.Flags().GetString("namespace")
 		runtime, _ := cmd.Flags().GetString("runtime")
 		// tags, _ := cmd.Flags().GetStringSlice("tags")
+
+		if parallelContainerMode {
+			config = filepath.Join(resourceDirectoryPath, config)
+		}
 
 		switch runtime {
 		case "docker":

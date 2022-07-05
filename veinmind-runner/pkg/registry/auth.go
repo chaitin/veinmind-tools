@@ -1,6 +1,11 @@
 package registry
 
-import "github.com/BurntSushi/toml"
+import (
+	"errors"
+	"github.com/BurntSushi/toml"
+	"net/url"
+	"strings"
+)
 
 type Auth struct {
 	Registry string `toml:"registry"`
@@ -30,4 +35,17 @@ func parseAuthConfigFromString(content string) (*AuthConfig, error) {
 	}
 
 	return authConfig, nil
+}
+
+func filterRegistryScheme(registry string) (string, error) {
+	u, err := url.Parse(registry)
+	if err != nil {
+		return "", err
+	}
+
+	if strings.HasPrefix(registry, u.Scheme) {
+		return strings.TrimPrefix(registry, u.Scheme+"://"), nil
+	} else {
+		return "", errors.New("registry: address not match after parse")
+	}
 }
