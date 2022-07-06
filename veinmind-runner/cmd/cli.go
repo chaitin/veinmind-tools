@@ -268,6 +268,38 @@ var scanRegistryCmd = &cmd.Command{
 			}
 		}
 
+		// get repos tags
+		reposN := []string{}
+		for _, repo := range repos {
+			repoR, err := reference.Parse(repo)
+			if err != nil {
+				reposN = append(reposN, repo)
+				continue
+			}
+
+			switch repoR.(type) {
+			case reference.Tagged:
+				reposN = append(reposN, repo)
+				continue
+			}
+
+			switch c := c.(type) {
+			case *registry.RegistryDockerClient:
+				tags, err := c.GetRepoTags(repo)
+				if err != nil {
+					reposN = append(reposN, repo)
+					continue
+				}
+
+				for _, tag := range tags {
+					reposN = append(reposN, strings.Join([]string{repo, tag}, ":"))
+				}
+			case *registry.RegistryContainerdClient:
+				reposN = append(reposN, repo)
+			}
+		}
+		repos = reposN
+
 		for _, repo := range repos {
 			log.Infof("Start pull image: %#v\n", repo)
 			r, err := c.Pull(repo)
