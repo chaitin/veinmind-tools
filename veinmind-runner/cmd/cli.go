@@ -4,23 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/chaitin/libveinmind/go"
+	"os"
+	"path/filepath"
+	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
+	scanutil "github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
+
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -133,6 +135,27 @@ var (
 )
 
 var rootCmd = &cmd.Command{}
+var authCmd = &cmd.Command{
+	Use:   "authz",
+	Short: "authz as docker plugin",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		authzConfigFile, err := cmd.Flags().GetString("config")
+		if err != nil {
+			return err
+		}
+
+		authzConfig, err := authz.ParsePolicyConfig(authzConfigFile)
+		if err != nil {
+			return err
+		}
+		s, err := authz.NewAuthZServer(*authzConfig)
+		if err != nil {
+			return err
+		}
+		s.Run()
+		return nil
+	},
+}
 var listCmd = &cmd.Command{
 	Use:   "list",
 	Short: "list relevant information",
@@ -333,6 +356,10 @@ var scanRegistryCmd = &cmd.Command{
 			}
 
 			ids, err := veinmindRuntime.FindImageIDs(repo)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 			switch c.(type) {
 			case *registry.RegistryDockerClient:
 				if len(ids) > 0 {
@@ -370,6 +397,9 @@ var scanRegistryCmd = &cmd.Command{
 					repoRef string
 				)
 				repoRefs, err := image.RepoRefs()
+				if err != nil {
+					log.Error(err)
+				}
 				if len(repoRefs) > 0 {
 					repoRef = repoRefs[0]
 				} else {
@@ -411,24 +441,10 @@ func scan(c *cmd.Command, image api.Image) error {
 	}
 
 	log.Infof("Scan image: %#v\n", ref)
-	if err := cmd.ScanImage(ctx, ps, image,
-		plugin.WithExecInterceptor(func(
-			ctx context.Context, plug *plugin.Plugin, c *plugin.Command,
-			next func(context.Context, ...plugin.ExecOption) error,
-		) error {
-			// Register Service
-			reg := service.NewRegistry()
-			reg.AddServices(log.WithFields(log.Fields{
-				"plugin":  plug.Name,
-				"command": path.Join(c.Path...),
-			}))
-			reg.AddServices(reportService)
-
-			// Next Plugin
-			return next(ctx, reg.Bind())
-		}), plugin.WithExecParallelism(t)); err != nil {
+	if err := scanutil.ScanImage(ctx, ps, image, reportService, plugin.WithExecParallelism(t)); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -436,6 +452,8 @@ func init() {
 	// Cobra init
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
+	rootCmd.AddCommand(authCmd)
+	authCmd.Flags().StringP("config", "c", "", "authz config path")
 	rootCmd.AddCommand(listCmd)
 	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 	listCmd.AddCommand(listPluginCmd)

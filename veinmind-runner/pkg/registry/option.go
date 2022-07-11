@@ -34,3 +34,15 @@ func WithAuth(path string) Option {
 		return c, nil
 	}
 }
+func WithAuthField(auth Auth) Option {
+	authConfig := &AuthConfig{
+		Auths: []Auth{auth}}
+	return func(c Client) (Client, error) {
+		err := c.Auth(*authConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		return c, nil
+	}
+}
