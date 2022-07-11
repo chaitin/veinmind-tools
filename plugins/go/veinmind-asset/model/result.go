@@ -1,6 +1,6 @@
 package model
 
-import "github.com/aquasecurity/fanal/types"
+import "github.com/aquasecurity/trivy/pkg/fanal/types"
 
 type ScanImageResult struct {
 	// 镜像名称

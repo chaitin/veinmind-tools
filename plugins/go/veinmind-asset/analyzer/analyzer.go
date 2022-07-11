@@ -5,12 +5,11 @@ import (
 	"io/fs"
 	"sync"
 
-	"github.com/aquasecurity/fanal/analyzer"
-	_ "github.com/aquasecurity/fanal/analyzer/all"
-	"github.com/aquasecurity/fanal/artifact"
-	_ "github.com/aquasecurity/fanal/hook/all"
-	"github.com/aquasecurity/fanal/types"
 	dio "github.com/aquasecurity/go-dep-parser/pkg/io"
+	"github.com/aquasecurity/trivy/pkg/fanal/analyzer"
+	_ "github.com/aquasecurity/trivy/pkg/fanal/analyzer/all"
+	"github.com/aquasecurity/trivy/pkg/fanal/artifact"
+	"github.com/aquasecurity/trivy/pkg/fanal/types"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-asset/model"
 	"golang.org/x/sync/semaphore"
@@ -44,13 +43,13 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 	wg.Wait()
 	res.Sort()
 	blobInfo := types.BlobInfo{
-		SchemaVersion:   types.BlobJSONSchemaVersion,
-		Digest:          "",
-		OS:              res.OS,
-		Repository:      res.Repository,
-		PackageInfos:    res.PackageInfos,
-		Applications:    res.Applications,
-		SystemFiles:     res.SystemInstalledFiles,
+		SchemaVersion: types.BlobJSONSchemaVersion,
+		Digest:        "",
+		OS:            res.OS,
+		Repository:    res.Repository,
+		PackageInfos:  res.PackageInfos,
+		Applications:  res.Applications,
+		// SystemFiles:     res.SystemInstalledFiles,
 		OpaqueDirs:      []string{},
 		WhiteoutFiles:   []string{},
 		CustomResources: res.CustomResources,
