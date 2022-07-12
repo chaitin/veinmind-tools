@@ -11,9 +11,10 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
-	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
+	"github.com/chaitin/veinmind-common-go/registry"
+	commonRuntime "github.com/chaitin/veinmind-common-go/runtime"
+	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
@@ -180,7 +181,7 @@ var scanRegistryCmd = &cmd.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
 			err             error
-			c               registry.Client
+			c               commonRuntime.Client
 			veinmindRuntime api.Runtime
 		)
 
@@ -197,9 +198,9 @@ var scanRegistryCmd = &cmd.Command{
 		switch runtime {
 		case "docker":
 			if config == "" {
-				c, err = registry.NewRegistryDockerClient()
+				c, err = commonRuntime.NewDockerClient()
 			} else {
-				c, err = registry.NewRegistryDockerClient(registry.WithAuth(config))
+				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuth(config))
 			}
 			if err != nil {
 				return err
@@ -210,7 +211,7 @@ var scanRegistryCmd = &cmd.Command{
 				return err
 			}
 		case "containerd":
-			c, err = registry.NewRegistryContainerdClient()
+			c, err = commonRuntime.NewContainerdClient()
 			if err != nil {
 				return err
 			}
@@ -226,12 +227,14 @@ var scanRegistryCmd = &cmd.Command{
 		// If no repo is specified, then query all repo through catalog
 		repos := []string{}
 		if len(args) == 0 {
-			switch c := c.(type) {
-			case *registry.RegistryDockerClient:
-				repos, err = c.GetRepos(server)
-				if err != nil {
-					return err
-				}
+			r, err := registry.NewClient(registry.WithAuthFromPath(config))
+			if err != nil {
+				return err
+			}
+
+			repos, err = r.GetRepos(server)
+			if err != nil {
+				return err
 			}
 		} else {
 			// If it doesn't start with registry, autofill registry
@@ -283,19 +286,20 @@ var scanRegistryCmd = &cmd.Command{
 				continue
 			}
 
-			switch c := c.(type) {
-			case *registry.RegistryDockerClient:
-				tags, err := c.GetRepoTags(repo)
-				if err != nil {
-					reposN = append(reposN, repo)
-					continue
-				}
+			// get repos tags from remote registry
+			r, err := registry.NewClient(registry.WithAuthFromPath(config))
+			if err != nil {
+				return err
+			}
 
-				for _, tag := range tags {
-					reposN = append(reposN, strings.Join([]string{repo, tag}, ":"))
-				}
-			case *registry.RegistryContainerdClient:
+			tags, err := r.GetRepoTags(repo)
+			if err != nil {
 				reposN = append(reposN, repo)
+				continue
+			}
+
+			for _, tag := range tags {
+				reposN = append(reposN, strings.Join([]string{repo, tag}, ":"))
 			}
 		}
 		repos = reposN
@@ -314,7 +318,7 @@ var scanRegistryCmd = &cmd.Command{
 			)
 
 			switch c.(type) {
-			case *registry.RegistryDockerClient:
+			case *commonRuntime.DockerClient:
 				rNamed, err = reference.ParseDockerRef(r)
 				if err != nil {
 					log.Error(err)
@@ -328,13 +332,13 @@ var scanRegistryCmd = &cmd.Command{
 						repo = strings.Join(strings.Split(repo, "/")[1:], "")
 					}
 				}
-			case *registry.RegistryContainerdClient:
+			case *commonRuntime.ContainerdClient:
 				repo = r
 			}
 
 			ids, err := veinmindRuntime.FindImageIDs(repo)
 			switch c.(type) {
-			case *registry.RegistryDockerClient:
+			case *commonRuntime.DockerClient:
 				if len(ids) > 0 {
 					for _, id := range ids {
 						image, err := veinmindRuntime.OpenImageByID(id)
@@ -359,7 +363,7 @@ var scanRegistryCmd = &cmd.Command{
 						}
 					}
 				}
-			case *registry.RegistryContainerdClient:
+			case *commonRuntime.ContainerdClient:
 				image, err := veinmindRuntime.OpenImageByID(r)
 				if err != nil {
 					log.Error(err)

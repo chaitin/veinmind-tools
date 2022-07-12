@@ -6,7 +6,7 @@ import (
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/pkg/errors"
 	"io"
 )
