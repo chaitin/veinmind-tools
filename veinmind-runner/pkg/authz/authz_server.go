@@ -2,7 +2,6 @@ package authz
 
 import (
 	"errors"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"net"
 	"os"
 	"os/signal"
@@ -90,6 +89,18 @@ func WithListenerUnix(addr string) ServerOption {
 	}
 }
 
+func WithServerOptions(options []ServerOption) ServerOption {
+	return func(s *serverOption) error {
+		for _, option := range options {
+			if err := option(s); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
 type Server interface {
 	Run() error
 }
@@ -110,9 +121,7 @@ func newDefaultServer(s server, opts ...ServerOption) *defaultServer {
 		server:  s,
 		options: make([]ServerOption, 0),
 	}
-	for _, opt := range opts {
-		result.options = append(result.options, opt)
-	}
+	result.options = append(result.options, opts...)
 
 	return result
 }
@@ -144,16 +153,22 @@ func (my *defaultServer) init() error {
 	default:
 		return errors.New("not support the server")
 	}
-	for _, option := range my.options {
-		if err := option(result); err != nil {
-			return err
-		}
+	if err := WithServerOptions(my.options)(result); err != nil {
+		return err
 	}
 
-	log.Info(my.options)
-
-	if result.listener == nil || result.authLog == nil || result.pluginLog == nil {
-		return errors.New("fail to init server option")
+	var defaultOptions []ServerOption
+	if result.authLog == nil {
+		defaultOptions = append(defaultOptions, WithAuthLog(defaultAuthLogPath))
+	}
+	if result.pluginLog == nil {
+		defaultOptions = append(defaultOptions, WithPluginLog(defaultPluginPath))
+	}
+	if result.listener == nil {
+		defaultOptions = append(defaultOptions, WithListenerUnix(defaultSockListenAddr))
+	}
+	if err := WithServerOptions(defaultOptions)(result); err != nil {
+		return err
 	}
 
 	return my.server.init()

@@ -467,7 +467,7 @@ func init() {
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
 	rootCmd.AddCommand(authCmd)
-	authCmd.Flags().StringP("config", "c", "", "authzxxx config path")
+	authCmd.Flags().StringP("config", "c", "", "authz config path")
 	rootCmd.AddCommand(listCmd)
 	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 	listCmd.AddCommand(listPluginCmd)

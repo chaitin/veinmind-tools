@@ -2,8 +2,16 @@ package authz
 
 import (
 	"errors"
+
 	"github.com/BurntSushi/toml"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
+	"github.com/chaitin/veinmind-common-go/pkg/auth"
+)
+
+const (
+	defaultConfigPath     = "config.toml"
+	defaultPluginPath     = "plugin.log"
+	defaultAuthLogPath    = "auth.log"
+	defaultSockListenAddr = "/run/docker/plugins/veinmind-broker.sock"
 )
 
 type Policy struct {
@@ -25,15 +33,11 @@ type Listener struct {
 }
 
 type DockerPluginConfig struct {
-	Log        Log           `toml:"log"`
-	Listener   Listener      `toml:"listener"`
-	DockerAuth registry.Auth `toml:"docker_auth"`
-	Policies   []Policy      `toml:"policies"`
+	Log        Log       `toml:"log"`
+	Listener   Listener  `toml:"listener"`
+	DockerAuth auth.Auth `toml:"docker_auth"`
+	Policies   []Policy  `toml:"policies"`
 }
-
-const (
-	defaultConfigPath = "config.toml"
-)
 
 func NewDockerPluginConfig(paths ...string) (*DockerPluginConfig, error) {
 	if len(paths) < 1 {
@@ -44,8 +48,6 @@ func NewDockerPluginConfig(paths ...string) (*DockerPluginConfig, error) {
 	if paths[0] != "" {
 		path = paths[0]
 	}
-
-	path = defaultConfigPath
 
 	result := &DockerPluginConfig{}
 	_, err := toml.DecodeFile(path, result)

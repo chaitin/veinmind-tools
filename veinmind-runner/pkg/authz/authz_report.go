@@ -1,6 +1,10 @@
 package authz
 
-import "github.com/chaitin/veinmind-common-go/service/report"
+import (
+	"context"
+	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
+)
 
 func toLevelStr(level report.Level) string {
 	switch level {
@@ -15,4 +19,15 @@ func toLevelStr(level report.Level) string {
 	}
 
 	return "None"
+}
+
+func startReportService(ctx context.Context, runnerReporter *reporter.Reporter, reportService *report.ReportService) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case evt := <-reportService.EventChannel:
+			runnerReporter.EventChannel <- evt
+		}
+	}
 }

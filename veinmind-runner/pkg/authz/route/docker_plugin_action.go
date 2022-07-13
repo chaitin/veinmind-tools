@@ -1,9 +1,10 @@
 package route
 
 import (
+	"regexp"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
 	"github.com/docker/docker/pkg/authorization"
-	"regexp"
 )
 
 type routeAction struct {

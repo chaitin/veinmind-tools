@@ -3,6 +3,8 @@ package authz
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
@@ -11,18 +13,19 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	scankit "github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
 	"github.com/docker/docker/pkg/authorization"
-	"time"
 )
 
 type DockerPluginHandler func(policy Policy, req *authorization.Request) (bool, error)
 
-func handleContainerCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (bool, error) {
-	imageName, err := route.GetImageNameFromBodyParam(req.RequestURI, req.RequestHeaders["Content-Type"], "Image", req.RequestBody)
+func handleContainerCreate(policy Policy, req *authorization.Request,
+	runnerReporter *reporter.Reporter, reportService *report.ReportService) (bool, error) {
+	imageName, err := route.GetImageNameFromBodyParam(req.RequestURI,
+		req.RequestHeaders["Content-Type"], "Image", req.RequestBody)
 	if err != nil {
 		return true, err
 	}
-
-	err = scankit.ScanLocalImage(context.Background(), imageName, policy.EnabledPlugins, policy.PluginParams, reportService)
+	err = scankit.ScanLocalImage(context.Background(), imageName,
+		policy.EnabledPlugins, policy.PluginParams, reportService)
 	if err != nil {
 		log.Error(err)
 	}
@@ -32,6 +35,7 @@ func handleContainerCreate(policy Policy, req *authorization.Request, runnerRepo
 		riskLevelFilter[level] = struct{}{}
 	}
 	events, _ := runnerReporter.GetEvents()
+	fmt.Println(events)
 	for _, event := range events {
 		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
 			continue

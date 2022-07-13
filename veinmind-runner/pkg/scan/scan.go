@@ -11,8 +11,8 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
+	"github.com/chaitin/veinmind-common-go/runtime"
 	"github.com/chaitin/veinmind-common-go/service/report"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 )
 
 func GetFinalPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
@@ -36,44 +36,27 @@ func GetFinalPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plu
 	return finalPs, nil
 }
 
-func PullImage(dockerAuth registry.Auth, imageName string) error {
-	dockerClient, err :=
-		registry.NewRegistryDockerClient(registry.WithAuthField(dockerAuth))
-	if err != nil {
-		return err
-	}
-	_, err = dockerClient.Pull(imageName)
+func ScanRemoteImage(ctx context.Context, dockerClient runtime.Client, imageName string,
+	enabledPlugins []string, pluginParams []string,
+	reportService *report.ReportService) error {
+	_, err := dockerClient.Pull(imageName)
 	if err != nil {
 		log.Errorf("Pull image error: %#v\n", err.Error())
 		return err
 	}
 	log.Infof("Pull image success: %#v\n", imageName)
-
-	return nil
-}
-
-func RemoveImage(dockerAuth registry.Auth, imageName string) error {
-	dockerClient, err :=
-		registry.NewRegistryDockerClient(registry.WithAuthField(dockerAuth))
 	if err != nil {
 		return err
 	}
-	err = dockerClient.Remove(imageName)
-	if err != nil {
-		return err
-	}
-	log.Infof("Remove image success: %#v\n", imageName)
+	defer func() {
+		err = dockerClient.Remove(imageName)
+		if err != nil {
+			log.Errorf("Remove image failed: %#v\n", imageName)
+		} else {
+			log.Infof("Remove image success: %#v\n", imageName)
+		}
+	}()
 
-	return nil
-}
-func ScanRemoteImage(ctx context.Context, dockerAuth registry.Auth, imageName string,
-	enabledPlugins []string, pluginParams []string,
-	reportService *report.ReportService) error {
-	err := PullImage(dockerAuth, imageName)
-	if err != nil {
-		return err
-	}
-	defer RemoveImage(dockerAuth, imageName)
 	err = ScanLocalImage(ctx, imageName, enabledPlugins, pluginParams, reportService)
 	if err != nil {
 		return err
@@ -101,8 +84,6 @@ func ScanLocalImage(ctx context.Context, imageName string,
 			log.Error(err)
 			continue
 		}
-
-		log.Infof("ScanLocalImage: %s", image.ID())
 		err = ScanImage(ctx, finalPs, image, reportService,
 			specflags.WithSpecFlags(pluginParams))
 		if err != nil {
