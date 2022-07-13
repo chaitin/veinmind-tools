@@ -1,11 +1,12 @@
 package main
 
 import (
+	"os"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"os"
 )
 
 var rootCmd = &cmd.Command{}
