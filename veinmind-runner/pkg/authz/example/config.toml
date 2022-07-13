@@ -1,0 +1,33 @@
+[[policies]]
+action = "container_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_push"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+
+[docker_auth]
+registry = "xxx.xxx.xxx.xxx"
+username = "username"
+password = "password"
+
+[log]
+plugin_log_path = "plugin.log"
+auth_log_path = "auth.log"
+
+[listener]
+listener_addr = "/run/docker/plugins/veinmind-broker.sock"
