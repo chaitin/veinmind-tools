@@ -60,9 +60,6 @@ func (my *dockerPluginServer) handleAuthZReq(req *authorization.Request) *author
 
 	go runnerReporter.Listen()
 	go startReportService(ctx, runnerReporter, reportService)
-	defer func() {
-		runnerReporter.StopListen()
-	}()
 
 	var err error
 	var result bool
@@ -79,25 +76,8 @@ func (my *dockerPluginServer) handleAuthZReq(req *authorization.Request) *author
 		return my.allowAuthResp()
 	}
 
-	riskLevelFilter := make(map[string]struct{})
-	for _, level := range policy.RiskLevelFilter {
-		riskLevelFilter[level] = struct{}{}
-	}
-	events, _ := runnerReporter.GetEvents()
-	for _, event := range events {
-		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
-			continue
-		}
-
-		if policy.Alert {
-			log.Warn(fmt.Sprintf("Action %s has risks!", dockerPluginAction))
-		}
-		err = runnerReporter.Write(my.pluginLog)
-		if err != nil {
-			log.Error(err)
-		}
-	}
-
+	handleReportAlert(policy, runnerReporter)
+	handleReportLog(policy, my.pluginLog, runnerReporter)
 	return my.retAuthResp(result, "", "")
 }
 
