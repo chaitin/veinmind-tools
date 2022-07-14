@@ -1,0 +1,35 @@
+jobs:
+  ### REQUIRED ###
+  - name: veinmind-runner
+    image:
+      repository: veinmind/veinmind-runner
+      tag: latest
+      imagePullPolicy: IfNotPresent
+    schedule: "0 */8 * * *"
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Allow
+    restartPolicy: OnFailure
+  ### OPTIONAL ###
+    command: ["/tool/entrypoint.sh"]
+    args:
+      - "scan-host"
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 256Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi
+    volumes:
+      - name: files-mount
+        hostPath:
+          path: /
+      - name: sock-path
+        hostPath:
+          path: /var/run/docker.sock
+    volumeMounts:
+      - name: files-mount
+        mountPath: /host
+      - name: sock-path
+        mountPath: /var/run/docker.sock
