@@ -2,41 +2,27 @@ package authz
 
 import (
 	"errors"
+	"io"
 	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
 type ServerOption func(option *serverOption) error
 
 type serverOption struct {
-	authLog   *os.File
-	pluginLog *os.File
-	policies  *policyMap
+	authLog   io.WriteCloser
+	pluginLog io.WriteCloser
+	policies  sync.Map
 	listener  net.Listener
-}
-
-func newServerOption(options ...ServerOption) (*serverOption, error) {
-	result := &serverOption{
-		policies: newPolicyMap(),
-	}
-	for _, option := range options {
-		if err := option(result); err != nil {
-			return nil, err
-		}
-	}
-
-	return result, nil
 }
 
 func WithPolicy(policies ...Policy) ServerOption {
 	return func(option *serverOption) error {
-		if option.policies == nil {
-			option.policies = newPolicyMap()
-		}
 		for _, policy := range policies {
-			option.policies.Store(policy)
+			option.policies.Store(policy.Action, policy)
 		}
 
 		return nil
@@ -47,7 +33,10 @@ func WithAuthLog(path string) ServerOption {
 	return func(option *serverOption) error {
 		_, err := os.Stat(path)
 		if errors.Is(err, os.ErrNotExist) {
-			_, _ = os.Create(path)
+			_, err = os.Create(path)
+			if err != nil {
+				return err
+			}
 		}
 
 		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0666)
@@ -64,7 +53,10 @@ func WithPluginLog(path string) ServerOption {
 	return func(option *serverOption) error {
 		_, err := os.Stat(path)
 		if errors.Is(err, os.ErrNotExist) {
-			_, _ = os.Create(path)
+			_, err = os.Create(path)
+			if err != nil {
+				return err
+			}
 		}
 
 		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0666)
@@ -89,7 +81,7 @@ func WithListenerUnix(addr string) ServerOption {
 	}
 }
 
-func WithServerOptions(options []ServerOption) ServerOption {
+func WithServerOptions(options ...ServerOption) ServerOption {
 	return func(s *serverOption) error {
 		for _, option := range options {
 			if err := option(s); err != nil {
@@ -109,6 +101,7 @@ type server interface {
 	init() error
 	start() (err error)
 	wait() error
+	close()
 }
 
 type defaultServer struct {
@@ -126,34 +119,29 @@ func newDefaultServer(s server, opts ...ServerOption) *defaultServer {
 	return result
 }
 
-func (my *defaultServer) Run() error {
-	defer func() {
-		var result interface{} = my.server
-		option, _ := result.(serverOption)
-		_ = option.authLog.Close()
-		_ = option.pluginLog.Close()
-	}()
+func (s *defaultServer) Run() error {
+	defer s.close()
 
-	if err := my.init(); err != nil {
+	if err := s.init(); err != nil {
 		return err
 	}
 
-	if err := my.start(); err != nil {
+	if err := s.start(); err != nil {
 		return err
 	}
 
-	return my.wait()
+	return s.wait()
 }
 
-func (my *defaultServer) init() error {
+func (s *defaultServer) init() error {
 	var result *serverOption
-	switch s := my.server.(type) {
+	switch srv := s.server.(type) {
 	case *dockerPluginServer:
-		result = (*serverOption)(s)
+		result = srv.option
 	default:
 		return errors.New("not support the server")
 	}
-	if err := WithServerOptions(my.options)(result); err != nil {
+	if err := WithServerOptions(s.options...)(result); err != nil {
 		return err
 	}
 
@@ -167,19 +155,19 @@ func (my *defaultServer) init() error {
 	if result.listener == nil {
 		defaultOptions = append(defaultOptions, WithListenerUnix(defaultSockListenAddr))
 	}
-	if err := WithServerOptions(defaultOptions)(result); err != nil {
+	if err := WithServerOptions(defaultOptions...)(result); err != nil {
 		return err
 	}
 
-	return my.server.init()
+	return s.server.init()
 }
 
-func (my *defaultServer) wait() error {
+func (s *defaultServer) wait() error {
 	signalCh := make(chan os.Signal)
 	signal.Notify(signalCh, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 
-	for s := range signalCh {
-		switch s {
+	for sign := range signalCh {
+		switch sign {
 		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM:
 			os.Exit(0)
 		case syscall.SIGUSR1:
@@ -188,5 +176,9 @@ func (my *defaultServer) wait() error {
 		}
 	}
 
-	return my.server.wait()
+	return s.server.wait()
+}
+
+func (s *defaultServer) close() {
+	s.server.close()
 }

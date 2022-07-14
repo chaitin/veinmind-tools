@@ -3,6 +3,8 @@ package authz
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/chaitin/libveinmind/go/docker"
@@ -14,59 +16,60 @@ import (
 	"github.com/docker/docker/pkg/authorization"
 )
 
-func handleContainerCreate(policy Policy, req *authorization.Request,
-	runnerReporter *reporter.Reporter, reportService *report.ReportService) (bool, error) {
-	defer runnerReporter.StopListen()
+func handleContainerCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+	eventListCh := make(chan []reporter.ReportEvent, 1)
+	defer close(eventListCh)
 
-	imageName, err := route.GetImageNameFromBodyParam(req.RequestURI,
-		req.RequestHeaders["Content-Type"], "Image", req.RequestBody)
+	imageName, err := route.GetImageNameFromBodyParam(req.RequestURI, req.RequestHeaders["Content-Type"], "Image", req.RequestBody)
 	if err != nil {
-		return true, err
+		return eventListCh, true, err
 	}
+
 	err = scankit.ScanLocalImage(context.Background(), imageName,
 		policy.EnabledPlugins, policy.PluginParams, reportService)
 	if err != nil {
 		log.Error(err)
 	}
 
-	riskLevelFilter := make(map[string]struct{})
-	for _, level := range policy.RiskLevelFilter {
-		riskLevelFilter[level] = struct{}{}
-	}
 	events, _ := runnerReporter.GetEvents()
-	for _, event := range events {
-		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
-			continue
-		}
+	eventListCh <- events
 
-		if policy.Block {
-			return false, nil
-		}
-	}
-
-	return true, nil
+	return eventListCh, handlePolicyCheck(policy, events), nil
 }
 
-var imageCreateMap = newHandleMap()
+var imageCreateMap sync.Map
 
-func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (bool, error) {
+func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+	eventListCh := make(chan []reporter.ReportEvent, 1)
 	imageName, err := route.GetImageNameFromUrlParam(req.RequestURI, "fromImage")
 	if err != nil {
-		runnerReporter.StopListen()
-		return true, err
+		close(eventListCh)
+		return eventListCh, true, err
 	}
-
 	handleId := fmt.Sprintf("%s-%d", imageName, time.Now().UnixMicro())
-	if imageCreateMap.Count(handleId) > 1 {
-		runnerReporter.StopListen()
-		return false, nil
+
+	count := 0
+	imageCreateMap.Range(func(key, _ interface{}) bool {
+		id, ok := key.(string)
+		if !ok {
+			return true
+		}
+
+		if strings.HasPrefix(id, handleId) {
+			count += 1
+		}
+		return true
+	})
+	if count > 1 {
+		close(eventListCh)
+		return eventListCh, false, nil
 	}
 
-	imageCreateMap.Store(handleId)
+	imageCreateMap.Store(handleId, struct{}{})
 	go func() {
 		defer func() {
 			imageCreateMap.Delete(handleId)
-			runnerReporter.StopListen()
+			close(eventListCh)
 		}()
 
 		ticker := time.NewTicker(time.Second * 5)
@@ -77,30 +80,38 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 				return
 			case <-ticker.C:
 				imageIds, err := runtime.FindImageIDs(imageName)
-				if err != nil || len(imageIds) < 1 {
+				if err != nil {
+					log.Error(err)
 					break
 				}
 
-				err = scankit.ScanLocalImage(context.Background(), imageName, policy.EnabledPlugins, policy.PluginParams, reportService)
+				if len(imageIds) < 1 {
+					break
+				}
+
+				err = scankit.ScanLocalImage(context.Background(), imageName,
+					policy.EnabledPlugins, policy.PluginParams, reportService)
 				if err != nil {
 					log.Error(err)
 				}
 
-				handleReportAlert(policy, runnerReporter)
+				events, _ := runnerReporter.GetEvents()
+				eventListCh <- events
 				return
 			}
 		}
 	}()
 
-	return true, nil
+	return eventListCh, true, nil
 }
 
-func handleImagePush(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (bool, error) {
-	defer runnerReporter.StopListen()
+func handleImagePush(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+	eventListCh := make(chan []reporter.ReportEvent, 1)
+	defer close(eventListCh)
 
 	imageName, err := route.GetImageNameFromUri(req.RequestURI)
 	if err != nil {
-		return true, err
+		return eventListCh, true, err
 	}
 
 	err = scankit.ScanLocalImage(context.Background(), imageName, policy.EnabledPlugins, policy.PluginParams, reportService)
@@ -108,20 +119,8 @@ func handleImagePush(policy Policy, req *authorization.Request, runnerReporter *
 		log.Error(err)
 	}
 
-	riskLevelFilter := make(map[string]struct{})
-	for _, level := range policy.RiskLevelFilter {
-		riskLevelFilter[level] = struct{}{}
-	}
 	events, _ := runnerReporter.GetEvents()
-	for _, event := range events {
-		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
-			continue
-		}
+	eventListCh <- events
 
-		if policy.Block {
-			return false, nil
-		}
-	}
-
-	return true, nil
+	return eventListCh, handlePolicyCheck(policy, events), nil
 }

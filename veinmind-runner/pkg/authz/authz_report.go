@@ -24,7 +24,8 @@ func toLevelStr(level report.Level) string {
 	return "None"
 }
 
-func startReportService(ctx context.Context, runnerReporter *reporter.Reporter, reportService *report.ReportService) {
+func startReportService(ctx context.Context,
+	runnerReporter *reporter.Reporter, reportService *report.ReportService) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -35,41 +36,49 @@ func startReportService(ctx context.Context, runnerReporter *reporter.Reporter, 
 	}
 }
 
-func handleReportLog(policy Policy, pluginLog io.Writer, runnerReporter *reporter.Reporter) {
+func handleReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Policy,
+	pluginLog io.Writer, runnerReporter *reporter.Reporter) {
 	riskLevelFilter := make(map[string]struct{})
 	for _, level := range policy.RiskLevelFilter {
 		riskLevelFilter[level] = struct{}{}
 	}
 
-	enable := false
-	events, _ := runnerReporter.GetEvents()
-	for _, event := range events {
-		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
-			continue
-		}
-		enable = true
-	}
+	select {
+	case events := <-eventListCh:
+		filter := true
+		for _, event := range events {
+			if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
+				continue
+			}
 
-	if enable {
+			filter = false
+		}
+
+		if !filter {
+			if policy.Alert {
+				log.Warn(fmt.Sprintf("Action %s has risks!", policy.Action))
+			}
+		}
+
 		if err := runnerReporter.Write(pluginLog); err != nil {
 			log.Warn(err)
 		}
 	}
 }
 
-func handleReportAlert(policy Policy, runnerReporter *reporter.Reporter) {
+func handlePolicyCheck(policy Policy, events []reporter.ReportEvent) bool {
 	riskLevelFilter := make(map[string]struct{})
 	for _, level := range policy.RiskLevelFilter {
 		riskLevelFilter[level] = struct{}{}
 	}
-	events, _ := runnerReporter.GetEvents()
+
 	for _, event := range events {
 		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
 			continue
 		}
 
-		if policy.Alert {
-			log.Warn(fmt.Sprintf("Action %s has risks!", policy.Action))
-		}
+		return false
 	}
+
+	return true
 }
