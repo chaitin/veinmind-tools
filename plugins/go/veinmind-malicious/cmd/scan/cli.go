@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/biter777/processex"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
@@ -16,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"sync"
@@ -26,6 +28,7 @@ import (
 var reportData = model.ReportData{}
 var reportLock sync.Mutex
 var scanStart = time.Now()
+var clamdPid = -1
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
@@ -39,6 +42,29 @@ var extractCmd = &cmd.Command{
 var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		manual, _ := cmd.Flags().GetBool("manual")
+		// the permission of use run the clamAV
+		if !manual {
+			log.Info("using local clamAV")
+			// make sure local is not running a clamAV
+			_, _, err := processex.FindByName("clamd")
+			if err == processex.ErrNotFound {
+				log.Info("start local clamAV")
+				clam := exec.Command("clamd")
+				err := clam.Run()
+				//get the clamd PID
+				clamdPid = clam.Process.Pid + 1
+				if err != nil {
+					log.Error("clamAV failed to start: " + err.Error())
+				}
+			} else if err == nil {
+				log.Info("the local clamAV is running")
+			} else {
+				log.Error("find clamAV ERROR")
+			}
+		}
+	},
 	PostRun: func(cmd *cobra.Command, args []string) {
 		// 计算扫描数据
 		spend := time.Since(scanStart)
@@ -61,11 +87,23 @@ var scanCmd = &cmd.Command{
 		case report.CSV:
 			report.OutputCSV(reportData, fpath)
 		}
+
+		if clamdPid != -1 {
+			log.Info("close clamAV server")
+			err := syscall.Kill(-clamdPid, syscall.SIGKILL)
+			if err != nil {
+				log.Error(err)
+			}
+		}
 	},
 }
 
-func scan(_ *cmd.Command, image api.Image) error {
-	result, err := malicious.Scan(image)
+func scan(c *cmd.Command, image api.Image) error {
+	// clamAV host and port
+	clamdHost, _ := c.Flags().GetString("remote")
+	clamdPort, _ := c.Flags().GetString("port")
+
+	result, err := malicious.Scan(image, clamdHost, clamdPort)
 	if err != nil {
 		log.Error(err)
 		return nil
@@ -126,7 +164,6 @@ func scan(_ *cmd.Command, image api.Image) error {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -141,6 +178,9 @@ func init() {
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")
 	scanCmd.Flags().StringP("name", "n", "report", "report name for scan report")
 	scanCmd.Flags().StringP("output", "o", ".", "output path for report")
+	scanCmd.Flags().BoolP("manual", "m", false, "whether need to manually start clamAV")
+	scanCmd.Flags().StringP("remote", "r", "127.0.0.1", "host of ClamAV")
+	scanCmd.Flags().StringP("port", "p", "3310", "port of ClamAV")
 }
 
 func main() {

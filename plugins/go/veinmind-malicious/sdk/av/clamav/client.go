@@ -5,15 +5,22 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 	"github.com/dutchcoders/go-clamd"
 	"io"
-	"os"
 	"strings"
 )
 
-var client = func() *clamd.Clamd {
-	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
+var client *clamd.Clamd
+
+//var client = func() *clamd.Clamd {
+//	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
+//	c := clamd.NewClamd(CLAMD_ADDRESS)
+//	return c
+//}()
+
+func ConnectClamd(host, port string) {
+	var CLAMD_ADDRESS = "tcp://" + host + ":" + port
 	c := clamd.NewClamd(CLAMD_ADDRESS)
-	return c
-}()
+	client = c
+}
 
 func Active() bool {
 	if client == nil {

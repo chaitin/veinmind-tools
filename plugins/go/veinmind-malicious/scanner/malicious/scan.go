@@ -8,14 +8,14 @@ import (
 	"debug/elf"
 	"encoding/hex"
 	veinmindcommon "github.com/chaitin/libveinmind/go"
-	docker "github.com/chaitin/libveinmind/go/docker"
+	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/clamav"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/virustotal"
-	fs "io/fs"
+	"io/fs"
 	"io/ioutil"
 	"net"
 	"os"
@@ -24,13 +24,15 @@ import (
 	"time"
 )
 
-func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
+func Scan(image veinmindcommon.Image, clamdHost, clamdPort string) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
 		log.Info(image.ID(), " Has been detected")
 		return scanReport, nil
 	}
+	//连接ClamdSever
+	clamav.ConnectClamd(clamdHost, clamdPort)
 
 	refs, err := image.RepoRefs()
 	var imageRef string
@@ -133,6 +135,8 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 								log.Debug(err)
 							}
 						}
+					} else {
+						log.Error("ClamAV is not Working")
 					}
 
 					// 使用 Virustotal 进行扫描
