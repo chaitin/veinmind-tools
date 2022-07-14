@@ -30,16 +30,16 @@ Common actions for Helm:
 - helm list:      list releases of charts
 ```
 
-3. Go to the `helm_chart\veinmind\` folder:
+3. Go to the `helm_chart\veinmind` folder:
 ```bash
-# 安装
+# install
 [root@localhost veinmind]# helm install veinmind .
-# 卸载
+# uninstall
 [root@localhost veinmind]# helm uninstall veinmind
 ```
 
 ## Configuration
-```ymal
+```yaml
 jobs:
   ### REQUIRED ###
   - name: veinmind-runner
@@ -56,6 +56,8 @@ jobs:
     command: ["/tool/entrypoint.sh"] ### entry point
     args:
       - "scan-host"     ### parameters
+    nodeSelector:       ### Select the node that needs to execute veinmind according to the label, Select nodes by name via nodeName
+      beta.kubernetes.io/arch: amd64
     resources:          ### Resource configuration 1000m == 1 CPU,1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core
       limits:
         cpu: 1000m
@@ -75,6 +77,12 @@ jobs:
         mountPath: /host
       - name: sock-path
         mountPath: /var/run/docker.sock
+```
+how to get the labels?
+```bash
+[root@localhost veinmind]# kubectl get nodes --show-labels 
+NAME              STATUS   ROLES                              AGE   VERSION    LABELS
+192.168.136.146   Ready    control-plane,etcd,master,worker   12h   v1.22.10   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.136.146,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/etcd=,node-role.kubernetes.io/master=,node-role.kubernetes.io/worker=,node.kubernetes.io/exclude-from-external-load-balancers=
 ```
 
 ## Demo

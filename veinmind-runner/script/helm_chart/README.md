@@ -40,8 +40,8 @@ Common actions for Helm:
 ```
 
 ## 配置解析
-项目主要配置信息位于`values.ymal`:
-```ymal
+项目主要配置信息位于`values.yaml`:
+```yaml
 jobs:
   ### REQUIRED ###
   - name: veinmind-runner
@@ -58,6 +58,8 @@ jobs:
     command: ["/tool/entrypoint.sh"] ### 程序入口点
     args:
       - "scan-host"     ### 运行参数
+    nodeSelector:       ### 节点选择，可以依据标签将该任务推送到节点  类似的还有 nodeName,依据名称选择节点
+      beta.kubernetes.io/arch: amd64
     resources:          ### 资源配置,1000m == 1 个 CPU 单元，相当于1 个物理 CPU 核，或1 个虚拟核
       limits:
         cpu: 1000m
@@ -77,6 +79,12 @@ jobs:
         mountPath: /host
       - name: sock-path
         mountPath: /var/run/docker.sock
+```
+获取节点标签:
+```bash
+[root@localhost veinmind]# kubectl get nodes --show-labels 
+NAME              STATUS   ROLES                              AGE   VERSION    LABELS
+192.168.136.146   Ready    control-plane,etcd,master,worker   12h   v1.22.10   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.136.146,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/etcd=,node-role.kubernetes.io/master=,node-role.kubernetes.io/worker=,node.kubernetes.io/exclude-from-external-load-balancers=
 ```
 
 ## 运行截图
