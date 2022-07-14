@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io/fs"
+	"os"
 	"sync"
 
 	dio "github.com/aquasecurity/go-dep-parser/pkg/io"
@@ -25,6 +26,9 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 	var artifactOpt artifact.Option
 	var analysisOpt analyzer.AnalysisOptions
 
+	// 取消java远程解析
+	analysisOpt.Offline = true
+
 	ag := analyzer.NewAnalyzerGroup(artifactOpt.AnalyzerGroup, artifactOpt.DisabledAnalyzers)
 	var wg sync.WaitGroup
 	res := new(analyzer.AnalysisResult)
@@ -33,6 +37,13 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 		// 如果出现error会导致后续空指针，这里需要处理一下
 		if err != nil {
 			log.Debug(err)
+			return nil
+		}
+
+		// Copy From veinmind-malicious, 提速
+		// 判断文件类型，跳过特定类型文件
+		if (info.Mode() & (os.ModeDevice | os.ModeNamedPipe | os.ModeSocket | os.ModeCharDevice | os.ModeDir)) != 0 {
+			log.Debug("Skip: ", path)
 			return nil
 		}
 
