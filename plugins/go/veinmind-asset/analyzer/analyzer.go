@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io/fs"
 	"sync"
 
@@ -29,6 +30,12 @@ func ScanImage(image api.Image, parallel int64) (model.ScanImageResult, error) {
 	res := new(analyzer.AnalysisResult)
 
 	image.Walk("/", func(path string, info fs.FileInfo, err error) error {
+		// 如果出现error会导致后续空指针，这里需要处理一下
+		if err != nil {
+			log.Debug(err)
+			return nil
+		}
+
 		open := func() (dio.ReadSeekCloserAt, error) {
 			file, err := image.Open(path)
 			if err != nil {
