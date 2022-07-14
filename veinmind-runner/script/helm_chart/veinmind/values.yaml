@@ -14,8 +14,6 @@ jobs:
     command: ["/tool/entrypoint.sh"]
     args:
       - "scan-host"
-    nodeSelector:
-      beta.kubernetes.io/arch: amd64
     resources:
       limits:
         cpu: 1000m
