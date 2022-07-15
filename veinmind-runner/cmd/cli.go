@@ -443,8 +443,7 @@ func scan(c *cmd.Command, image api.Image) error {
 	log.Infof("Scan image: %#v\n", ref)
 	if err := cmd.ScanImage(ctx, ps, image,
 		plugin.WithExecInterceptor(func(
-			ctx context.Context, plug *plugin.Plugin, c *plugin.Command,
-			next func(context.Context, ...plugin.ExecOption) error,
+			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
 		) error {
 			// Register Service
 			reg := service.NewRegistry()

@@ -65,20 +65,3 @@ func handleReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Policy
 		}
 	}
 }
-
-func handlePolicyCheck(policy Policy, events []reporter.ReportEvent) bool {
-	riskLevelFilter := make(map[string]struct{})
-	for _, level := range policy.RiskLevelFilter {
-		riskLevelFilter[level] = struct{}{}
-	}
-
-	for _, event := range events {
-		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
-			continue
-		}
-
-		return false
-	}
-
-	return true
-}

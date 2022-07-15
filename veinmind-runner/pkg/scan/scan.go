@@ -93,7 +93,8 @@ func ScanLocalImage(ctx context.Context, imageName string,
 	return nil
 }
 
-func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image, reportService *report.ReportService, opts ...plugin.ExecOption) error {
+func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
+	reportService *report.ReportService, opts ...plugin.ExecOption) error {
 	opts = append(opts, plugin.WithExecInterceptor(func(
 		ctx context.Context, plug *plugin.Plugin, c *plugin.Command,
 		next func(context.Context, ...plugin.ExecOption) error,

@@ -2,6 +2,7 @@ package authz
 
 import (
 	"errors"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"io"
 	"net"
 	"os"
@@ -120,8 +121,6 @@ func newDefaultServer(s server, opts ...ServerOption) *defaultServer {
 }
 
 func (s *defaultServer) Run() error {
-	defer s.close()
-
 	if err := s.init(); err != nil {
 		return err
 	}
@@ -164,21 +163,36 @@ func (s *defaultServer) init() error {
 
 func (s *defaultServer) wait() error {
 	signalCh := make(chan os.Signal)
-	signal.Notify(signalCh, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
+	signal.Notify(signalCh, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	for sign := range signalCh {
 		switch sign {
 		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM:
+			s.close()
 			os.Exit(0)
-		case syscall.SIGUSR1:
-		case syscall.SIGUSR2:
-		default:
 		}
 	}
 
-	return s.server.wait()
+	return nil
 }
 
 func (s *defaultServer) close() {
 	s.server.close()
+}
+
+func handlePolicyCheck(policy Policy, events []reporter.ReportEvent) bool {
+	riskLevelFilter := make(map[string]struct{})
+	for _, level := range policy.RiskLevelFilter {
+		riskLevelFilter[level] = struct{}{}
+	}
+
+	for _, event := range events {
+		if _, ok := riskLevelFilter[toLevelStr(event.Level)]; !ok {
+			continue
+		}
+
+		return false
+	}
+
+	return true
 }

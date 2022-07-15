@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
-
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
@@ -15,6 +12,9 @@ import (
 	"github.com/docker/docker/pkg/authorization"
 	"github.com/docker/docker/pkg/plugins"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"io"
+	"os"
 )
 
 type dockerPluginServer struct {
@@ -33,8 +33,16 @@ func (s *dockerPluginServer) init() error {
 }
 
 func (s *dockerPluginServer) start() error {
+	multiWriter := io.MultiWriter(s.option.authLog, os.Stdout)
+
+	logger := logrus.New()
+	logger.Out = multiWriter
+
+	log.SetDefaultLogger(log.NewLogrus(logger))
+	gin.DefaultWriter = multiWriter
+
 	engine := s.registerRouter()
-	gin.DefaultWriter = io.MultiWriter(s.option.authLog, os.Stdout)
+
 	go func() {
 		err := engine.RunListener(s.option.listener)
 		if err != nil {
@@ -61,7 +69,7 @@ func (s *dockerPluginServer) close() {
 }
 
 func (s *dockerPluginServer) registerRouter() *gin.Engine {
-	engine := gin.New()
+	engine := gin.Default()
 
 	engine.POST("/Plugin.Activate", func(c *gin.Context) {
 		c.JSON(200, plugins.Manifest{
@@ -126,6 +134,8 @@ func (s *dockerPluginServer) handleAuthZReq(req *authorization.Request) *authori
 		eventListCh, result, err = handleImageCreate(policy, req, runnerReporter, reportService)
 	case action.ImagePush:
 		eventListCh, result, err = handleImagePush(policy, req, runnerReporter, reportService)
+	default:
+		eventListCh, result, err = handleDefaultAction()
 	}
 
 	go func() {

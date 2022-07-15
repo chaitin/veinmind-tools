@@ -46,16 +46,10 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 		close(eventListCh)
 		return eventListCh, true, err
 	}
-	handleId := fmt.Sprintf("%s-%d", imageName, time.Now().UnixMicro())
 
 	count := 0
 	imageCreateMap.Range(func(key, _ interface{}) bool {
-		id, ok := key.(string)
-		if !ok {
-			return true
-		}
-
-		if strings.HasPrefix(id, handleId) {
+		if strings.HasPrefix(key.(string), imageName) {
 			count += 1
 		}
 		return true
@@ -65,6 +59,7 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 		return eventListCh, false, nil
 	}
 
+	handleId := fmt.Sprintf("%s-%d", imageName, time.Now().UnixMicro())
 	imageCreateMap.Store(handleId, struct{}{})
 	go func() {
 		defer func() {
@@ -123,4 +118,11 @@ func handleImagePush(policy Policy, req *authorization.Request, runnerReporter *
 	eventListCh <- events
 
 	return eventListCh, handlePolicyCheck(policy, events), nil
+}
+
+func handleDefaultAction() (<-chan []reporter.ReportEvent, bool, error) {
+	eventListCh := make(chan []reporter.ReportEvent, 1)
+	defer close(eventListCh)
+
+	return eventListCh, true, nil
 }
