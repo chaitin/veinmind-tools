@@ -138,6 +138,8 @@ dockerd --authorization-plugin=veinmind-broker
 [log]
 plugin_log_path = "plugin.log"
 auth_log_path = "auth.log"
+[listener]
+listener_addr = "/run/docker/plugins/veinmind-broker.sock"
 [[policies]]
 action = "container_create"
 enabled_plugins = ["veinmind-weakpass"]
