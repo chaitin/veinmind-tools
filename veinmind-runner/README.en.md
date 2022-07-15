@@ -110,3 +110,47 @@ container runtime type
 ```
 ./veinmind-runner scan-host --containerd-root [your_path]
 ```
+
+9.support docker plugin for authorization
+```bash
+# first
+./veinmind-runner authz -c config.toml
+# second
+dockerd --authorization-plugin=veinmind-broker
+```
+Field in `config.toml`
+
+|  | **name**           | **attribute** | **meaning**  |
+|----------|-------------------|----------|---------|
+| policy   | action            | string   | action should be monitored |
+|          | enabled_plugins   | []string | which plugins to use
+|
+|          | plugin_params     | []string | parameters for each plugin |
+|          | risk_level_filter | []string | risk level    |
+|          | block             | bool     | whether to block    |
+|          | alert             | bool     | whether to alert    |
+| log      | report_log_path   | string   | log for veinmind plugins  |
+|          | authz_log_path    | string   | log for docker plugin  |
+
+- action supports [DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/) provided operation interface
+- The following configuration means: when `create a container`or`push a image`, use the `veinmind-weakpass` plugin to scan the `ssh` service, if a weak password is found, and the risk level is `High`, block this operation, and issue a warning. Finally, the scan results are stored in `plugin.log`, and the risk results are stored in `auth.log`.
+
+```toml
+[log]
+report_log_path = "plugin.log"
+authz_log_path = "auth.log"
+[[policies]]
+action = "container_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_paramas = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_push"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+```
