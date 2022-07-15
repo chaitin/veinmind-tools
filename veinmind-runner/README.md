@@ -136,8 +136,8 @@ dockerd --authorization-plugin=veinmind-broker
 
 ``` toml
 [log]
-report_log_path = "plugin.log"
-authz_log_path = "auth.log"
+plugin_log_path = "plugin.log"
+auth_log_path = "auth.log"
 [[policies]]
 action = "container_create"
 enabled_plugins = ["veinmind-weakpass"]
