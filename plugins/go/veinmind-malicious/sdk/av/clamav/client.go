@@ -8,25 +8,15 @@ import (
 	"strings"
 )
 
-var client *clamd.Clamd
-
-//var client = func() *clamd.Clamd {
-//	var CLAMD_ADDRESS = "tcp://" + os.Getenv("CLAMD_HOST") + ":" + os.Getenv("CLAMD_PORT")
-//	c := clamd.NewClamd(CLAMD_ADDRESS)
-//	return c
-//}()
-
-func ConnectClamd(host, port string) {
-	var CLAMD_ADDRESS = "tcp://" + host + ":" + port
-	c := clamd.NewClamd(CLAMD_ADDRESS)
-	client = c
+func New(clamavHost, clamavPort string) ClamavAddress {
+	return ClamavAddress{ClamavHost: clamavHost, ClamavPort: clamavPort, ClamavConnect: clamd.NewClamd("tcp://" + clamavHost + ":" + clamavPort)}
 }
 
-func Active() bool {
-	if client == nil {
+func (self *ClamavAddress) Active() bool {
+	if self.ClamavConnect == nil {
 		return false
 	} else {
-		if client.Ping() != nil {
+		if self.ClamavConnect.Ping() != nil {
 			return false
 		} else {
 			return true
@@ -34,9 +24,9 @@ func Active() bool {
 	}
 }
 
-func ScanStream(stream io.Reader) ([]av.ScanResult, error) {
+func (self *ClamavAddress) ScanStream(stream io.Reader) ([]av.ScanResult, error) {
 	abort := make(chan bool, 1)
-	response, err := client.ScanStream(stream, abort)
+	response, err := self.ClamavConnect.ScanStream(stream, abort)
 	defer func() {
 		close(abort)
 	}()
@@ -81,6 +71,12 @@ type ServiceInfo struct {
 	Threads  string
 	Memstats string
 	Queue    string
+}
+
+type ClamavAddress struct {
+	ClamavHost    string
+	ClamavPort    string
+	ClamavConnect *clamd.Clamd
 }
 
 type SizeLimitReachedError struct {

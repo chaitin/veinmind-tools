@@ -24,15 +24,13 @@ import (
 	"time"
 )
 
-func Scan(image veinmindcommon.Image, clamdHost, clamdPort string) (scanReport model.ReportImage, err error) {
+func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusService) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
 		log.Info(image.ID(), " Has been detected")
 		return scanReport, nil
 	}
-	//连接ClamdSever
-	clamav.ConnectClamd(clamdHost, clamdPort)
 
 	refs, err := image.RepoRefs()
 	var imageRef string
@@ -125,8 +123,8 @@ func Scan(image veinmindcommon.Image, clamdHost, clamdPort string) (scanReport m
 					results := []av.ScanResult{}
 
 					// 使用 ClamAV 进行扫描
-					if clamav.Active() {
-						results, err = clamav.ScanStream(f)
+					if antiVirusServer.ClamavAgent.Active() {
+						results, err = antiVirusServer.ClamavAgent.ScanStream(f)
 						if err != nil {
 							if _, ok := err.(*net.OpError); ok {
 								log.Error(err)
@@ -135,8 +133,6 @@ func Scan(image veinmindcommon.Image, clamdHost, clamdPort string) (scanReport m
 								log.Debug(err)
 							}
 						}
-					} else {
-						log.Error("ClamAV is not Working")
 					}
 
 					// 使用 Virustotal 进行扫描
@@ -235,4 +231,9 @@ func Scan(image veinmindcommon.Image, clamdHost, clamdPort string) (scanReport m
 	}
 
 	return scanReport, nil
+}
+
+//AntiVirus struct
+type AntiVirusService struct {
+	ClamavAgent clamav.ClamavAddress
 }
