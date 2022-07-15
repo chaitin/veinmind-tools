@@ -48,7 +48,7 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 		return eventListCh, true, err
 	}
 
-	_, err = reference.Parse(imageName)
+	_, err = reference.ParseDockerRef(imageName)
 	if err != nil {
 		close(eventListCh)
 		return eventListCh, true, err
