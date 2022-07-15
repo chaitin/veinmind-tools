@@ -11,12 +11,10 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
-	"github.com/chaitin/veinmind-common-go/runtime"
 	"github.com/chaitin/veinmind-common-go/service/report"
 )
 
-func GetFinalPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
-
+func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
 	ps, err := plugin.DiscoverPlugins(ctx, ".")
 	if err != nil {
 		return nil, err
@@ -36,33 +34,6 @@ func GetFinalPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plu
 	return finalPs, nil
 }
 
-func ScanRemoteImage(ctx context.Context, dockerClient runtime.Client, imageName string,
-	enabledPlugins []string, pluginParams []string,
-	reportService *report.ReportService) error {
-	_, err := dockerClient.Pull(imageName)
-	if err != nil {
-		log.Errorf("Pull image error: %#v\n", err.Error())
-		return err
-	}
-	log.Infof("Pull image success: %#v\n", imageName)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = dockerClient.Remove(imageName)
-		if err != nil {
-			log.Errorf("Remove image failed: %#v\n", imageName)
-		} else {
-			log.Infof("Remove image success: %#v\n", imageName)
-		}
-	}()
-
-	err = ScanLocalImage(ctx, imageName, enabledPlugins, pluginParams, reportService)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 func ScanLocalImage(ctx context.Context, imageName string,
 	enabledPlugins []string, pluginParams []string,
 	reportService *report.ReportService) error {
@@ -74,7 +45,7 @@ func ScanLocalImage(ctx context.Context, imageName string,
 	if err != nil {
 		return err
 	}
-	finalPs, err := GetFinalPlugins(ctx, enabledPlugins)
+	finalPs, err := FindTargetPlugins(ctx, enabledPlugins)
 	if err != nil {
 		return err
 	}

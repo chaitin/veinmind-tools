@@ -3,7 +3,6 @@ package route
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"regexp"
 	"strings"
@@ -70,7 +69,6 @@ func GetImageNameFromBodyParam(uri, contentType, key string, reqBody []byte) (st
 			return "", err
 		}
 	}
-	fmt.Println(uri)
 	// imageName should be tagged
 	// if you don't hava Image Key, then return defaultResponse
 	imageNameI, ok := body[key]

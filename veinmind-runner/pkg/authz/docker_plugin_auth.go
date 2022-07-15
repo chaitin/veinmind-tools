@@ -3,6 +3,7 @@ package authz
 import (
 	"context"
 	"fmt"
+	"github.com/distribution/distribution/reference"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +43,12 @@ var imageCreateMap sync.Map
 func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
 	eventListCh := make(chan []reporter.ReportEvent, 1)
 	imageName, err := route.GetImageNameFromUrlParam(req.RequestURI, "fromImage")
+	if err != nil {
+		close(eventListCh)
+		return eventListCh, true, err
+	}
+
+	_, err = reference.Parse(imageName)
 	if err != nil {
 		close(eventListCh)
 		return eventListCh, true, err
