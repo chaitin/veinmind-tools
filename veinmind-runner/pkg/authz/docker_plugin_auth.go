@@ -3,36 +3,33 @@ package authz
 import (
 	"context"
 	"fmt"
-	"github.com/distribution/distribution/reference"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/distribution/distribution/reference"
+
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/route"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	scankit "github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
 	"github.com/docker/docker/pkg/authorization"
 )
 
-func handleContainerCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+func handleContainerCreate(policy Policy, req *authorization.Request) (<-chan []reporter.ReportEvent, bool, error) {
 	eventListCh := make(chan []reporter.ReportEvent, 1)
 	defer close(eventListCh)
-
 	imageName, err := route.GetImageNameFromBodyParam(req.RequestURI, req.RequestHeaders["Content-Type"], "Image", req.RequestBody)
 	if err != nil {
 		return eventListCh, true, err
 	}
 
-	err = scankit.ScanLocalImage(context.Background(), imageName,
-		policy.EnabledPlugins, policy.PluginParams, reportService)
+	events, err := scankit.ScanLocalImage(context.Background(), imageName,
+		policy.EnabledPlugins, policy.PluginParams)
 	if err != nil {
 		log.Error(err)
 	}
-
-	events, _ := runnerReporter.GetEvents()
 	eventListCh <- events
 
 	return eventListCh, handlePolicyCheck(policy, events), nil
@@ -40,7 +37,7 @@ func handleContainerCreate(policy Policy, req *authorization.Request, runnerRepo
 
 var imageCreateMap sync.Map
 
-func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+func handleImageCreate(policy Policy, req *authorization.Request) (<-chan []reporter.ReportEvent, bool, error) {
 	eventListCh := make(chan []reporter.ReportEvent, 1)
 	imageName, err := route.GetImageNameFromUrlParam(req.RequestURI, "fromImage")
 	if err != nil {
@@ -91,13 +88,12 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 					break
 				}
 
-				err = scankit.ScanLocalImage(context.Background(), imageName,
-					policy.EnabledPlugins, policy.PluginParams, reportService)
+				events, err := scankit.ScanLocalImage(context.Background(), imageName,
+					policy.EnabledPlugins, policy.PluginParams)
 				if err != nil {
 					log.Error(err)
 				}
 
-				events, _ := runnerReporter.GetEvents()
 				eventListCh <- events
 				return
 			}
@@ -107,23 +103,22 @@ func handleImageCreate(policy Policy, req *authorization.Request, runnerReporter
 	return eventListCh, true, nil
 }
 
-func handleImagePush(policy Policy, req *authorization.Request, runnerReporter *reporter.Reporter, reportService *report.ReportService) (<-chan []reporter.ReportEvent, bool, error) {
+func handleImagePush(policy Policy, req *authorization.Request) (<-chan []reporter.ReportEvent, bool, error) {
 	eventListCh := make(chan []reporter.ReportEvent, 1)
 	defer close(eventListCh)
 
+	var events []reporter.ReportEvent
 	imageName, err := route.GetImageNameFromUri(req.RequestURI)
 	if err != nil {
 		return eventListCh, true, err
 	}
 
-	err = scankit.ScanLocalImage(context.Background(), imageName, policy.EnabledPlugins, policy.PluginParams, reportService)
+	events, err = scankit.ScanLocalImage(context.Background(), imageName,
+		policy.EnabledPlugins, policy.PluginParams)
 	if err != nil {
 		log.Error(err)
 	}
-
-	events, _ := runnerReporter.GetEvents()
 	eventListCh <- events
-
 	return eventListCh, handlePolicyCheck(policy, events), nil
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
 func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
@@ -35,19 +36,26 @@ func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.P
 }
 
 func ScanLocalImage(ctx context.Context, imageName string,
-	enabledPlugins []string, pluginParams []string,
-	reportService *report.ReportService) error {
+	enabledPlugins []string, pluginParams []string) (events []reporter.ReportEvent, err error) {
+	reportService := report.NewReportService()
+	runnerReporter, _ := reporter.NewReporter()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go startReportService(ctx, runnerReporter, reportService)
+	go runnerReporter.Listen()
+	defer runnerReporter.StopListen()
+
 	veinmindRuntime, err := docker.New()
 	if err != nil {
-		return err
+		return events, err
 	}
 	imageIDs, err := veinmindRuntime.FindImageIDs(imageName)
 	if err != nil {
-		return err
+		return events, err
 	}
 	finalPs, err := FindTargetPlugins(ctx, enabledPlugins)
 	if err != nil {
-		return err
+		return events, err
 	}
 	for _, id := range imageIDs {
 		image, err := veinmindRuntime.OpenImageByID(id)
@@ -61,7 +69,7 @@ func ScanLocalImage(ctx context.Context, imageName string,
 			log.Error(err)
 		}
 	}
-	return nil
+	return runnerReporter.GetEvents()
 }
 
 func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
@@ -82,4 +90,16 @@ func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
 		return next(ctx, reg.Bind())
 	}))
 	return cmd.ScanImage(ctx, rang, image, opts...)
+}
+
+func startReportService(ctx context.Context,
+	runnerReporter *reporter.Reporter, reportService *report.ReportService) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case evt := <-reportService.EventChannel:
+			runnerReporter.EventChannel <- evt
+		}
+	}
 }

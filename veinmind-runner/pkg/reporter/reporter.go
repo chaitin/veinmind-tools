@@ -71,6 +71,25 @@ func (r *Reporter) Write(writer io.Writer) error {
 	return err
 }
 
+func WriteEvents2Log(events []ReportEvent, writer io.Writer) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	eventsBytes, err := json.MarshalIndent(events, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(eventsBytes)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write([]byte("\n"))
+	return err
+}
+
 func (r *Reporter) GetEvents() ([]ReportEvent, error) {
 	return r.events, nil
 }

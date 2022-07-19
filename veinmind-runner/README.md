@@ -154,4 +154,11 @@ plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
 risk_level_filter = ["High"]
 block = true
 alert = true
+[[policies]]
+action = "image_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
 ```
