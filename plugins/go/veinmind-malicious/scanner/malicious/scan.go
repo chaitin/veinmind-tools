@@ -24,7 +24,12 @@ import (
 	"time"
 )
 
-func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusService) (scanReport model.ReportImage, err error) {
+type AntiVirusEngine struct {
+	ClamavHost string
+	ClamavPort string
+}
+
+func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusEngine) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
@@ -32,6 +37,7 @@ func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusService) (scanRep
 		return scanReport, nil
 	}
 
+	clamav.Setup(antiVirusServer.ClamavHost, antiVirusServer.ClamavPort)
 	refs, err := image.RepoRefs()
 	var imageRef string
 	if err == nil && len(refs) > 0 {
@@ -123,8 +129,8 @@ func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusService) (scanRep
 					results := []av.ScanResult{}
 
 					// 使用 ClamAV 进行扫描
-					if antiVirusServer.ClamavAgent.Active() {
-						results, err = antiVirusServer.ClamavAgent.ScanStream(f)
+					if clamav.Active() {
+						results, err = clamav.ScanStream(f)
 						if err != nil {
 							if _, ok := err.(*net.OpError); ok {
 								log.Error(err)
@@ -231,9 +237,4 @@ func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusService) (scanRep
 	}
 
 	return scanReport, nil
-}
-
-//AntiVirus struct
-type AntiVirusService struct {
-	ClamavAgent clamav.ClamavAddress
 }
