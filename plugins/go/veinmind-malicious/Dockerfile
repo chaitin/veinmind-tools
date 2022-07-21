@@ -10,8 +10,7 @@ ENV CI_GOOS $CI_GOOS
 ARG CI_GOARCH
 ENV CI_GOARCH $CI_GOARCH
 WORKDIR /tool
-COPY dockerfiles/clamd.sh .
 ADD veinmind-malicious_${CI_GOOS}_${CI_GOARCH} .
-RUN echo "#!/bin/bash\n\n./veinmind-malicious_${CI_GOOS}_${CI_GOARCH} --clamav-manually-start=false --clamav-host=127.0.0.1 --clamav-port=3310\$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
+RUN echo "#!/bin/bash\n\n./veinmind-malicious_${CI_GOOS}_${CI_GOARCH} --clamav-automaticly-start --clamav-host=127.0.0.1 --clamav-port=3310\$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
 ENTRYPOINT ["/tool/entrypoint.sh"]
 

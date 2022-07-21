@@ -11,6 +11,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
+	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/registry"
 	commonRuntime "github.com/chaitin/veinmind-common-go/runtime"
 	"github.com/chaitin/veinmind-common-go/service/report"
@@ -33,6 +34,7 @@ var (
 	ctx                   context.Context
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
+	pluginFlags           = []string{"veinmind-malicious.clamav-automaticly-start"}
 	parallelContainerMode = container.InContainer()
 	scanPreRunE           = func(c *cobra.Command, args []string) error {
 		// create resource directory if not exist
@@ -413,7 +415,6 @@ func scan(c *cmd.Command, image api.Image) error {
 	if err != nil {
 		t = 5
 	}
-
 	log.Infof("Scan image: %#v\n", ref)
 	if err := cmd.ScanImage(ctx, ps, image,
 		plugin.WithExecInterceptor(func(
@@ -430,7 +431,7 @@ func scan(c *cmd.Command, image api.Image) error {
 
 			// Next Plugin
 			return next(ctx, reg.Bind())
-		}), plugin.WithExecParallelism(t)); err != nil {
+		}), plugin.WithExecParallelism(t), specflags.WithSpecFlags(pluginFlags)); err != nil {
 		return err
 	}
 	return nil

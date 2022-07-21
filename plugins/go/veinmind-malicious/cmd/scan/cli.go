@@ -28,6 +28,7 @@ var reportData = model.ReportData{}
 var reportLock sync.Mutex
 var scanStart = time.Now()
 var clamavPID = 0
+var clamavAutoStart bool
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
@@ -42,10 +43,6 @@ var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		clamavManualStart, err := cmd.Flags().GetBool("clamav-manually-start")
-		if err != nil {
-			log.Error(err)
-		}
 		clamavConf, err := cmd.Flags().GetString("clamav-conf")
 		if err != nil {
 			log.Error(err)
@@ -56,7 +53,7 @@ var scanCmd = &cmd.Command{
 		}
 		clamavPort, err := cmd.Flags().GetString("clamav-port")
 		if err != nil {
-			log.Error(err.Error())
+			log.Error(err)
 		}
 		clamavHost, err := cmd.Flags().GetString("clamav-host")
 		if err != nil {
@@ -64,7 +61,7 @@ var scanCmd = &cmd.Command{
 		}
 
 		// the flag of Manual run the clamAV
-		if !clamavManualStart {
+		if clamavAutoStart {
 			err = avutil.ClamAVPreCheck(clamavHost, clamavPort)
 			if err != nil {
 				log.Error(err)
@@ -209,7 +206,7 @@ func init() {
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")
 	scanCmd.Flags().StringP("name", "n", "report", "report name for scan report")
 	scanCmd.Flags().StringP("output", "o", ".", "output path for report")
-	scanCmd.Flags().BoolP("clamav-manually-start", "", true, "whether need to manually start clamAV")
+	scanCmd.Flags().BoolVarP(&clamavAutoStart, "clamav-automaticly-start", "", false, "whether need to automatically start clamAV")
 	scanCmd.Flags().StringP("clamav-host", "", "127.0.0.1", "host of ClamAV")
 	scanCmd.Flags().StringP("clamav-port", "", "3310", "port of ClamAV")
 	scanCmd.Flags().StringP("clamav-exec", "", "/usr/sbin/clamd", "execution file path of ClamAV")
