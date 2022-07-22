@@ -60,6 +60,9 @@ const (
 
 	// NT-Hash (actually MD4)
 	NTHash
+	
+	//yescrypto
+	YESCRYPTO
 )
 
 // Password represents the data field inside.
@@ -99,6 +102,14 @@ func ParsePassword(pass *Password, phrase string) error {
 
 	// Split the string into multiple portions.
 	s := strings.Split(phrase, "$")
+	// currently many released Linux have used defalut encrypto $y$
+	// store formate is:
+	// $method$param$salt$hash => ["", method, param, salt, hash]
+	if strings.HasPrefix(phrase, "$y$") {
+		pass.Method = YESCRYPTO
+		pass.Hash = phrase
+		return nil
+	}
 	if len(s) != 4 {
 		// $method$salt$hash => ["", method, salt, hash]
 		return ErrMalformed
@@ -139,6 +150,16 @@ func ParsePassword(pass *Password, phrase string) error {
 	return nil
 }
 
+// prepare for $y$
+func yescryptoMatch(key, hash string) bool {
+	ckey := C.CString(key)
+	chash := C.CString(hash)
+	out := C.crypt(ckey, chash)
+	C.free(unsafe.Pointer(ckey))
+	C.free(unsafe.Pointer(chash))
+	return C.GoString(out) == hash
+}
+
 // Match tests whether one of your guesses matches one of the given
 // password. It can only be used for weak password detection purpose.
 func (pw *Password) Match(guesses []string) (string, bool) {
@@ -146,7 +167,14 @@ func (pw *Password) Match(guesses []string) (string, bool) {
 	if pw.Method == Shadowed || pw.Method == Locked {
 		return "", false
 	}
-
+	if pw.Method == YESCRYPTO {
+		for _, guess := range guesses {
+			if yescryptoMatch(guess, pw.Hash) {
+				return guess, true
+			}
+		}
+		return "", false
+	}
 	// Match only empty guesses. (Though we should only guess
 	// password with empty key checking.
 	if pw.Method == NoPassword {
