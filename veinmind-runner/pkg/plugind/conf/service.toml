@@ -1,0 +1,15 @@
+[[Plugin]]
+Name = "veinmind-malicious"
+
+[[Plugin.Service]]
+Name = "clamd"
+ExecNeed = true                       # 是否激活服务
+ExecScript = "/root/Primer/init.d/clamav-daemon" # 服务启动脚本
+ExecStop = true                       # 是否关闭
+
+
+[[Plugin.Service]]
+Name = "freshclam"
+ExecNeed = true                       # 是否激活服务
+ExecScript = "/root/Primer/init.d/clamav-freshclam" # 服务启动脚本
+ExecStop = true
