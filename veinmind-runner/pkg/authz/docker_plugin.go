@@ -1,11 +1,12 @@
 package authz
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/route"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
@@ -13,8 +14,6 @@ import (
 	"github.com/docker/docker/pkg/plugins"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"io"
-	"os"
 )
 
 type dockerPluginServer struct {
@@ -110,37 +109,23 @@ func (s *dockerPluginServer) handleAuthZReq(req *authorization.Request) *authori
 		return s.allowAuthResp()
 	}
 	policy := val.(Policy)
-
-	reportService := report.NewReportService()
-	runnerReporter, _ := reporter.NewReporter()
-	ctx, cancel := context.WithCancel(context.Background())
-	go runnerReporter.Listen()
-	go startReportService(ctx, runnerReporter, reportService)
-
-	reportClose := func() {
-		cancel()
-		runnerReporter.StopListen()
-	}
-
 	var (
+		eventListCh <-chan []reporter.ReportEvent
 		result      bool
 		err         error
-		eventListCh <-chan []reporter.ReportEvent
 	)
 	switch dockerPluginAction {
 	case action.ContainerCreate:
-		eventListCh, result, err = handleContainerCreate(policy, req, runnerReporter, reportService)
+		eventListCh, result, err = handleContainerCreate(policy, req)
 	case action.ImageCreate:
-		eventListCh, result, err = handleImageCreate(policy, req, runnerReporter, reportService)
+		eventListCh, result, err = handleImageCreate(policy, req)
 	case action.ImagePush:
-		eventListCh, result, err = handleImagePush(policy, req, runnerReporter, reportService)
+		eventListCh, result, err = handleImagePush(policy, req)
 	default:
 		eventListCh, result, err = handleDefaultAction()
 	}
-
 	go func() {
-		defer reportClose()
-		handleReportEvents(eventListCh, policy, s.option.pluginLog, runnerReporter)
+		handleReportEvents(eventListCh, policy, s.option.pluginLog)
 	}()
 
 	if err != nil {

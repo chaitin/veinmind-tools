@@ -2,13 +2,14 @@ package authz
 
 import (
 	"errors"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"io"
 	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
 type ServerOption func(option *serverOption) error

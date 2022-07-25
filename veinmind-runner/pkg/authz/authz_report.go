@@ -1,12 +1,12 @@
 package authz
 
 import (
-	"context"
 	"fmt"
+	"io"
+
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
-	"io"
 )
 
 func toLevelStr(level report.Level) string {
@@ -24,25 +24,12 @@ func toLevelStr(level report.Level) string {
 	return "None"
 }
 
-func startReportService(ctx context.Context,
-	runnerReporter *reporter.Reporter, reportService *report.ReportService) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case evt := <-reportService.EventChannel:
-			runnerReporter.EventChannel <- evt
-		}
-	}
-}
-
 func handleReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Policy,
-	pluginLog io.Writer, runnerReporter *reporter.Reporter) {
+	pluginLog io.Writer) {
 	riskLevelFilter := make(map[string]struct{})
 	for _, level := range policy.RiskLevelFilter {
 		riskLevelFilter[level] = struct{}{}
 	}
-
 	select {
 	case events := <-eventListCh:
 		filter := true
@@ -60,7 +47,7 @@ func handleReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Policy
 			}
 		}
 
-		if err := runnerReporter.Write(pluginLog); err != nil {
+		if err := reporter.WriteEvents2Log(events, pluginLog); err != nil {
 			log.Warn(err)
 		}
 	}
