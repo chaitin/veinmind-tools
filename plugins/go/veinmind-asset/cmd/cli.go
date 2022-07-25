@@ -17,6 +17,7 @@ import (
 var results = []model.ScanImageResult{}
 var scanStart = time.Now()
 var rootCmd = &cmd.Command{}
+var defaultArch = "noarch"
 
 var scanCmd = &cmd.Command{
 	Use:   "scan",
@@ -65,8 +66,6 @@ func scan(c *cmd.Command, image api.Image) error {
 		return err
 	}
 
-	results = append(results, res)
-
 	assetDetail := &report.AssetDetail{
 		OS: report.AssetOSDetail{
 			Family: res.ImageOSInfo.Family,
@@ -78,13 +77,17 @@ func scan(c *cmd.Command, image api.Image) error {
 			assetPackageDetails := []report.AssetPackageDetail{}
 
 			for _, pkgInfo := range res.PackageInfos {
-				for _, pkg := range pkgInfo.Packages {
+				for i, pkg := range pkgInfo.Packages {
+					// temp arch format
+					if pkg.Arch == "" || pkg.Arch == "None" {
+						pkgInfo.Packages[i].Arch = defaultArch
+					}
 					assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
 						Name:       pkg.Name,
 						Version:    pkg.Version,
 						Release:    pkg.Release,
 						Epoch:      pkg.Epoch,
-						Arch:       pkg.Arch,
+						Arch:       pkgInfo.Packages[i].Arch,
 						SrcName:    pkg.SrcName,
 						SrcEpoch:   pkg.SrcEpoch,
 						SrcRelease: pkg.SrcRelease,
@@ -105,13 +108,17 @@ func scan(c *cmd.Command, image api.Image) error {
 			assetPackageDetails := []report.AssetPackageDetail{}
 
 			for _, app := range res.Applications {
-				for _, pkg := range app.Libraries {
+				for i, pkg := range app.Libraries {
+					// temp arch format
+					if pkg.Arch == "" || pkg.Arch == "None" {
+						app.Libraries[i].Arch = defaultArch
+					}
 					assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
 						Name:       pkg.Name,
 						Version:    pkg.Version,
 						Release:    pkg.Release,
 						Epoch:      pkg.Epoch,
-						Arch:       pkg.Arch,
+						Arch:       app.Libraries[i].Arch,
 						SrcName:    pkg.SrcName,
 						SrcEpoch:   pkg.SrcEpoch,
 						SrcRelease: pkg.SrcRelease,
@@ -129,6 +136,8 @@ func scan(c *cmd.Command, image api.Image) error {
 			return assetApplicationDetailsList
 		}(),
 	}
+	// first format, then add
+	results = append(results, res)
 
 	reportEvent := report.ReportEvent{
 		ID:         image.ID(),
