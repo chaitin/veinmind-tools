@@ -1,0 +1,18 @@
+[[PluginConf]]
+Name = "veinmind-malicious"
+
+[[PluginConf.ServiceConf]]
+Name = "clamd"
+ExecScript = "/usr/sbin/clamd" # 服务启动脚本
+ExecArgs = "--config-file=/etc/clamav/clamd.conf -F"                       # 启动参数
+StdoutLog = "clamerr.log"
+StderrLog = "clamout.log"
+Port = "3311"
+
+[[PluginConf.ServiceConf]]
+Name = "test"
+ExecScript = "nc" # 服务启动脚本
+ExecArgs = "-lvp 4444"                       # 启动参数
+StdoutLog = "ncout.log"
+StderrLog = "ncerr.log"
+Port = ""
