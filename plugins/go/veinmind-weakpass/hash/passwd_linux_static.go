@@ -60,7 +60,7 @@ const (
 
 	// NT-Hash (actually MD4)
 	NTHash
-	
+
 	//yescrypto
 	YESCRYPTO
 )
@@ -151,7 +151,7 @@ func ParsePassword(pass *Password, phrase string) error {
 }
 
 // prepare for $y$
-func yescryptoMatch(key, hash string) bool {
+func (pw *Password) matchYescrypto(key, hash string) bool {
 	ckey := C.CString(key)
 	chash := C.CString(hash)
 	out := C.crypt(ckey, chash)
@@ -169,7 +169,7 @@ func (pw *Password) Match(guesses []string) (string, bool) {
 	}
 	if pw.Method == YESCRYPTO {
 		for _, guess := range guesses {
-			if yescryptoMatch(guess, pw.Hash) {
+			if pw.matchYescrypto(guess, pw.Hash) {
 				return guess, true
 			}
 		}
