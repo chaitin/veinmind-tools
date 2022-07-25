@@ -1,127 +1,133 @@
 package plugind
 
 import (
+	"context"
 	"errors"
-	"github.com/BurntSushi/toml"
-	"log"
+	"fmt"
+	"net"
+	"os"
 	"os/exec"
+	"os/signal"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
 )
 
-type PluginService struct {
-	Plugins []Plugin `toml:"Plugin"`
+type ServiceRunner struct {
+	ExecScript string
+	ExecArgs   []string
+	Stderr     *os.File
+	Stdout     *os.File
+	Port       string
+	stop       func()
+	Process    *os.Process
+	Mut        sync.Mutex
+	TimeOut    int
 }
 
-type Plugin struct {
-	Name     string    `toml:"Name"`
-	Services []Service `toml:"Service"`
-}
-
-type Service struct {
-	Name       string `toml:"Name"`
-	ExecScript string `toml:"ExecScript"`
-	ExecNeed   bool   `toml:"ExecNeed"`
-	ExecStop   bool   `toml:"ExecStop"`
-}
-
-var servicePath = "./conf/service.toml"
-
-var plugind = func() PluginService {
-	var pluginServices PluginService
-	_, err := toml.DecodeFile(servicePath, &pluginServices)
+func NewService(s ServiceConf) (*ServiceRunner, error) {
+	StderrFile, err := os.OpenFile(s.StderrLog, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
-	return pluginServices
-}()
-
-func Run(s Service, action string) error {
-	_, err := exec.Command(s.ExecScript, action).Output() //nolint:gosec
+	StdoutFile, err := os.OpenFile(s.StdoutLog, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	return &ServiceRunner{
+		ExecScript: s.ExecScript,
+		ExecArgs:   strings.Split(s.ExecArgs, " "),
+		Stdout:     StdoutFile,
+		Stderr:     StderrFile,
+		Port:       s.Port,
+		TimeOut:    10,
+	}, nil
+}
+
+func (s *ServiceRunner) Run(ctx context.Context) {
+	ctx, s.stop = context.WithCancel(ctx)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-s.loop(ctx):
+			}
+		}
+	}()
+}
+
+func (s *ServiceRunner) loop(ctx context.Context) <-chan error {
+	errs := make(chan error)
+	sig := make(chan os.Signal, 1)
+	go func() {
+		signal.Notify(sig)
+		signal.Notify(sig, syscall.SIGCHLD)
+		cmd := exec.Command(s.ExecScript, s.ExecArgs...) //nolint:gosec
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		cmd.Stderr = s.Stderr
+		cmd.Stdout = s.Stdout
+		err := cmd.Start()
+		if err != nil {
+			errs <- fmt.Errorf("panic with error %v", err)
+		}
+		s.Mut.Lock()
+		s.TimeOut = 10
+		s.Process = cmd.Process
+		s.Mut.Unlock()
+		err = cmd.Wait()
+		if err != nil {
+			errs <- fmt.Errorf("panic with error %v", err)
+		}
+		sigInfo := <-sig
+		errs <- errors.New(sigInfo.String())
+	}()
+	return errs
+}
+
+func (s *ServiceRunner) Stop() error {
+	if s.stop != nil {
+		s.stop()
+		if s.Process != nil {
+			err := s.Process.Kill()
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
 
-func StartService(s Service) error {
-	if s.ExecNeed {
-		return Run(s, "start")
+func (s *ServiceRunner) Ready() error {
+	if s.Port != "" {
+		for {
+			if s.TimeOut <= 0 {
+				return errors.New("time out")
+			}
+			if s.CheckPort() {
+				return nil
+			} else {
+				s.Mut.Lock()
+				s.TimeOut = s.TimeOut - 1
+				s.Mut.Unlock()
+			}
+			time.Sleep(time.Duration(s.TimeOut) * time.Second)
+		}
 	}
 	return nil
 }
 
-func StopService(s Service) error {
-	if s.ExecStop {
-		return Run(s, "stop")
-	}
-	return nil
-}
-
-func StatusService(s Service) bool {
-	if err := Run(s, "status"); err != nil {
+func (s *ServiceRunner) CheckPort() bool {
+	if s.Port != "" {
+		timeout, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", s.Port), 3*time.Second)
+		if err != nil {
+			return false
+		}
+		if timeout != nil {
+			return true
+		}
 		return false
 	}
 	return true
-}
-
-func StartServices(s []Service) error {
-	for _, service := range s {
-		if !StatusService(service) {
-			err := StartService(service)
-			if err != nil {
-				return errors.New("Start " + service.Name + " error: " + err.Error())
-			}
-		}
-	}
-	return nil
-}
-
-func StopServices(s []Service) error {
-	for _, service := range s {
-		if StatusService(service) {
-			err := StopService(service)
-			if err != nil {
-				return errors.New("Stop " + service.Name + " error: " + err.Error())
-			}
-		}
-	}
-	return nil
-}
-
-func StatusServices(s []Service) bool {
-	var isAllWorking = true
-	for _, service := range s {
-		isAllWorking = isAllWorking && StatusService(service)
-	}
-	return isAllWorking
-}
-
-func StartPluginsService() error {
-	for _, plugin := range plugind.Plugins {
-		return StartServices(plugin.Services)
-	}
-	return nil
-}
-
-func StopPluginsService() error {
-	for _, plugin := range plugind.Plugins {
-		return StopServices(plugin.Services)
-	}
-	return nil
-}
-
-func StatusPluginsServices(pluginName string) bool {
-	for _, plugin := range plugind.Plugins {
-		if plugin.Name == pluginName {
-			return StatusServices(plugin.Services)
-		}
-	}
-	return false
-}
-
-func StatusAllPluginsService() bool {
-	workingFlag := true
-	for _, plugin := range plugind.Plugins {
-		workingFlag = workingFlag && StatusServices(plugin.Services)
-	}
-	return workingFlag
 }

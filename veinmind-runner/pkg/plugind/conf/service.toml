@@ -1,15 +1,9 @@
-[[Plugin]]
+[[ServiceConf]]
 Name = "veinmind-malicious"
 
-[[Plugin.Service]]
-Name = "clamd"
-ExecNeed = true                       # 是否激活服务
-ExecScript = "/root/Primer/init.d/clamav-daemon" # 服务启动脚本
-ExecStop = true                       # 是否关闭
-
-
-[[Plugin.Service]]
-Name = "freshclam"
-ExecNeed = true                       # 是否激活服务
-ExecScript = "/root/Primer/init.d/clamav-freshclam" # 服务启动脚本
-ExecStop = true
+[[ServiceConf.ServiceConf]]
+Name = "clamd" # 是否激活服务
+ExecScript = "/usr/sbin/clamd" # 服务启动脚本
+ExecArgs = "-F --config-file=/etc/clamav/clamd.conf"                       # 启动参数
+StdoutLog = "clamerr.log"
+StderrLog = "clamout.log"
