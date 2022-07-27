@@ -32,8 +32,10 @@ veinmind-backdoor 是由长亭科技自研的一款镜像后门扫描工具
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
-然后安装`veinmind-backdoor`所需要的`python`依赖
+然后安装`veinmind-backdoor`所需要的`python`依赖，在项目目录执行命令
 ```
+cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
+cd ./plugins/python/veinmind-backdoor
 pip install -r requirements.txt
 ```
 

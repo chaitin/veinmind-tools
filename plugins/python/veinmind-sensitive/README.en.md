@@ -22,11 +22,16 @@ veinmind-sensitive is an image sensitive information scanning tool developed by 
 ### install by package manager
 
 1. install `libveinmind`  firstlly ，you can click here [offical document](https://github.com/chaitin/libveinmind) for more info
-2. install python dependencies which `veinmind-sensitive` need
-```
-    pip install -r requirements.txt
-```
-### install by parallel container 
+
+2. install python dependencies which `veinmind-sensitive` need，execute the command in the project directory
+
+   ```
+   cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
+   cd ./plugins/python/veinmind-sensitive
+   pip install -r requirements.txt
+   ```
+### install by parallel container
+
 1. Install by Parallel Container，pull `veinmind-sensitive` iamge  and start
     ```
     docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive

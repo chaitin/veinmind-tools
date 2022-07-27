@@ -23,8 +23,10 @@ veinmind-history is an image anomaly history command scanning tool developed by 
 
 1. install `libveinmind`  firstlly ，you can click here [offical document](https://github.com/chaitin/libveinmind) for more info
 
-2. install python dependencies which `veinmind-history` need
+2. install python dependencies which `veinmind-history` need，execute the command in the project directory
     ```
+    cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
+    cd ./plugins/python/veinmind-history
     pip install -r requirements.txt
     ```
 
