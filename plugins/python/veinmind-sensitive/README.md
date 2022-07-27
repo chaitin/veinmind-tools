@@ -23,8 +23,10 @@ veinmind-sensitive 是由长亭科技自研的一款镜像敏感信息扫描工�
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
 
-然后安装`veinmind-sensitive`所需要的`python`依赖
+然后安装`veinmind-sensitive`所需要的`python`依赖，在项目目录执行命令
 ```
+cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
+cd ./plugins/python/veinmind-sensitive
 pip install -r requirements.txt
 ```
 
