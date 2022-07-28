@@ -177,10 +177,13 @@ var webhookCmd = &cmd.Command{
 		}
 
 		options := []authz.ServerOption{
-			authz.WithPolicy(config.Policies...),
+			authz.WithHarborPolicy(config.Policies...),
 			authz.WithAuthLog(config.Log.AuthZLogPath),
 			authz.WithPluginLog(config.Log.PluginLogPath),
 			authz.WithPort(config.Port.Port),
+			authz.WithPassword(config.Password.Password),
+			authz.WithAuthInfo(config.DockerAuth),
+			authz.WithMailServer(config.MailConf),
 		}
 
 		server := authz.NewHarborWebhook(options...)
@@ -253,7 +256,7 @@ var scanRegistryCmd = &cmd.Command{
 			if config == "" {
 				c, err = commonRuntime.NewDockerClient()
 			} else {
-				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuth(config))
+				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuthFromPath(config))
 			}
 			if err != nil {
 				return err

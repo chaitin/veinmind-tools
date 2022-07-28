@@ -24,6 +24,11 @@ type Policy struct {
 	Alert           bool     `toml:"alert"`
 }
 
+type HarborPolicy struct {
+	Policy
+	SendMail bool `toml:"send_mail"`
+}
+
 type Log struct {
 	AuthZLogPath  string `toml:"auth_log_path"`
 	PluginLogPath string `toml:"plugin_log_path"`
@@ -35,6 +40,16 @@ type Listener struct {
 type Port struct {
 	Port string `toml:"port"`
 }
+type Password struct {
+	Password string `toml:"webhook_password"`
+}
+type MailConf struct {
+	Host     string   `toml:"host"`
+	Port     int      `toml:"port"`
+	Name     string   `toml:"username"`
+	Password string   `toml:"password"`
+	SendTo   []string `toml:"send_to"`
+}
 type DockerPluginConfig struct {
 	Log        Log       `toml:"log"`
 	Listener   Listener  `toml:"listener"`
@@ -42,10 +57,12 @@ type DockerPluginConfig struct {
 	Policies   []Policy  `toml:"policies"`
 }
 type HarborWebhookConfig struct {
-	Log        Log       `toml:"log"`
-	Port       Port      `toml:"port"`
-	DockerAuth auth.Auth `toml:"docker_auth"`
-	Policies   []Policy  `toml:"policies"`
+	Log        Log            `toml:"log"`
+	Port       Port           `toml:"port"`
+	DockerAuth auth.Auth      `toml:"docker_auth"`
+	Policies   []HarborPolicy `toml:"policies"`
+	Password   Password       `toml:"password"`
+	MailConf   MailConf       `toml:"mail_conf"`
 }
 
 func NewDockerPluginConfig(paths ...string) (*DockerPluginConfig, error) {

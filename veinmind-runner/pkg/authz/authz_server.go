@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/chaitin/veinmind-common-go/pkg/auth"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
@@ -20,8 +21,29 @@ type serverOption struct {
 	policies  sync.Map
 	listener  net.Listener
 	port      string
+	password  string
+	authInfo  auth.Auth
+	mailConf  MailConf
 }
 
+func WithMailServer(mailconf MailConf) ServerOption {
+	return func(option *serverOption) error {
+		option.mailConf = mailconf
+		return nil
+	}
+}
+func WithAuthInfo(auth auth.Auth) ServerOption {
+	return func(option *serverOption) error {
+		option.authInfo = auth
+		return nil
+	}
+}
+func WithPassword(password string) ServerOption {
+	return func(option *serverOption) error {
+		option.password = password
+		return nil
+	}
+}
 func WithPort(port string) ServerOption {
 	return func(option *serverOption) error {
 		option.port = port
@@ -35,6 +57,15 @@ func WithPolicy(policies ...Policy) ServerOption {
 			option.policies.Store(policy.Action, policy)
 		}
 
+		return nil
+	}
+}
+
+func WithHarborPolicy(policies ...HarborPolicy) ServerOption {
+	return func(option *serverOption) error {
+		for _, policy := range policies {
+			option.policies.Store(policy.Action, policy)
+		}
 		return nil
 	}
 }

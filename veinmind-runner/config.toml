@@ -1,0 +1,31 @@
+[log]
+plugin_log_path = "plugin.log"
+auth_log_path = "auth.log"
+
+[port]
+port = "8081"
+
+[webhook_password]
+password = "asdqwe123"
+
+[[policies]]
+action = "PUSH_ARTIFACT"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+send_mail = true
+
+[docker_auth]
+registry = "10.9.33.98"
+username = "admin"
+password = "asdqwe123"
+
+[mail_conf]
+host = "smtp.qq.com"
+port = 465
+username = "369212851@qq.com"
+password = "test"
+send_to = ["220205328@seu.edu.cn"]
+
