@@ -45,6 +45,20 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
+### 安装方式三
+基于`Kubernetes`环境，使用`Helm`安装`veinmind-runner`，定时执行扫描任务
+
+请先安装`Helm`， 安装方法可以参考[官方文档](https://helm.sh/zh/docs/intro/install/)
+
+安装`veinmind-runner`之前，可配置执行参数，可参考[文档](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.md)
+
+使用`Helm`安装 `veinmind-runner`
+
+```
+cd ./veinmind-runner/script/helm_chart/veinmind
+helm install veinmind .
+```
+
 ## 使用
 
 1.指定镜像名称或镜像 ID 并扫描 (需要本地存在对应的镜像)

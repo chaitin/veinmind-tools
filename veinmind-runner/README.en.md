@@ -45,6 +45,21 @@ or use the script provided by the project to start
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
+### Install by Helm
+
+based on `Kubernetes` environment, use `Helm` to install `veinmind-runner`，run scan tasks regularly
+
+Please install `Helm` first, the installation method can refer to the [official document](https://helm.sh/zh/docs/intro/install/)
+
+Before installing `veinmind-runner`, please configure the running parameters, please refer to the [document](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.en.md)
+
+Install `veinmind-runner` with `Helm`
+
+```
+cd ./veinmind-runner/script/helm_chart/veinmind
+helm install veinmind .
+```
+
 ## Usage
 
 1.specify the image name or image ID and scan (need to have a corresponding image locally)
