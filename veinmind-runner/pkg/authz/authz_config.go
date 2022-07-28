@@ -12,6 +12,7 @@ const (
 	defaultPluginPath     = "plugin.log"
 	defaultAuthLogPath    = "auth.log"
 	defaultSockListenAddr = "/run/docker/plugins/veinmind-broker.sock"
+	defaultPort           = "8080"
 )
 
 type Policy struct {
@@ -23,6 +24,11 @@ type Policy struct {
 	Alert           bool     `toml:"alert"`
 }
 
+type HarborPolicy struct {
+	Policy
+	SendMail bool `toml:"send_mail"`
+}
+
 type Log struct {
 	AuthZLogPath  string `toml:"auth_log_path"`
 	PluginLogPath string `toml:"plugin_log_path"`
@@ -31,12 +37,32 @@ type Log struct {
 type Listener struct {
 	ListenAddr string `toml:"listener_addr"`
 }
-
+type Port struct {
+	Port string `toml:"port"`
+}
+type Password struct {
+	Password string `toml:"webhook_password"`
+}
+type MailConf struct {
+	Host     string   `toml:"host"`
+	Port     int      `toml:"port"`
+	Name     string   `toml:"username"`
+	Password string   `toml:"password"`
+	SendTo   []string `toml:"send_to"`
+}
 type DockerPluginConfig struct {
 	Log        Log       `toml:"log"`
 	Listener   Listener  `toml:"listener"`
 	DockerAuth auth.Auth `toml:"docker_auth"`
 	Policies   []Policy  `toml:"policies"`
+}
+type HarborWebhookConfig struct {
+	Log        Log            `toml:"log"`
+	Port       Port           `toml:"port"`
+	DockerAuth auth.Auth      `toml:"docker_auth"`
+	Policies   []HarborPolicy `toml:"policies"`
+	Password   Password       `toml:"password"`
+	MailConf   MailConf       `toml:"mail_conf"`
 }
 
 func NewDockerPluginConfig(paths ...string) (*DockerPluginConfig, error) {
@@ -50,6 +76,24 @@ func NewDockerPluginConfig(paths ...string) (*DockerPluginConfig, error) {
 	}
 
 	result := &DockerPluginConfig{}
+	_, err := toml.DecodeFile(path, result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+func NewHarborWebhookConfig(paths ...string) (*HarborWebhookConfig, error) {
+	if len(paths) < 1 {
+		return nil, errors.New("config path can't be empty")
+	}
+
+	path := defaultConfigPath
+	if paths[0] != "" {
+		path = paths[0]
+	}
+
+	result := &HarborWebhookConfig{}
 	_, err := toml.DecodeFile(path, result)
 	if err != nil {
 		return nil, err

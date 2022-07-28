@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/chaitin/veinmind-common-go/pkg/auth"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
@@ -19,6 +20,35 @@ type serverOption struct {
 	pluginLog io.WriteCloser
 	policies  sync.Map
 	listener  net.Listener
+	port      string
+	password  string
+	authInfo  auth.Auth
+	mailConf  MailConf
+}
+
+func WithMailServer(mailconf MailConf) ServerOption {
+	return func(option *serverOption) error {
+		option.mailConf = mailconf
+		return nil
+	}
+}
+func WithAuthInfo(auth auth.Auth) ServerOption {
+	return func(option *serverOption) error {
+		option.authInfo = auth
+		return nil
+	}
+}
+func WithPassword(password string) ServerOption {
+	return func(option *serverOption) error {
+		option.password = password
+		return nil
+	}
+}
+func WithPort(port string) ServerOption {
+	return func(option *serverOption) error {
+		option.port = port
+		return nil
+	}
 }
 
 func WithPolicy(policies ...Policy) ServerOption {
@@ -27,6 +57,15 @@ func WithPolicy(policies ...Policy) ServerOption {
 			option.policies.Store(policy.Action, policy)
 		}
 
+		return nil
+	}
+}
+
+func WithHarborPolicy(policies ...HarborPolicy) ServerOption {
+	return func(option *serverOption) error {
+		for _, policy := range policies {
+			option.policies.Store(policy.Action, policy)
+		}
 		return nil
 	}
 }
@@ -138,6 +177,8 @@ func (s *defaultServer) init() error {
 	switch srv := s.server.(type) {
 	case *dockerPluginServer:
 		result = srv.option
+	case *harborWebhookServer:
+		result = srv.option
 	default:
 		return errors.New("not support the server")
 	}
@@ -152,9 +193,17 @@ func (s *defaultServer) init() error {
 	if result.pluginLog == nil {
 		defaultOptions = append(defaultOptions, WithPluginLog(defaultPluginPath))
 	}
-	if result.listener == nil {
-		defaultOptions = append(defaultOptions, WithListenerUnix(defaultSockListenAddr))
+	switch s.server.(type) {
+	case *dockerPluginServer:
+		if result.listener == nil {
+			defaultOptions = append(defaultOptions, WithListenerUnix(defaultSockListenAddr))
+		}
+	case *harborWebhookServer:
+		if result.port == "" {
+			defaultOptions = append(defaultOptions, WithPort(defaultPort))
+		}
 	}
+
 	if err := WithServerOptions(defaultOptions...)(result); err != nil {
 		return err
 	}

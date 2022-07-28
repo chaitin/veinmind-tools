@@ -4,7 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/chaitin/libveinmind/go"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
@@ -19,10 +24,6 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -160,6 +161,35 @@ var authCmd = &cmd.Command{
 		return server.Run()
 	},
 }
+
+var webhookCmd = &cmd.Command{
+	Use:   "webhook",
+	Short: "webhook for harbor",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		path, err := cmd.Flags().GetString("config")
+		if err != nil {
+			return err
+		}
+
+		config, err := authz.NewHarborWebhookConfig(path)
+		if err != nil {
+			return err
+		}
+
+		options := []authz.ServerOption{
+			authz.WithHarborPolicy(config.Policies...),
+			authz.WithAuthLog(config.Log.AuthZLogPath),
+			authz.WithPluginLog(config.Log.PluginLogPath),
+			authz.WithPort(config.Port.Port),
+			authz.WithPassword(config.Password.Password),
+			authz.WithAuthInfo(config.DockerAuth),
+			authz.WithMailServer(config.MailConf),
+		}
+
+		server := authz.NewHarborWebhook(options...)
+		return server.Run()
+	},
+}
 var listCmd = &cmd.Command{
 	Use:   "list",
 	Short: "list relevant information",
@@ -226,7 +256,7 @@ var scanRegistryCmd = &cmd.Command{
 			if config == "" {
 				c, err = commonRuntime.NewDockerClient()
 			} else {
-				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuth(config))
+				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuthFromPath(config))
 			}
 			if err != nil {
 				return err
@@ -467,6 +497,8 @@ func init() {
 	rootCmd.AddCommand(scanRegistryCmd)
 	rootCmd.AddCommand(authCmd)
 	authCmd.Flags().StringP("config", "c", "", "authz config path")
+	rootCmd.AddCommand(webhookCmd)
+	webhookCmd.Flags().StringP("config", "c", "", "webhook config path")
 	rootCmd.AddCommand(listCmd)
 	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 	listCmd.AddCommand(listPluginCmd)
