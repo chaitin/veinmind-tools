@@ -45,6 +45,20 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
+### 安装方式三
+基于`Kubernetes`环境，使用`Helm`安装`veinmind-runner`，定时执行扫描任务
+
+请先安装`Helm`，安装方法可以参考[官方文档](https://helm.sh/zh/docs/intro/install/)
+
+安装`veinmind-runner`之前，可配置执行参数，可参考[文档](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.md)
+
+使用`Helm`安装 `veinmind-runner`
+
+```
+cd ./veinmind-runner/script/helm_chart/veinmind
+helm install veinmind .
+```
+
 ## 使用
 
 1.指定镜像名称或镜像 ID 并扫描 (需要本地存在对应的镜像)
@@ -109,4 +123,56 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 ```
 ./veinmind-runner scan-host --containerd-root [your_path]
+```
+
+9.支持 docker 镜像阻断功能
+```bash
+# first
+./veinmind-runner authz -c config.toml 
+# second
+dockerd --authorization-plugin=veinmind-broker
+```
+其中`config.toml`,包含如下字段
+
+|  | **字段名**           | **字段属性** | **含义**  |
+|----------|-------------------|----------|---------|
+| policy   | action            | string   | 需要监控的行为 |
+|          | enabled_plugins   | []string | 使用哪些插件  |
+|          | plugin_params     | []string | 各个插件的参数 |
+|          | risk_level_filter | []string | 风险等级    |
+|          | block             | bool     | 是否阻断    |
+|          | alert             | bool     | 是否报警    |
+| log      | report_log_path   | string   | 插件扫描日志  |
+|          | authz_log_path    | string   | 阻断服务日志  |
+
+- action 原则上支持[DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/)所提供的操作接口
+- 如下的配置表示：当 `创建容器`或`推送镜像` 时，使用 `veinmind-weakpass` 插件扫描`ssh`服务，如果发现有弱密码存在，并且风险等级为 `High` 则阻止此操作，并发出警告。最终将扫描结果存放至`plugin.log`,将风险结果存放至`auth.log`。
+
+``` toml
+[log]
+plugin_log_path = "plugin.log"
+auth_log_path = "auth.log"
+[listener]
+listener_addr = "/run/docker/plugins/veinmind-broker.sock"
+[[policies]]
+action = "container_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_paramas = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_push"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
 ```

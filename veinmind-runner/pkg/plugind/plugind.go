@@ -3,105 +3,74 @@ package plugind
 import (
 	"context"
 	_ "embed"
-	"github.com/BurntSushi/toml"
+	"errors"
+
 	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
-type PluginServicesConf struct {
-	Plugins []PluginConf `toml:"PluginConf"`
-}
-type ServiceConf struct {
-	Name       string `toml:"Name"`
-	ExecScript string `toml:"ExecScript"`
-	ExecArgs   string `toml:"ExecArgs"`
-	StdoutLog  string `toml:"StdoutLog"`
-	StderrLog  string `toml:"StderrLog"`
-	Port       string `toml:"Port"`
-}
-
-type PluginConf struct {
-	Name     string        `toml:"Name"`
-	Services []ServiceConf `toml:"ServiceConf"`
-}
-
-//go:embed conf/service.toml
-var servicePath string
-
-type Plugin struct {
-	PluginName string
-	Service    []*ServiceRunner
-}
-
-type PluginsServices struct {
-	Plugins []Plugin
-}
-
-var plugind = func() PluginsServices {
-	var psConf PluginServicesConf
-	_, err := toml.Decode(servicePath, &psConf)
+// RunService start the Plugin's all Services runner
+func RunService(ctx context.Context, runners []*Runner) error {
+	err := startAllService(runners)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
-	var ps PluginsServices
-	for _, plugin := range psConf.Plugins {
-		plugin := initService(plugin)
-		if len(plugin.Service) != 0 {
-			ps.Plugins = append(ps.Plugins, plugin)
-		}
-	}
-	return ps
-}()
-
-func initService(p PluginConf) Plugin {
-	var services Plugin
-	services.PluginName = p.Name
-	for _, service := range p.Services {
-		s, err := NewService(service)
-		if err != nil {
-			log.Error("init error: ", service.Name, err)
-		} else {
-			services.Service = append(services.Service, s)
-		}
-	}
-	return services
+	daemon(ctx)
+	return nil
 }
 
-func Start() {
-	for _, pservice := range plugind.Plugins {
-		for _, runner := range pservice.Service {
-			if runner != nil {
-				runner.Run(context.Background())
-				err := runner.Ready()
+//daemon will create a coroutine user to monitor
+//whether the already running service exits.
+//If it exits, it will be pulled up again.
+func daemon(ctx context.Context) {
+	go func() {
+		defer kill()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case v := <-Signal:
+				err := restart(v)
 				if err != nil {
 					log.Error(err)
+					return
 				}
 			}
 		}
-	}
+	}()
 }
 
-func Stop() error {
-	for _, service := range plugind.Plugins {
-		for _, runner := range service.Service {
-			if runner != nil && runner.stop != nil {
-				err := runner.Stop()
-				if err != nil {
-					return err
-				}
-			}
+// startAllService start all the runner
+func startAllService(runners []*Runner) error {
+	for _, runner := range runners {
+		RunnerMap.Store(runner.Uuid, runner)
+		err := runner.start()
+		if err != nil {
+			kill()
+			return err
 		}
 	}
 	return nil
 }
 
-func Work() (bool, error) {
-	for _, service := range plugind.Plugins {
-		for _, runner := range service.Service {
-			err := runner.Ready()
+// restart the process according to the Uuid of the process
+func restart(uuid string) error {
+	value, ok := RunnerMap.Load(uuid)
+	if ok {
+		return value.(*Runner).start()
+	}
+	return errors.New("can not find service")
+}
+
+// kill all surviving processes
+func kill() {
+	RunnerMap.Range(func(key, value any) bool {
+		if value.(*Runner).Cmd != nil {
+			err := value.(*Runner).Cmd.Process.Kill()
 			if err != nil {
-				return false, err
+				log.Error(err)
+				return false
 			}
 		}
-	}
-	return true, nil
+		return true
+	})
 }
