@@ -10,6 +10,7 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/pkg/avutil"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/scanner/malicious"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"
 	reportService "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
@@ -26,6 +27,7 @@ import (
 var reportData = model.ReportData{}
 var reportLock sync.Mutex
 var scanStart = time.Now()
+var clamavPID = 0
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
@@ -39,6 +41,43 @@ var extractCmd = &cmd.Command{
 var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		clamavManualStart, err := cmd.Flags().GetBool("clamav-manually-start")
+		if err != nil {
+			log.Error(err)
+		}
+		clamavConf, err := cmd.Flags().GetString("clamav-conf")
+		if err != nil {
+			log.Error(err)
+		}
+		clamavExec, err := cmd.Flags().GetString("clamav-exec")
+		if err != nil {
+			log.Error(err)
+		}
+		clamavPort, err := cmd.Flags().GetString("clamav-port")
+		if err != nil {
+			log.Error(err.Error())
+		}
+		clamavHost, err := cmd.Flags().GetString("clamav-host")
+		if err != nil {
+			log.Error(err)
+		}
+
+		// the flag of Manual run the clamAV
+		if !clamavManualStart {
+			err = avutil.ClamAVPreCheck(clamavHost, clamavPort)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+			log.Info("start clamAV ....")
+			clamavPID, err = avutil.StartClamAV(clamavPort, clamavExec, clamavConf)
+			if err != nil {
+				log.Error(err)
+			}
+		}
+	},
+
 	PostRun: func(cmd *cobra.Command, args []string) {
 		// 计算扫描数据
 		spend := time.Since(scanStart)
@@ -47,11 +86,23 @@ var scanCmd = &cmd.Command{
 		report.CalculateScanReportCount(&reportData)
 		report.SortScanReport(&reportData)
 
-		format, _ := cmd.Flags().GetString("format")
-		name, _ := cmd.Flags().GetString("name")
-		outputPath, _ := cmd.Flags().GetString("output")
+		format, err := cmd.Flags().GetString("format")
+		if err != nil {
+			log.Error(err)
+		}
+		name, err := cmd.Flags().GetString("name")
+		if err != nil {
+			log.Error(err)
+		}
+		outputPath, err := cmd.Flags().GetString("output")
+		if err != nil {
+			log.Error(err)
+		}
 		name = strings.Join([]string{name, format}, ".")
 		fpath := path.Join(outputPath, name)
+		if err != nil {
+			log.Error(err)
+		}
 
 		switch format {
 		case report.HTML:
@@ -61,11 +112,29 @@ var scanCmd = &cmd.Command{
 		case report.CSV:
 			report.OutputCSV(reportData, fpath)
 		}
+
+		if clamavPID != 0 {
+			log.Info("close clamAV ....")
+			err := avutil.CloseClamAV(clamavPID)
+			if err != nil {
+				log.Error(err)
+			}
+		}
 	},
 }
 
-func scan(_ *cmd.Command, image api.Image) error {
-	result, err := malicious.Scan(image)
+func scan(c *cmd.Command, image api.Image) error {
+	clamavHost, err := c.Flags().GetString("clamav-host")
+	if err != nil {
+		log.Error(err)
+	}
+	clamavPort, err := c.Flags().GetString("clamav-port")
+	if err != nil {
+		log.Error(err)
+	}
+
+	antiVirusAgent := malicious.AntiVirusEngine{ClamavHost: clamavHost, ClamavPort: clamavPort}
+	result, err := malicious.Scan(image, antiVirusAgent)
 	if err != nil {
 		log.Error(err)
 		return nil
@@ -126,7 +195,6 @@ func scan(_ *cmd.Command, image api.Image) error {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -141,6 +209,11 @@ func init() {
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")
 	scanCmd.Flags().StringP("name", "n", "report", "report name for scan report")
 	scanCmd.Flags().StringP("output", "o", ".", "output path for report")
+	scanCmd.Flags().BoolP("clamav-manually-start", "", true, "whether need to manually start clamAV")
+	scanCmd.Flags().StringP("clamav-host", "", "127.0.0.1", "host of ClamAV")
+	scanCmd.Flags().StringP("clamav-port", "", "3310", "port of ClamAV")
+	scanCmd.Flags().StringP("clamav-exec", "", "/usr/sbin/clamd", "execution file path of ClamAV")
+	scanCmd.Flags().StringP("clamav-conf", "", "/etc/clamav/clamd.conf", "config file path of ClamAV")
 }
 
 func main() {

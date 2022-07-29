@@ -8,14 +8,14 @@ import (
 	"debug/elf"
 	"encoding/hex"
 	veinmindcommon "github.com/chaitin/libveinmind/go"
-	docker "github.com/chaitin/libveinmind/go/docker"
+	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/clamav"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/virustotal"
-	fs "io/fs"
+	"io/fs"
 	"io/ioutil"
 	"net"
 	"os"
@@ -24,7 +24,12 @@ import (
 	"time"
 )
 
-func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
+type AntiVirusEngine struct {
+	ClamavHost string
+	ClamavPort string
+}
+
+func Scan(image veinmindcommon.Image, antiVirusServer AntiVirusEngine) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
@@ -32,6 +37,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 		return scanReport, nil
 	}
 
+	clamav.Setup(antiVirusServer.ClamavHost, antiVirusServer.ClamavPort)
 	refs, err := image.RepoRefs()
 	var imageRef string
 	if err == nil && len(refs) > 0 {
