@@ -3,61 +3,37 @@ package plugind
 import (
 	_ "embed"
 	"github.com/BurntSushi/toml"
-	"os"
-	"os/exec"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind/service"
 	"sync"
-	"time"
 )
 
 //go:embed conf/service.toml
 var servicePath string
 
-var (
-	Signal    chan string
-	RunnerMap sync.Map
-)
-
 type Conf struct {
 	Plugins []PluginConf `toml:"PluginConf"`
 }
 
-type ServiceConf struct {
-	Name      string `toml:"Name"`
-	Command   string `toml:"Command"`
-	StdoutLog string `toml:"StdoutLog"`
-	StderrLog string `toml:"StderrLog"`
-	Port      string `toml:"Port"`
-}
-
 type PluginConf struct {
-	Name     string        `toml:"Name"`
-	Services []ServiceConf `toml:"ServiceConf"`
+	Name     string         `toml:"Name"`
+	Services []service.Conf `toml:"ServiceConf"`
 }
 
 type Plugin struct {
 	PluginName string
-	Service    []*Runner
+	Service    []*service.Runner
+	RunnerMap  *sync.Map
+	StopDaemon func()
+	syncFlag   *sync.WaitGroup
 }
 
-type Runner struct {
-	Name    string
-	Uuid    string
-	Command string
-	Stderr  *os.File
-	Stdout  *os.File
-	Port    string
-	Cmd     *exec.Cmd
-	TimeOut time.Duration
-}
-
-func NewPluginServices() ([]Plugin, error) {
+var plugind = func() []Plugin {
 	var psConf Conf
 	var ps []Plugin
 
-	Signal = make(chan string)
 	_, err := toml.Decode(servicePath, &psConf)
 	if err != nil {
-		return ps, err
+		return ps
 	}
 
 	for _, plugin := range psConf.Plugins {
@@ -66,16 +42,17 @@ func NewPluginServices() ([]Plugin, error) {
 			ps = append(ps, plugin)
 		}
 	}
-
-	return ps, nil
-}
+	return ps
+}()
 
 func initService(plugin PluginConf) Plugin {
 	p := Plugin{
 		PluginName: plugin.Name,
+		RunnerMap:  &sync.Map{},
+		syncFlag:   &sync.WaitGroup{},
 	}
-	for _, service := range plugin.Services {
-		runner, err := newRunner(service)
+	for _, s := range plugin.Services {
+		runner, err := service.NewRunner(s)
 		if err != nil {
 			continue
 		}

@@ -1,4 +1,4 @@
-package plugind
+package service
 
 import (
 	"errors"
