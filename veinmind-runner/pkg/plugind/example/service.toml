@@ -1,0 +1,18 @@
+[[Plugin]]
+Name = "veinmind-malicious"
+
+[[Plugin.Service]]
+cmd = "/usr/sbin/clamd -F --config-file=/etc/clamav/clamd.conf" # 服务启动命令
+StdoutLog = "clamerr.log"
+StderrLog = "clamout.log"
+DetectTarget= "3310"
+DetectMethod= "tcp"
+timeout=100
+
+[[Plugin.Service]]
+cmd = "sleep 60" # 服务启动命令
+StdoutLog = "ncout.log"
+StderrLog = "ncerr.log"
+DetectTarget= ""
+DetectMethod= ""
+timeout=20
