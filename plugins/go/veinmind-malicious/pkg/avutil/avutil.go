@@ -1,76 +1,127 @@
 package avutil
 
 import (
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/pkg/netutil"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/pkg/procutil"
-	"github.com/pkg/errors"
+	"context"
+	"errors"
+	"net"
+	"os"
 	"os/exec"
+	"sync"
+	"time"
 )
 
-func StartClamAV(port, clamavExec, clamavConf string) (int, error) {
-	clam := exec.Command(clamavExec, "-c", clamavConf) //nolint:gos-ec
-	err := clam.Run()
-	if err != nil {
-		return 0, err
+type ServiceOption func(*ClamAVManger)
+
+func WithPort(port string) ServiceOption {
+	return func(manger *ClamAVManger) {
+		manger.clamAVPort = port
 	}
-	PID, err := CheckClamAVPortStatus(port)
-	if err != nil {
-		return 0, err
-	}
-	if PID != 0 {
-		return PID, nil
-	}
-	return 0, errors.New("failed to activate clamAV")
 }
 
-func CloseClamAV(PID int) error {
-	ClamavProcess, err := procutil.GetProcessByPID(PID)
+func WithExec(exec string) ServiceOption {
+	return func(manger *ClamAVManger) {
+		manger.clamAVExec = exec
+	}
+}
+
+func WithConf(config string) ServiceOption {
+	return func(manger *ClamAVManger) {
+		manger.clamAVConf = config
+	}
+}
+
+func WithHost(host string) ServiceOption {
+	return func(manger *ClamAVManger) {
+		manger.clamAVHost = host
+	}
+}
+
+type ClamAVManger struct {
+	ctx        context.Context
+	sig        chan struct{}
+	wg         *sync.WaitGroup
+	clamAVPort string
+	clamAVHost string
+	clamAVExec string
+	clamAVConf string
+	proc       *os.Process
+}
+
+func New(ctx context.Context, opts ...ServiceOption) *ClamAVManger {
+	cam := &ClamAVManger{
+		ctx: ctx,
+		sig: make(chan struct{}),
+		wg:  &sync.WaitGroup{},
+	}
+	for _, opt := range opts {
+		opt(cam)
+	}
+	return cam
+}
+
+func (c *ClamAVManger) Run() error {
+	clamAVRunner := exec.Command(c.clamAVExec, "-c", c.clamAVConf, "-F")
+	err := clamAVRunner.Start()
 	if err != nil {
 		return err
 	}
-	name, err := ClamavProcess.Name()
+	c.proc = clamAVRunner.Process
+	err = clamAVRunner.Wait()
 	if err != nil {
 		return err
 	}
-	if name == "clamd" {
-		err := ClamavProcess.Kill()
-		if err != nil {
-			return err
+	c.sig<- struct{}{}
+	return nil
+}
+
+func (c *ClamAVManger) Ready() error {
+	ctx, cancel := context.WithTimeout(c.ctx, 20*time.Second)
+	defer cancel()
+	for {
+		select {
+		case <-ctx.Done():
+			return errors.New("time out")
+		case <-time.Tick(time.Second):
+			err := c.checkPortIsUsed()
+			if err != nil {
+				continue
+			}
+			return nil
 		}
-	} else {
-		return errors.New("not clamAV process")
 	}
-	return nil
 }
 
-// ClamAVPreCheck check if the clamAV is running and the host is local
-func ClamAVPreCheck(host, port string) error {
-	local, err := netutil.IsLocalHost(host)
+func (c *ClamAVManger) checkPortIsUsed() error {
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(c.clamAVHost, c.clamAVPort), 3*time.Second)
 	if err != nil {
 		return err
 	}
-	if !local {
-		return errors.New("not local host")
-	}
-	PID, err := CheckClamAVPortStatus(port)
-	if err != nil {
-		return err
-	}
-	if PID != 0 {
-		return errors.New("port occupation")
-	}
+	defer conn.Close()
 	return nil
 }
 
-// checkClamAVPortStatus check if the port of ClamAV is opening
-// err is nil and pid is 0: can not find the pid
-func CheckClamAVPortStatus(port string) (int, error) {
-	PID, err := netutil.GetPidByPort(port)
-	if err != nil {
-		return 0, err
+func (c *ClamAVManger) Daemon() error {
+	c.wg.Add(1)
+	defer c.wg.Done()
+	for {
+		select {
+		case <-c.ctx.Done():
+			if c.proc != nil {
+				err := c.proc.Kill()
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		case <-c.sig:
+			err := c.Run()
+			if err != nil {
+				return err
+			}
+		}
 	}
-	if PID != 0 {
-		return PID, nil
-	}
-	return 0, nil
+}
+
+func (c *ClamAVManger) Wait() {
+	c.wg.Wait()
 }

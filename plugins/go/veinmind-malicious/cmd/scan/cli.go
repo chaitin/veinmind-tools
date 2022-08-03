@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
@@ -15,6 +16,7 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"
 	reportService "github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 	_ "net/http/pprof"
 	"os"
 	"path"
@@ -27,7 +29,10 @@ import (
 var reportData = model.ReportData{}
 var reportLock sync.Mutex
 var scanStart = time.Now()
-var clamavPID = 0
+var ctx = context.Background()
+var cancel context.CancelFunc
+var clamavAutoStart bool
+var clamAV *avutil.ClamAVManger
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
@@ -42,10 +47,6 @@ var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		clamavManualStart, err := cmd.Flags().GetBool("clamav-manually-start")
-		if err != nil {
-			log.Error(err)
-		}
 		clamavConf, err := cmd.Flags().GetString("clamav-conf")
 		if err != nil {
 			log.Error(err)
@@ -56,7 +57,7 @@ var scanCmd = &cmd.Command{
 		}
 		clamavPort, err := cmd.Flags().GetString("clamav-port")
 		if err != nil {
-			log.Error(err.Error())
+			log.Error(err)
 		}
 		clamavHost, err := cmd.Flags().GetString("clamav-host")
 		if err != nil {
@@ -64,17 +65,34 @@ var scanCmd = &cmd.Command{
 		}
 
 		// the flag of Manual run the clamAV
-		if !clamavManualStart {
-			err = avutil.ClamAVPreCheck(clamavHost, clamavPort)
-			if err != nil {
+		if clamavAutoStart {
+			log.Info("start clamAV ....")
+			ctx, cancel = context.WithCancel(ctx)
+			options := make([]avutil.ServiceOption, 0)
+			options = append(options, avutil.WithHost(clamavHost), avutil.WithPort(clamavPort))
+			options = append(options, avutil.WithExec(clamavExec), avutil.WithConf(clamavConf))
+			clamAV = avutil.New(ctx, options...)
+			go func() {
+				err := clamAV.Run()
+				if err != nil {
+					log.Error(err)
+				}
+			}()
+
+			g, _ := errgroup.WithContext(ctx)
+			g.Go(clamAV.Ready)
+
+			if err = g.Wait(); err != nil {
 				log.Error(err)
 				return
 			}
-			log.Info("start clamAV ....")
-			clamavPID, err = avutil.StartClamAV(clamavPort, clamavExec, clamavConf)
-			if err != nil {
-				log.Error(err)
-			}
+
+			go func() {
+				err := clamAV.Daemon()
+				if err != nil {
+					log.Info(err)
+				}
+			}()
 		}
 	},
 
@@ -113,12 +131,10 @@ var scanCmd = &cmd.Command{
 			report.OutputCSV(reportData, fpath)
 		}
 
-		if clamavPID != 0 {
+		if clamAV != nil {
 			log.Info("close clamAV ....")
-			err := avutil.CloseClamAV(clamavPID)
-			if err != nil {
-				log.Error(err)
-			}
+			cancel()
+			clamAV.Wait()
 		}
 	},
 }
@@ -209,7 +225,7 @@ func init() {
 	scanCmd.Flags().StringP("format", "f", "html", "report format for scan report")
 	scanCmd.Flags().StringP("name", "n", "report", "report name for scan report")
 	scanCmd.Flags().StringP("output", "o", ".", "output path for report")
-	scanCmd.Flags().BoolP("clamav-manually-start", "", true, "whether need to manually start clamAV")
+	scanCmd.Flags().BoolVarP(&clamavAutoStart, "clamav-automaticly-start", "", false, "whether need to automatically start clamAV")
 	scanCmd.Flags().StringP("clamav-host", "", "127.0.0.1", "host of ClamAV")
 	scanCmd.Flags().StringP("clamav-port", "", "3310", "port of ClamAV")
 	scanCmd.Flags().StringP("clamav-exec", "", "/usr/sbin/clamd", "execution file path of ClamAV")
