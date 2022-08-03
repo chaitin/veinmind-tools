@@ -14,6 +14,7 @@ import (
 	"github.com/chaitin/veinmind-common-go/registry"
 	commonRuntime "github.com/chaitin/veinmind-common-go/runtime"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
@@ -134,6 +135,31 @@ var (
 )
 
 var rootCmd = &cmd.Command{}
+var authCmd = &cmd.Command{
+	Use:   "authz",
+	Short: "authz as docker plugin",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		path, err := cmd.Flags().GetString("config")
+		if err != nil {
+			return err
+		}
+
+		config, err := authz.NewDockerPluginConfig(path)
+		if err != nil {
+			return err
+		}
+
+		options := []authz.ServerOption{
+			authz.WithPolicy(config.Policies...),
+			authz.WithAuthLog(config.Log.AuthZLogPath),
+			authz.WithPluginLog(config.Log.PluginLogPath),
+			authz.WithListenerUnix(config.Listener.ListenAddr),
+		}
+
+		server := authz.NewDockerPlugin(options...)
+		return server.Run()
+	},
+}
 var listCmd = &cmd.Command{
 	Use:   "list",
 	Short: "list relevant information",
@@ -417,8 +443,7 @@ func scan(c *cmd.Command, image api.Image) error {
 	log.Infof("Scan image: %#v\n", ref)
 	if err := cmd.ScanImage(ctx, ps, image,
 		plugin.WithExecInterceptor(func(
-			ctx context.Context, plug *plugin.Plugin, c *plugin.Command,
-			next func(context.Context, ...plugin.ExecOption) error,
+			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
 		) error {
 			// Register Service
 			reg := service.NewRegistry()
@@ -440,6 +465,8 @@ func init() {
 	// Cobra init
 	rootCmd.AddCommand(cmd.MapImageCommand(scanHostCmd, scan))
 	rootCmd.AddCommand(scanRegistryCmd)
+	rootCmd.AddCommand(authCmd)
+	authCmd.Flags().StringP("config", "c", "", "authz config path")
 	rootCmd.AddCommand(listCmd)
 	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 	listCmd.AddCommand(listPluginCmd)

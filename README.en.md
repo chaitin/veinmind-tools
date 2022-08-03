@@ -51,6 +51,18 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 PS: All tools currently support running in parallel containers
 
+## ☁️ Cloud-native infrastructure compatibility
+| Name | Type | Compatibility |
+|------|------|----------|
+| Jenkins | CI/CD | ✔️ |
+| Gitlab CI | CI/CD | ✔️ |
+| Github Action | CI/CD | ✔️ |
+| DockerHub | Registry | ✔️ |
+| Docker Registry | Registry | ✔️ |
+| Harbor | Registry | ✔️ |
+| Docker | Runtime | ✔️ |
+| Containerd | Runtime | ✔️ |
+
 ## 🏘️ Contact Us
 1. You can make bug feedback and feature suggestions directly through GitHub Issues.
 2. By scanning the QR code below (use wechat), you can join the discussion group of veinmind users for detailed discussions by adding the veinmind assistant.

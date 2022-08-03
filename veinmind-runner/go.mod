@@ -7,9 +7,10 @@ require (
 	github.com/chaitin/libveinmind v1.1.1
 	github.com/chaitin/veinmind-common-go v1.0.5
 	github.com/distribution/distribution v2.8.1+incompatible
-	github.com/google/uuid v1.3.0
+	github.com/docker/docker v20.10.17+incompatible
+	github.com/gin-gonic/gin v1.8.1
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29

@@ -29,6 +29,13 @@ func TestHashShadow(t *testing.T) {
 	stringGotFromShadow = "$5$3oF7bkISmfCcnGIC$X588PbRFjkh5WDQfXcrLLYnYPN7bsjntaytebGGh3nsXp6d4uJCp3MCu54JSVXoZ8NxGWS5FxMcnloKvM4FXV/"
 	find, _ = shadow.Match(stringGotFromShadow, stringInDict)
 	assert.False(t, find)
+	stringGotFromShadow = "$y$j9T$u.6g7OsvLMeIhyBve4MsT/$S8btad/SN91QUwrQjf84XEzLj2w64xVA1UQQN6xZeQ2"
+	find, _ = shadow.Match(stringGotFromShadow, stringInDict)
+	assert.True(t, find)
+	stringGotFromShadow = "$y$j9T$u.6g01svLMeIhyBve4MsT/$S8btad/SN91QUwrQjf84XEzLj2w64xVA1UQQN6xZeQ2"
+	find, _ = shadow.Match(stringGotFromShadow, stringInDict)
+	assert.False(t, find)
+
 }
 
 func TestHashPlain(t *testing.T) {

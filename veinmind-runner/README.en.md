@@ -45,6 +45,21 @@ or use the script provided by the project to start
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
+### Install by Helm
+
+based on `Kubernetes` environment, use `Helm` to install `veinmind-runner`，run scan tasks regularly
+
+Please install `Helm` first, the installation method can refer to the [official document](https://helm.sh/zh/docs/intro/install/)
+
+Before installing `veinmind-runner`, please configure the running parameters, please refer to the [document](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.en.md)
+
+Install `veinmind-runner` with `Helm`
+
+```
+cd ./veinmind-runner/script/helm_chart/veinmind
+helm install veinmind .
+```
+
 ## Usage
 
 1.specify the image name or image ID and scan (need to have a corresponding image locally)
@@ -109,4 +124,57 @@ container runtime type
 ```
 ```
 ./veinmind-runner scan-host --containerd-root [your_path]
+```
+
+9.support docker plugin for authorization
+```bash
+# first
+./veinmind-runner authz -c config.toml
+# second
+dockerd --authorization-plugin=veinmind-broker
+```
+Field in `config.toml`
+
+|  | **name**           | **attribute** | **meaning**  |
+|----------|-------------------|----------|---------|
+| policy   | action            | string   | action should be monitored |
+|          | enabled_plugins   | []string | which plugins to use
+|
+|          | plugin_params     | []string | parameters for each plugin |
+|          | risk_level_filter | []string | risk level    |
+|          | block             | bool     | whether to block    |
+|          | alert             | bool     | whether to alert    |
+| log      | report_log_path   | string   | log for veinmind plugins  |
+|          | authz_log_path    | string   | log for docker plugin  |
+
+- action supports [DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/) provided operation interface
+- The following configuration means: when `create a container`or`push a image`, use the `veinmind-weakpass` plugin to scan the `ssh` service, if a weak password is found, and the risk level is `High`, block this operation, and issue a warning. Finally, the scan results are stored in `plugin.log`, and the risk results are stored in `auth.log`.
+
+```toml
+[log]
+plugin_log_path = "plugin.log"
+auth_log_path = "auth.log"
+[listener]
+listener_addr = "/run/docker/plugins/veinmind-broker.sock"
+[[policies]]
+action = "container_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_paramas = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_push"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
+[[policies]]
+action = "image_create"
+enabled_plugins = ["veinmind-weakpass"]
+plugin_params = ["veinmind-weakpass:scan.serviceName=ssh"]
+risk_level_filter = ["High"]
+block = true
+alert = true
 ```

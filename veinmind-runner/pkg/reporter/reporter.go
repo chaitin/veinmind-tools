@@ -2,16 +2,17 @@ package reporter
 
 import (
 	"encoding/json"
+	"io"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/pkg/errors"
-	"io"
 )
 
-type reportEvent struct {
+type ReportEvent struct {
 	report.ReportEvent
 	ImageRefs []string `json:"image_refs"`
 }
@@ -19,14 +20,14 @@ type reportEvent struct {
 type Reporter struct {
 	EventChannel chan report.ReportEvent
 	closeCh      chan struct{}
-	events       []reportEvent
+	events       []ReportEvent
 }
 
 func NewReporter() (*Reporter, error) {
 	return &Reporter{
 		EventChannel: make(chan report.ReportEvent, 1<<8),
 		closeCh:      make(chan struct{}),
-		events:       []reportEvent{},
+		events:       []ReportEvent{},
 	}, nil
 }
 
@@ -70,11 +71,30 @@ func (r *Reporter) Write(writer io.Writer) error {
 	return err
 }
 
-func (r *Reporter) GetEvents() ([]reportEvent, error) {
+func WriteEvents2Log(events []ReportEvent, writer io.Writer) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	eventsBytes, err := json.MarshalIndent(events, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(eventsBytes)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write([]byte("\n"))
+	return err
+}
+
+func (r *Reporter) GetEvents() ([]ReportEvent, error) {
 	return r.events, nil
 }
 
-func (r *Reporter) convert(event report.ReportEvent) (reportEvent, error) {
+func (r *Reporter) convert(event report.ReportEvent) (ReportEvent, error) {
 	dr, _ := docker.New()
 	cr, _ := containerd.New()
 	runtimes := []api.Runtime{dr, cr}
@@ -92,7 +112,7 @@ func (r *Reporter) convert(event report.ReportEvent) (reportEvent, error) {
 		}
 	}
 	if !find || image == nil {
-		return reportEvent{}, errors.New("Can't get image object")
+		return ReportEvent{}, errors.New("Can't get image object")
 	}
 
 	refs, err := image.RepoRefs()
@@ -107,7 +127,7 @@ func (r *Reporter) convert(event report.ReportEvent) (reportEvent, error) {
 	//	log.Error(err)
 	//}
 
-	return reportEvent{
+	return ReportEvent{
 		ImageRefs:   refs,
 		ReportEvent: event,
 	}, nil
