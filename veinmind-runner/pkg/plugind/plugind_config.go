@@ -1,12 +1,12 @@
 package plugind
 
 type Config struct {
-	Plugin  PluginConf     `json:"plugin" ,toml:"plugin"`
-	Service []*ServiceConf `json:"service" ,toml:"service"`
+	Plugin []PluginConf `json:"plugin" ,toml:"plugin"`
 }
 
 type PluginConf struct {
-	Name string `json:"name" ,toml:"name"`
+	Name    string         `json:"name" ,toml:"name"`
+	Service []*ServiceConf `json:"service" ,toml:"service"`
 }
 
 type ServiceConf struct {

@@ -2,6 +2,7 @@ package plugind
 
 import (
 	"context"
+	"errors"
 	"github.com/BurntSushi/toml"
 	"sync"
 )
@@ -15,22 +16,33 @@ func NewPlugindConfig(config string) (*Config, error) {
 	return &plugindConfig, nil
 }
 
-func StartWithContext(ctx context.Context, conf []*ServiceConf) error {
-	for _, c := range conf {
-		err := pluginSvc.Start(ctx, c)
-		if err != nil {
-			return err
+func (c *Config) StartWithContext(ctx context.Context, name string) error {
+	for _, conf := range c.Plugin {
+		if conf.Name == name {
+			for _, s := range conf.Service {
+				err := pluginSvc.Start(ctx, s)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
 		}
 	}
-	return nil
+	return errors.New("")
+}
+
+func (c *Config) Wait() {
+	pluginSvc.wg.Wait()
 }
 
 type pluginService struct {
+	wg       *sync.WaitGroup
 	services sync.Map
 }
 
 func newPluginService() pluginService {
 	return pluginService{
+		wg:       &sync.WaitGroup{},
 		services: sync.Map{},
 	}
 }
@@ -52,20 +64,10 @@ func (s *pluginService) Start(ctx context.Context, conf *ServiceConf) error {
 	options = append(options, withCheckChains(checkChains...))
 
 	svc := newService(ctx, conf.Command, options...)
-	if err := svc.Start(); err != nil {
+	if err := svc.Start(s.wg); err != nil {
 		return err
 	}
 	s.services.Store(conf.Name, svc)
 
 	return nil
-}
-
-func (s *pluginService) IsAlive(name string) (bool, error) {
-	val, ok := s.services.Load(name)
-	if !ok {
-		return false, SvcNotExist
-	}
-	svc := val.(service)
-
-	return svc.IsAlive(), nil
 }

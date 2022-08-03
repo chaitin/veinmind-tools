@@ -7,6 +7,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"net"
 	"os"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -39,6 +40,7 @@ func withTimeout(timeout int) serviceOption {
 
 type service struct {
 	ctx         context.Context
+	sig         chan struct{}
 	cmd         string
 	stdout      string
 	stderr      string
@@ -47,32 +49,11 @@ type service struct {
 	checkChains []serviceCheckFunc
 }
 
-func (s *service) Start() error {
-	sig := make(chan syscall.Signal)
-	command, err := createCommand(s.cmd)
-
+func (s *service) Start(wg *sync.WaitGroup) error {
+	err := s.run()
 	if err != nil {
 		return err
 	}
-	stdout, err := os.OpenFile(s.stdout, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	stderr, err := os.OpenFile(s.stderr, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	command.Stdout = stdout
-	command.Stderr = stderr
-
-	go func() {
-		err := command.Run()
-		if err != nil {
-			log.Error(err)
-		}
-		sig <- syscall.SIGKILL
-	}()
-	s.proc = command.Process
 
 	// check service is working
 	ctx, cancel := context.WithTimeout(s.ctx, s.timeout)
@@ -81,7 +62,7 @@ func (s *service) Start() error {
 	g.Go(func() error {
 		for {
 			select {
-			case <-s.ctx.Done():
+			case <-ctx.Done():
 				return errors.New("time out")
 			case <-time.Tick(time.Second):
 				for _, chain := range s.checkChains {
@@ -98,7 +79,9 @@ func (s *service) Start() error {
 	}
 
 	// daemon this process
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for {
 			select {
 			case <-s.ctx.Done():
@@ -107,8 +90,8 @@ func (s *service) Start() error {
 					log.Error(err)
 				}
 				return
-			case <-sig:
-				err := s.Start()
+			case <-s.sig:
+				err := s.run()
 				if err != nil {
 					log.Error(err)
 					return
@@ -120,10 +103,46 @@ func (s *service) Start() error {
 	return nil
 }
 
+func (s *service) run() error {
+
+	command, err := createCommand(s.cmd)
+
+	if err != nil {
+		return err
+	}
+	stdout, err := os.OpenFile(s.stdout, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	stderr, err := os.OpenFile(s.stderr, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	command.Stdout = stdout
+	command.Stderr = stderr
+
+	err = command.Start()
+	if err != nil {
+		return err
+	}
+	s.proc = command.Process
+
+	go func() {
+		err := command.Wait()
+		if err != nil {
+			log.Error(err)
+		}
+		s.sig <- struct{}{}
+	}()
+
+	return nil
+}
+
 func newService(ctx context.Context, cmd string, opts ...serviceOption) *service {
 	svc := &service{
 		ctx: ctx,
 		cmd: cmd,
+		sig: make(chan struct{}),
 	}
 
 	for _, opt := range opts {
