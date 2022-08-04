@@ -2,14 +2,18 @@ package plugind
 
 import (
 	"context"
+	_ "embed"
 	"github.com/BurntSushi/toml"
 	"golang.org/x/sync/errgroup"
 	"sync"
 )
 
-func NewManager(config string) (*Manager, error) {
+//go:embed conf/service.toml
+var config string
+
+func NewManager() (*Manager, error) {
 	var pluginsManager Manager
-	_, err := toml.DecodeFile(config, &pluginsManager)
+	_, err := toml.Decode(config, &pluginsManager)
 	if err != nil {
 		return nil, err
 	}

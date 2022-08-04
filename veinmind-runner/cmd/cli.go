@@ -27,8 +27,7 @@ import (
 )
 
 const (
-	resourceDirectoryPath   = "./resource"
-	pluginServiceConfigPath = "./conf/service.toml"
+	resourceDirectoryPath = "./resource"
 )
 
 var (
@@ -64,7 +63,7 @@ var (
 			return err
 		}
 
-		serviceManager, err = plugind.NewManager(pluginServiceConfigPath)
+		serviceManager, err = plugind.NewManager()
 		if err != nil {
 			return err
 		}
