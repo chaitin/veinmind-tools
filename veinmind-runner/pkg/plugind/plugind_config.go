@@ -1,15 +1,15 @@
 package plugind
 
-type Config struct {
-	Plugin []PluginConf `json:"plugin" ,toml:"plugin"`
+type Manager struct {
+	Plugins []Plugin `json:"plugin" ,toml:"plugin"`
 }
 
-type PluginConf struct {
-	Name    string         `json:"name" ,toml:"name"`
-	Service []*ServiceConf `json:"service" ,toml:"service"`
+type Plugin struct {
+	Name    string     `json:"name" ,toml:"name"`
+	Service []*Service `json:"service" ,toml:"service"`
 }
 
-type ServiceConf struct {
+type Service struct {
 	Name    string          `json:"name" ,toml:"name"`
 	Command string          `json:"command" ,toml:"command"`
 	Stdout  string          `json:"stdout" ,toml:"stdout"`

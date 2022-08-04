@@ -2,54 +2,54 @@ package plugind
 
 import (
 	"context"
-	"errors"
 	"github.com/BurntSushi/toml"
 	"sync"
 )
 
-func NewPlugindConfig(config string) (*Config, error) {
-	var plugindConfig Config
-	_, err := toml.DecodeFile(config, &plugindConfig)
+func NewManager(config string) (*Manager, error) {
+	var pluginsManager Manager
+	_, err := toml.DecodeFile(config, &pluginsManager)
 	if err != nil {
 		return nil, err
 	}
-	return &plugindConfig, nil
+
+	return &pluginsManager, nil
 }
 
-func (c *Config) StartWithContext(ctx context.Context, name string) error {
-	for _, conf := range c.Plugin {
-		if conf.Name == name {
-			for _, s := range conf.Service {
-				err := pluginSvc.Start(ctx, s)
+func (c *Manager) StartWithContext(ctx context.Context, name string) error {
+	for _, plugin := range c.Plugins {
+		if plugin.Name == name {
+			for _, s := range plugin.Service {
+				err := svcManager.Start(ctx, s)
 				if err != nil {
 					return err
 				}
 			}
-			return nil
 		}
 	}
-	return errors.New("")
+
+	return nil
 }
 
-func (c *Config) Wait() {
-	pluginSvc.wg.Wait()
+func (c *Manager) Wait() {
+	svcManager.wg.Wait()
 }
 
-type pluginService struct {
+type serviceManager struct {
 	wg       *sync.WaitGroup
 	services sync.Map
 }
 
-func newPluginService() pluginService {
-	return pluginService{
+func newServiceManager() serviceManager {
+	return serviceManager{
 		wg:       &sync.WaitGroup{},
 		services: sync.Map{},
 	}
 }
 
-var pluginSvc = newPluginService()
+var svcManager = newServiceManager()
 
-func (s *pluginService) Start(ctx context.Context, conf *ServiceConf) error {
+func (s *serviceManager) Start(ctx context.Context, conf *Service) error {
 	checkChains := make([]serviceCheckFunc, 0)
 	for _, check := range conf.Check {
 		fn, ok := serviceChecks[check.Type]
@@ -60,11 +60,11 @@ func (s *pluginService) Start(ctx context.Context, conf *ServiceConf) error {
 
 	options := make([]serviceOption, 0)
 	options = append(options, withStdout(conf.Stdout), withStderr(conf.Stderr))
-	options = append(options, withTimeout(conf.Timeout))
+	options = append(options, withTimeout(conf.Timeout), withWaitGroup(s.wg))
 	options = append(options, withCheckChains(checkChains...))
 
 	svc := newService(ctx, conf.Command, options...)
-	if err := svc.Start(s.wg); err != nil {
+	if err := svc.Start(); err != nil {
 		return err
 	}
 	s.services.Store(conf.Name, svc)
