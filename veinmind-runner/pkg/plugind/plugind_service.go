@@ -54,7 +54,7 @@ type service struct {
 	checkChains []serviceCheckFunc
 }
 
-func (s *service) Start() error {
+func (s *service) Start(wg *sync.WaitGroup) error {
 	err := s.run()
 	if err != nil {
 		return err
