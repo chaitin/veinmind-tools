@@ -9,33 +9,33 @@ import (
 	"time"
 )
 
-type ServiceOption func(*ClamAVManger)
+type ServiceOption func(*ClamAVManager)
 
 func WithPort(port string) ServiceOption {
-	return func(manger *ClamAVManger) {
+	return func(manger *ClamAVManager) {
 		manger.clamAVPort = port
 	}
 }
 
 func WithExec(exec string) ServiceOption {
-	return func(manger *ClamAVManger) {
+	return func(manger *ClamAVManager) {
 		manger.clamAVExec = exec
 	}
 }
 
 func WithConf(config string) ServiceOption {
-	return func(manger *ClamAVManger) {
+	return func(manger *ClamAVManager) {
 		manger.clamAVConf = config
 	}
 }
 
 func WithHost(host string) ServiceOption {
-	return func(manger *ClamAVManger) {
+	return func(manger *ClamAVManager) {
 		manger.clamAVHost = host
 	}
 }
 
-type ClamAVManger struct {
+type ClamAVManager struct {
 	ctx        context.Context
 	sig        chan struct{}
 	wg         *sync.WaitGroup
@@ -45,8 +45,8 @@ type ClamAVManger struct {
 	clamAVConf string
 }
 
-func New(ctx context.Context, opts ...ServiceOption) *ClamAVManger {
-	cam := &ClamAVManger{
+func New(ctx context.Context, opts ...ServiceOption) *ClamAVManager {
+	cam := &ClamAVManager{
 		ctx: ctx,
 		sig: make(chan struct{}),
 		wg:  &sync.WaitGroup{},
@@ -57,7 +57,7 @@ func New(ctx context.Context, opts ...ServiceOption) *ClamAVManger {
 	return cam
 }
 
-func (c *ClamAVManger) Run() error {
+func (c *ClamAVManager) Run() error {
 	clamAVRunner := exec.CommandContext(c.ctx, c.clamAVExec, "-c", c.clamAVConf, "-F")
 	err := clamAVRunner.Run()
 	if err != nil {
@@ -67,7 +67,7 @@ func (c *ClamAVManger) Run() error {
 	return nil
 }
 
-func (c *ClamAVManger) Ready() error {
+func (c *ClamAVManager) Ready() error {
 	ctx, cancel := context.WithTimeout(c.ctx, 20*time.Second)
 	defer cancel()
 	for {
@@ -84,7 +84,7 @@ func (c *ClamAVManger) Ready() error {
 	}
 }
 
-func (c *ClamAVManger) checkPortIsUsed() error {
+func (c *ClamAVManager) checkPortIsUsed() error {
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(c.clamAVHost, c.clamAVPort), 3*time.Second)
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (c *ClamAVManger) checkPortIsUsed() error {
 	return nil
 }
 
-func (c *ClamAVManger) Daemon() error {
+func (c *ClamAVManager) Daemon() error {
 	c.wg.Add(1)
 	defer c.wg.Done()
 	for {
@@ -109,6 +109,6 @@ func (c *ClamAVManger) Daemon() error {
 	}
 }
 
-func (c *ClamAVManger) Wait() {
+func (c *ClamAVManager) Wait() {
 	c.wg.Wait()
 }

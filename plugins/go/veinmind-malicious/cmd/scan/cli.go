@@ -32,7 +32,7 @@ var scanStart = time.Now()
 var ctx = context.Background()
 var cancel context.CancelFunc
 var clamavAutoStart bool
-var clamAV *avutil.ClamAVManger
+var clamAV *avutil.ClamAVManager
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
