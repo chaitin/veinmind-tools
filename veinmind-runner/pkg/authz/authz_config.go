@@ -14,6 +14,8 @@ const (
 	defaultSockListenAddr = "/run/docker/plugins/veinmind-broker.sock"
 )
 
+
+
 type Policy struct {
 	Action          string   `toml:"action"`
 	EnabledPlugins  []string `toml:"enabled_plugins"`
