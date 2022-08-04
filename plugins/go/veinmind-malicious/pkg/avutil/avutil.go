@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net"
-	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -44,7 +43,6 @@ type ClamAVManger struct {
 	clamAVHost string
 	clamAVExec string
 	clamAVConf string
-	proc       *os.Process
 }
 
 func New(ctx context.Context, opts ...ServiceOption) *ClamAVManger {
@@ -60,17 +58,12 @@ func New(ctx context.Context, opts ...ServiceOption) *ClamAVManger {
 }
 
 func (c *ClamAVManger) Run() error {
-	clamAVRunner := exec.Command(c.clamAVExec, "-c", c.clamAVConf, "-F")
-	err := clamAVRunner.Start()
+	clamAVRunner := exec.CommandContext(c.ctx, c.clamAVExec, "-c", c.clamAVConf, "-F")
+	err := clamAVRunner.Run()
 	if err != nil {
 		return err
 	}
-	c.proc = clamAVRunner.Process
-	err = clamAVRunner.Wait()
-	if err != nil {
-		return err
-	}
-	c.sig<- struct{}{}
+	c.sig <- struct{}{}
 	return nil
 }
 
@@ -106,12 +99,6 @@ func (c *ClamAVManger) Daemon() error {
 	for {
 		select {
 		case <-c.ctx.Done():
-			if c.proc != nil {
-				err := c.proc.Kill()
-				if err != nil {
-					return err
-				}
-			}
 			return nil
 		case <-c.sig:
 			err := c.Run()
