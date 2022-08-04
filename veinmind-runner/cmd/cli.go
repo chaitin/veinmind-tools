@@ -27,14 +27,15 @@ import (
 )
 
 const (
-	resourceDirectoryPath = "./resource"
+	resourceDirectoryPath   = "./resource"
+	pluginServiceConfigPath = "./conf/service.toml"
 )
 
 var (
 	ps                    []*plugin.Plugin
 	ctx                   context.Context
 	allPlugins            []*plugin.Plugin //All found plugins
-	serviceConfig         *plugind.Config
+	serviceManager        *plugind.Manager
 	cancel                context.CancelFunc
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
@@ -62,14 +63,14 @@ var (
 			return err
 		}
 
-		serviceConfig, err = plugind.NewPlugindConfig("conf/service.toml")
+		serviceManager, err = plugind.NewManager(pluginServiceConfigPath)
 		if err != nil {
 			return err
 		}
 
 		for _, p := range allPlugins {
 			log.Infof("Discovered plugin: %#v\n", p.Name)
-			err = serviceConfig.StartWithContext(ctx, p.Name)
+			err = serviceManager.StartWithContext(ctx, p.Name)
 			if err != nil {
 				log.Errorf("%#v can not work: %#v\n", p.Name, err)
 				continue
@@ -128,7 +129,7 @@ var (
 		}
 
 		cancel()
-		serviceConfig.Wait()
+		serviceManager.Wait()
 
 		// Exit
 		exitcode, err := cmd.Flags().GetInt("exit-code")

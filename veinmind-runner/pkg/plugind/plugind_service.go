@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -38,18 +37,24 @@ func withTimeout(timeout int) serviceOption {
 	}
 }
 
+func withWaitGroup(wg *sync.WaitGroup) serviceOption {
+	return func(s *service) {
+		s.wg = wg
+	}
+}
+
 type service struct {
 	ctx         context.Context
 	sig         chan struct{}
 	cmd         string
 	stdout      string
 	stderr      string
-	proc        *os.Process
+	wg          *sync.WaitGroup
 	timeout     time.Duration
 	checkChains []serviceCheckFunc
 }
 
-func (s *service) Start(wg *sync.WaitGroup) error {
+func (s *service) Start() error {
 	err := s.run()
 	if err != nil {
 		return err
@@ -65,6 +70,9 @@ func (s *service) Start(wg *sync.WaitGroup) error {
 			case <-ctx.Done():
 				return errors.New("time out")
 			case <-time.Tick(time.Second):
+				if s.checkChains == nil {
+					return nil
+				}
 				for _, chain := range s.checkChains {
 					err := chain(s)
 					if err == nil {
@@ -79,16 +87,12 @@ func (s *service) Start(wg *sync.WaitGroup) error {
 	}
 
 	// daemon this process
-	wg.Add(1)
+	s.wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer s.wg.Done()
 		for {
 			select {
 			case <-s.ctx.Done():
-				err := s.Stop()
-				if err != nil {
-					log.Error(err)
-				}
 				return
 			case <-s.sig:
 				err := s.run()
@@ -104,8 +108,7 @@ func (s *service) Start(wg *sync.WaitGroup) error {
 }
 
 func (s *service) run() error {
-
-	command, err := createCommand(s.cmd)
+	command, err := createCommandWithContext(s.ctx, s.cmd)
 
 	if err != nil {
 		return err
@@ -121,14 +124,8 @@ func (s *service) run() error {
 	command.Stdout = stdout
 	command.Stderr = stderr
 
-	err = command.Start()
-	if err != nil {
-		return err
-	}
-	s.proc = command.Process
-
 	go func() {
-		err := command.Wait()
+		err := command.Run()
 		if err != nil {
 			log.Error(err)
 		}
@@ -150,32 +147,6 @@ func newService(ctx context.Context, cmd string, opts ...serviceOption) *service
 	}
 
 	return svc
-}
-
-func (s *service) Stop() error {
-	return s.proc.Kill()
-}
-
-func (s *service) IsAlive() bool {
-	if s.proc != nil {
-		//  kill -0 will not terminate the process
-		// the return status can be used to
-		//determine whether a process is running
-		return s.proc.Signal(syscall.Signal(0)) == nil
-	}
-	return false
-}
-
-func (s *service) handleContext() {
-	for {
-		select {
-		case <-s.ctx.Done():
-			if err := s.Stop(); err != nil {
-				log.Error(err)
-			}
-			return
-		}
-	}
 }
 
 type serviceCheckFunc func(*service) error

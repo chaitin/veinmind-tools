@@ -1,6 +1,7 @@
 package plugind
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -85,7 +86,7 @@ func parseCommand(command string) ([]string, error) {
 
 // create command from string or []string
 //
-func createCommand(command interface{}) (*exec.Cmd, error) {
+func createCommandWithContext(ctx context.Context, command interface{}) (*exec.Cmd, error) {
 	args := make([]string, 0)
 	var err error = nil
 
@@ -102,7 +103,7 @@ func createCommand(command interface{}) (*exec.Cmd, error) {
 		return nil, errors.New("empty command")
 	}
 
-	cmd := exec.Command(args[0])
+	cmd := exec.CommandContext(ctx, args[0])
 	if len(args) > 1 {
 		cmd.Args = args
 	}
