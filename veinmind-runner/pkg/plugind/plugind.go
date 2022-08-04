@@ -3,6 +3,7 @@ package plugind
 import (
 	"context"
 	"github.com/BurntSushi/toml"
+	"golang.org/x/sync/errgroup"
 	"sync"
 )
 
@@ -18,16 +19,16 @@ func NewManager(config string) (*Manager, error) {
 
 func (c *Manager) StartWithContext(ctx context.Context, name string) error {
 	for _, plugin := range c.Plugins {
-		if plugin.Name == name {
-			for _, s := range plugin.Service {
-				err := svcManager.Start(ctx, s)
-				if err != nil {
-					return err
-				}
+		if plugin.Name != name {
+			continue
+		}
+		for _, s := range plugin.Service {
+			err := svcManager.Start(ctx, s)
+			if err != nil {
+				return err
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -36,14 +37,12 @@ func (c *Manager) Wait() {
 }
 
 type serviceManager struct {
-	wg       *sync.WaitGroup
-	services sync.Map
+	wg *sync.WaitGroup
 }
 
 func newServiceManager() serviceManager {
 	return serviceManager{
-		wg:       &sync.WaitGroup{},
-		services: sync.Map{},
+		wg: &sync.WaitGroup{},
 	}
 }
 
@@ -64,10 +63,17 @@ func (s *serviceManager) Start(ctx context.Context, conf *Service) error {
 	options = append(options, withCheckChains(checkChains...))
 
 	svc := newService(ctx, conf.Command, options...)
-	if err := svc.Start(); err != nil {
+	if err := svc.start(); err != nil {
 		return err
 	}
-	s.services.Store(conf.Name, svc)
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(svc.ready)
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	go svc.daemon()
 
 	return nil
 }

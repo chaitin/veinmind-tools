@@ -53,6 +53,7 @@ var (
 		ctx = c.Context()
 		ctx, cancel = context.WithCancel(ctx)
 		ps = []*plugin.Plugin{}
+
 		glob, err := c.Flags().GetString("glob")
 		if err == nil && glob != "" {
 			allPlugins, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))

@@ -2,9 +2,8 @@ package plugind
 
 import (
 	"context"
+	"errors"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 	"net"
 	"os"
 	"sync"
@@ -54,60 +53,7 @@ type service struct {
 	checkChains []serviceCheckFunc
 }
 
-func (s *service) Start(wg *sync.WaitGroup) error {
-	err := s.run()
-	if err != nil {
-		return err
-	}
-
-	// check service is working
-	ctx, cancel := context.WithTimeout(s.ctx, s.timeout)
-	defer cancel()
-	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return errors.New("time out")
-			case <-time.Tick(time.Second):
-				if s.checkChains == nil {
-					return nil
-				}
-				for _, chain := range s.checkChains {
-					err := chain(s)
-					if err == nil {
-						return nil
-					}
-				}
-			}
-		}
-	})
-	if err = g.Wait(); err != nil {
-		return err
-	}
-
-	// daemon this process
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		for {
-			select {
-			case <-s.ctx.Done():
-				return
-			case <-s.sig:
-				err := s.run()
-				if err != nil {
-					log.Error(err)
-					return
-				}
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (s *service) run() error {
+func (s *service) start() error {
 	command, err := createCommandWithContext(s.ctx, s.cmd)
 
 	if err != nil {
@@ -133,6 +79,44 @@ func (s *service) run() error {
 	}()
 
 	return nil
+}
+
+func (s *service) ready() error {
+	ctx, cancel := context.WithTimeout(s.ctx, s.timeout)
+	defer cancel()
+	for {
+		select {
+		case <-ctx.Done():
+			return errors.New("time out")
+		case <-time.Tick(time.Second):
+			if s.checkChains == nil {
+				return nil
+			}
+			for _, chain := range s.checkChains {
+				err := chain(s)
+				if err == nil {
+					return nil
+				}
+			}
+		}
+	}
+}
+
+func (s *service) daemon() {
+	s.wg.Add(1)
+	defer s.wg.Done()
+	for {
+		select {
+		case <-s.ctx.Done():
+			return
+		case <-s.sig:
+			err := s.start()
+			if err != nil {
+				log.Error(err)
+				return
+			}
+		}
+	}
 }
 
 func newService(ctx context.Context, cmd string, opts ...serviceOption) *service {
