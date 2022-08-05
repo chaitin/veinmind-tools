@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	gomail "gopkg.in/mail.v2"
+
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
@@ -53,4 +55,35 @@ func handleDockerPluginReportEvents(eventListCh <-chan []reporter.ReportEvent, b
 	if err := reporter.WriteEvents2Log(events, pluginLog); err != nil {
 		log.Warn(err)
 	}
+}
+
+func handleHarborWebhookReportEvents(eventListCh <-chan []reporter.ReportEvent, hpolicy HarborPolicy,
+	pluginLog io.Writer, mailconf MailConf) {
+	filter, events := processReportEvents(eventListCh, hpolicy.Policy, pluginLog)
+	if filter {
+		if hpolicy.Alert {
+			log.Warn(fmt.Sprintf("Action %s has risks!", hpolicy.Action))
+		}
+		if hpolicy.SendMail {
+			err := sendReport2Mail(events, mailconf)
+			if err != nil {
+				log.Error(err)
+			}
+		}
+	}
+	if err := reporter.WriteEvents2Log(events, pluginLog); err != nil {
+		log.Warn(err)
+	}
+}
+func sendReport2Mail(events []reporter.ReportEvent, mailconf MailConf) error {
+	d := gomail.NewDialer(mailconf.Host, mailconf.Port, mailconf.Name, mailconf.Password)
+	m := gomail.NewMessage()
+	m.SetHeader("From", mailconf.Name)
+	m.SetHeader("To", mailconf.Subscriber...)
+	m.SetHeader("Subject", "Harbor webhook Report")
+	m.SetBody("text/plain", fmt.Sprintf("%#v", events))
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
 }
