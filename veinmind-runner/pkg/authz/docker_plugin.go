@@ -2,9 +2,12 @@ package authz
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
+	"sync"
 
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
@@ -16,23 +19,125 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type dockerPluginServer struct {
-	option *serverOption
+type DockerServerOption func(option *dockerServerOption) error
+
+type dockerServerOption struct {
+	authLog   io.WriteCloser
+	pluginLog io.WriteCloser
+	policies  sync.Map
+	listener  net.Listener
 }
 
-func NewDockerPlugin(opts ...ServerOption) Server {
-	s := &dockerPluginServer{
-		option: new(serverOption),
+func WithPolicy(policies ...Policy) DockerServerOption {
+	return func(option *dockerServerOption) error {
+		for _, policy := range policies {
+			option.policies.Store(policy.Action, policy)
+		}
+
+		return nil
 	}
-	return newDefaultServer(s, opts...)
 }
 
-func (s *dockerPluginServer) init() error {
+func WithAuthLog(path string) DockerServerOption {
+	return func(option *dockerServerOption) error {
+		_, err := os.Stat(path)
+		if errors.Is(err, os.ErrNotExist) {
+			_, err = os.Create(path)
+			if err != nil {
+				return err
+			}
+		}
+
+		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+
+		option.authLog = fp
+		return nil
+	}
+}
+
+func WithPluginLog(path string) DockerServerOption {
+	return func(option *dockerServerOption) error {
+		_, err := os.Stat(path)
+		if errors.Is(err, os.ErrNotExist) {
+			_, err = os.Create(path)
+			if err != nil {
+				return err
+			}
+		}
+
+		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+
+		option.pluginLog = fp
+		return nil
+	}
+}
+
+func WithListenerUnix(addr string) DockerServerOption {
+	return func(option *dockerServerOption) error {
+		listener, err := net.ListenUnix("unix", &net.UnixAddr{Net: "unix", Name: addr})
+		if err != nil {
+			return err
+		}
+
+		option.listener = listener
+		return nil
+	}
+}
+
+func WithServerOptions(options ...DockerServerOption) DockerServerOption {
+	return func(s *dockerServerOption) error {
+		for _, option := range options {
+			if err := option(s); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+type dockerPluginServer struct {
+	defaultServer
+	dockerOpt *dockerServerOption
+}
+
+func NewDockerPluginServer(opts ...DockerServerOption) (dockerPluginServer, error) {
+	option := &dockerServerOption{}
+	for _, opt := range opts {
+		if err := opt(option); err != nil {
+			return dockerPluginServer{}, err
+		}
+	}
+	return dockerPluginServer{dockerOpt: option}, nil
+
+}
+
+func (s *dockerPluginServer) Init() error {
+	opts := make([]DockerServerOption, 0)
+	if s.dockerOpt.authLog == nil {
+		opts = append(opts, WithAuthLog(defaultAuthLogPath))
+	}
+	if s.dockerOpt.pluginLog == nil {
+		opts = append(opts, WithPluginLog(defaultPluginPath))
+	}
+	if s.dockerOpt.listener == nil {
+		opts = append(opts, WithListenerUnix(defaultSockListenAddr))
+	}
+	if err := WithServerOptions(opts...)(s.dockerOpt); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (s *dockerPluginServer) start() error {
-	multiWriter := io.MultiWriter(s.option.authLog, os.Stdout)
+func (s *dockerPluginServer) Start() error {
+	multiWriter := io.MultiWriter(s.dockerOpt.authLog, os.Stdout)
 
 	logger := logrus.New()
 	logger.Out = multiWriter
@@ -43,7 +148,7 @@ func (s *dockerPluginServer) start() error {
 	engine := s.registerRouter()
 
 	go func() {
-		err := engine.RunListener(s.option.listener)
+		err := engine.RunListener(s.dockerOpt.listener)
 		if err != nil {
 			log.Error(err)
 		}
@@ -51,25 +156,21 @@ func (s *dockerPluginServer) start() error {
 	return nil
 }
 
-func (s *dockerPluginServer) wait() error {
+func (s *dockerPluginServer) Close() error {
+	err := s.dockerOpt.authLog.Close()
+	if err != nil {
+		return err
+	}
+
+	err = s.dockerOpt.pluginLog.Close()
+	if err != nil {
+		return err
+	}
 	return nil
-}
-
-func (s *dockerPluginServer) close() {
-	err := s.option.authLog.Close()
-	if err != nil {
-		log.Error(err)
-	}
-
-	err = s.option.pluginLog.Close()
-	if err != nil {
-		log.Error(err)
-	}
 }
 
 func (s *dockerPluginServer) registerRouter() *gin.Engine {
 	engine := gin.Default()
-
 	engine.POST("/Plugin.Activate", func(c *gin.Context) {
 		c.JSON(200, plugins.Manifest{
 			Implements: []string{authorization.AuthZApiImplements},
@@ -104,7 +205,7 @@ func (s *dockerPluginServer) registerRouter() *gin.Engine {
 
 func (s *dockerPluginServer) handleAuthZReq(req *authorization.Request) *authorization.Response {
 	dockerPluginAction := route.ParseDockerPluginAction(req)
-	val, ok := s.option.policies.Load(string(dockerPluginAction))
+	val, ok := s.dockerOpt.policies.Load(string(dockerPluginAction))
 	if !ok {
 		return s.allowAuthResp()
 	}
@@ -125,7 +226,7 @@ func (s *dockerPluginServer) handleAuthZReq(req *authorization.Request) *authori
 		eventListCh, result, err = handleDefaultAction()
 	}
 	go func() {
-		handleReportEvents(eventListCh, policy, s.option.pluginLog)
+		handleDockerPluginReportEvents(eventListCh, policy, s.dockerOpt.pluginLog)
 	}()
 
 	if err != nil {

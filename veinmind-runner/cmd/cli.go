@@ -4,7 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/chaitin/libveinmind/go"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
@@ -19,10 +24,6 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -149,15 +150,18 @@ var authCmd = &cmd.Command{
 			return err
 		}
 
-		options := []authz.ServerOption{
+		options := []authz.DockerServerOption{
 			authz.WithPolicy(config.Policies...),
 			authz.WithAuthLog(config.Log.AuthZLogPath),
 			authz.WithPluginLog(config.Log.PluginLogPath),
 			authz.WithListenerUnix(config.Listener.ListenAddr),
 		}
-
-		server := authz.NewDockerPlugin(options...)
-		return server.Run()
+		server, err := authz.NewDockerPluginServer(options...)
+		if err != nil {
+			return err
+		}
+		runner := authz.NewDefaultRunner(&server)
+		return runner.Run()
 	},
 }
 var listCmd = &cmd.Command{
