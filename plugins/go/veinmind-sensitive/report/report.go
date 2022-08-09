@@ -1,16 +1,17 @@
 package report
 
 import (
+	"io/fs"
+	"strconv"
+	"syscall"
+	"time"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
-	"io/fs"
-	"strconv"
-	"syscall"
-	"time"
 )
 
 func localRuleLevel2EventLevel(level string) report.Level {
@@ -37,9 +38,9 @@ func file2FileDetail(info fs.FileInfo, path string) (report.FileDetail, error) {
 		Size: info.Size(),
 		Uid:  int64(sys.Uid),
 		Gid:  int64(sys.Gid),
-		Ctim: sys.Ctim.Sec,
-		Mtim: sys.Mtim.Sec,
-		Atim: sys.Mtim.Sec,
+		Ctim: int64(sys.Ctim.Sec),
+		Mtim: int64(sys.Mtim.Sec),
+		Atim: int64(sys.Mtim.Sec),
 	}, nil
 }
 
