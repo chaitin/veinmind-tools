@@ -85,11 +85,10 @@ func (c *ClamAVManager) Ready() error {
 }
 
 func (c *ClamAVManager) checkPortIsUsed() error {
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(c.clamAVHost, c.clamAVPort), 3*time.Second)
+	_, err := net.DialTimeout("tcp", net.JoinHostPort(c.clamAVHost, c.clamAVPort), 3*time.Second)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
 	return nil
 }
 
