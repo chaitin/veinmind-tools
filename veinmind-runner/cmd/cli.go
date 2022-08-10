@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"os"
@@ -21,6 +22,7 @@ import (
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/distribution/distribution/reference"
 	"github.com/spf13/cobra"
@@ -33,6 +35,9 @@ const (
 var (
 	ps                    []*plugin.Plugin
 	ctx                   context.Context
+	allPlugins            []*plugin.Plugin //All found plugins
+	serviceManager        *plugind.Manager
+	cancel                context.CancelFunc
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
 	parallelContainerMode = container.InContainer()
@@ -47,17 +52,32 @@ var (
 
 		// discover plugins
 		ctx = c.Context()
+		ctx, cancel = context.WithCancel(ctx)
+		ps = []*plugin.Plugin{}
+
 		glob, err := c.Flags().GetString("glob")
 		if err == nil && glob != "" {
-			ps, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
+			allPlugins, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
 		} else {
-			ps, err = plugin.DiscoverPlugins(ctx, ".")
+			allPlugins, err = plugin.DiscoverPlugins(ctx, ".")
 		}
 		if err != nil {
 			return err
 		}
-		for _, p := range ps {
+
+		serviceManager, err = plugind.NewManager()
+		if err != nil {
+			return err
+		}
+
+		for _, p := range allPlugins {
 			log.Infof("Discovered plugin: %#v\n", p.Name)
+			err = serviceManager.StartWithContext(ctx, p.Name)
+			if err != nil {
+				log.Errorf("%#v can not work: %#v\n", p.Name, err)
+				continue
+			}
+			ps = append(ps, p)
 		}
 
 		// reporter channel listen
@@ -109,6 +129,9 @@ var (
 				}
 			}
 		}
+
+		cancel()
+		serviceManager.Wait()
 
 		// Exit
 		exitcode, err := cmd.Flags().GetInt("exit-code")
