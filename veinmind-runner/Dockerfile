@@ -11,11 +11,18 @@ FROM veinmind/veinmind-backdoor:latest as backdoor
 
 FROM veinmind/python3:1.1.0-stretch as release
 WORKDIR /tool
+
+COPY dockerfiles/sources.list /etc/apt/sources.list
+RUN apt update && apt-get install -y clamav clamav-daemon && freshclam
+COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
+
 COPY --from=builder /build/veinmind-runner .
 COPY --from=weakpass /tool/veinmind-weakpass .
+COPY --from=malicious /tool/veinmind-malicious_linux_amd64 .
 COPY --from=sensitive /tool /tool/veinmind-sensitive
 COPY --from=history /tool /tool/veinmind-history
 COPY --from=backdoor /tool /tool/veinmind-backdoor
+
 RUN pip install -r veinmind-sensitive/requirements.txt && pip install -r veinmind-history/requirements.txt && pip install -r veinmind-backdoor/requirements.txt && chmod +x */scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner
 ENTRYPOINT ["/tool/entrypoint.sh"]
