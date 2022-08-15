@@ -80,7 +80,7 @@ jobs:
         with:
           files: ./plugins/go/veinmind-malicious/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   test-veinmind-weakpass:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
@@ -95,7 +95,7 @@ jobs:
           cd ../service && go test -tags static  && go test -tags dynamic 
     
   build-amd64-static-veinmind-weakpass:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
@@ -118,7 +118,7 @@ jobs:
           files: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-dynamic-veinmind-weakpass:
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     container:
       image: veinmind/go1.18:1.1.0-stretch
     env:
