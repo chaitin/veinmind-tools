@@ -13,28 +13,28 @@ import (
 )
 
 type SensitiveConfig struct {
-	WhiteList SensitiveWhiteList `json:"white_list" ,toml:"white_list"`
-	Rules     []SensitiveRule    `json:"rules" ,toml:"rules"`
+	WhiteList SensitiveWhiteList `json:"white_list" toml:"white_list"`
+	Rules     []SensitiveRule    `json:"rules" toml:"rules"`
 	MIMEMap   map[string]bool
 }
 
 type SensitiveWhiteList struct {
-	Paths     []string `json:"paths" ,toml:"paths"`
+	Paths     []string `json:"paths" toml:"paths"`
 	PathsGlob []glob.Glob
 }
 
 type SensitiveRule struct {
-	Id             int64  `json:"id" ,toml:"id"`
-	Name           string `json:"name" ,toml:"name"`
-	Description    string `json:"description" ,toml:"description"`
+	Id             int64  `json:"id" toml:"id"`
+	Name           string `json:"name" toml:"name"`
+	Description    string `json:"description" toml:"description"`
 	Filepath       string `json:"filepath" ,toml:"filepath"`
 	FilepathRegexp *regexp.Regexp
-	Level          string `json:"level" ,toml:"level"`
-	MIME           string `json:"mime" ,toml:"mime"`
-	Match          string `json:"match" ,toml:"match"`
+	Level          string `json:"level" toml:"level"`
+	MIME           string `json:"mime" toml:"mime"`
+	Match          string `json:"match" toml:"match"`
 	MatchContains  string
 	MatchRegex     *regexp.Regexp
-	Env            string `json:"env" ,toml:"env"`
+	Env            string `json:"env" toml:"env"`
 }
 
 var sensitiveConfig *SensitiveConfig
