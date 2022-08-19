@@ -48,6 +48,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)  | scan images for backdoors                 |
 | [veinmind-history](plugins/python/veinmind-history/README.en.md)    | scan images for abnormal history commands |
 | [veinmind-asset](plugins/go/veinmind-asset/README.en.md)            | scan images for asset information         |
+| [veinmind-webshell](plugins/go/veinmind-webshell)       | scan images for webshell                  |
 
 PS: All tools currently support running in parallel containers
 
