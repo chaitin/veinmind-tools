@@ -178,6 +178,22 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: veinmind-runner.tar.gz
+  build-amd64-veinmind-webshell:
+    runs-on: ubuntu-18.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.18.1'
+      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: cd ./plugins/go/veinmind-webshell && /bin/bash -x script/build_veinmind_webshell_amd64.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: veinmind-webshell-amd64
+          path: ./plugins/go/veinmind-webshell/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   push-veinmind-backdoor:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
@@ -327,6 +343,27 @@ jobs:
             veinmind/veinmind-asset:latest
             veinmind/veinmind-asset:${{github.ref_name}}
           context: ./plugins/go/veinmind-asset
+  push-veinmind-webshell:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: cp -r ./veinmind-common ./plugins/go/veinmind-webshell && rm -rf ./plugins/go/veinmind-asset/veinmind-common/python
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+          tags: |
+            veinmind/veinmind-webshell:latest
+            veinmind/veinmind-webshell:${{github.ref_name}}
+          context: ./plugins/go/veinmind-webshell
   push-veinmind-runner:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04

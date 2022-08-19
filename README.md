@@ -41,15 +41,16 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 ## 🔨 工具列表
 
-| 工具                                                                                                     | 功能  | 
-|--------------------------------------------------------------------------------------------------------|---|
-| [veinmind-runner](veinmind-runner/README.md)                                                                     | 扫描工具运行宿主 |
-| [veinmind-malicious](plugins/go/veinmind-malicious)     | 扫描镜像中的恶意文件  |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass)  | 扫描镜像中的弱口令  |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive) | 扫描镜像中的敏感信息  |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor) | 扫描镜像中的后门 |
-| [veinmind-history](plugins/python/veinmind-history) | 扫描镜像中的异常历史命令 |
-| [veinmind-asset](plugins/go/veinmind-asset)      | 扫描镜像中的资产信息 |
+| 工具                                                      | 功能              | 
+|---------------------------------------------------------|-----------------|
+| [veinmind-runner](veinmind-runner/README.md)            | 扫描工具运行宿主        |
+| [veinmind-malicious](plugins/go/veinmind-malicious)     | 扫描镜像中的恶意文件      |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass)       | 扫描镜像中的弱口令       |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive) | 扫描镜像中的敏感信息      |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor)   | 扫描镜像中的后门        |
+| [veinmind-history](plugins/python/veinmind-history)     | 扫描镜像中的异常历史命令    |
+| [veinmind-asset](plugins/go/veinmind-asset)             | 扫描镜像中的资产信息      |
+| [veinmind-webshell](plugins/go/veinmind-webshell)       | 扫描镜像中的 Webshell |
     
 PS: 目前所有工具均已支持平行容器的方式运行
 
