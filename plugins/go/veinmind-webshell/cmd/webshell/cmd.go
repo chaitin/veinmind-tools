@@ -50,7 +50,7 @@ func scan(c *cmd.Command, image api.Image) (err error) {
 	errG := errgroup.Group{}
 	errG.SetLimit(100)
 
-	err = image.Walk("/tmp", func(path string, info fs.FileInfo, err error) error {
+	err = image.Walk("/", func(path string, info fs.FileInfo, err error) error {
 		if isScript, scriptType, err := filter.Kit.Filter(path, info); !isScript {
 			return nil
 		} else {
