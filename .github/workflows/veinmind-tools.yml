@@ -194,6 +194,10 @@ jobs:
         with:
           name: veinmind-webshell-amd64
           path: ./plugins/go/veinmind-webshell/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./plugins/go/veinmind-webshell/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   push-veinmind-backdoor:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
