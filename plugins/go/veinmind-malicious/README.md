@@ -22,11 +22,18 @@ veinmind-malicious 是由长亭科技自研的一款镜像恶意文件扫描工�
 ### 安装方式一
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
+。
 
-确保机器上安装了`docker`以及`docker-compose`，并启动`ClamAV`。
+veinmind-malicious 提供使用自动启动本地clamAV服务以及手动启动clamAV服务，默认为自动启动本地clamAV, 若用户本地选择自动启用本地clamAV服务并且存在clamD进程, 程序则不会再启动clamAV:
 
+自动使用本地clamAV服务:
 ```
-chmod +x veinmind-malicious && ./veinmind-malicious extract && cd scripts && docker-compose pull && docker-compose up -d
+go run cmd/scan/cli.go scan -m=false -r CLAMAV_HOST -p CLAMAV_PORT scan
+```
+
+手动启动clamAV:
+```base
+go run cmd/scan/cli.go scan -m=true -r CLAMAV_HOST -p CLAMAV_PORT scan
 ```
 
 如果您使用的是`VirusTotal`，则需要在环境变量或`scripts/.env`文件中声明`VT_API_KEY`
@@ -51,36 +58,36 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-./veinmind-malicious scan [imagename/imageid]
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan  [imagename/imageid]
 ```
 
 2.扫描所有本地镜像
 
 ```
-./veinmind-malicious scan
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan
 ```
 
 3.指定输出报告格式 (目前支持html/csv/json)
 
 ```
-./veinmind-malicious scan -f [html/csv/json]
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan -f [html/csv/json]
 ```
 
 4.指定输出报告名称
 
 ```
-./veinmind-malicious scan -n [reportname]
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan -n [reportname]
 ```
 
 5.指定输出路径
 
 ```
-./veinmind-malicious scan -o [outputpath]
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan -o [outputpath]
 ```
 
 6.指定容器运行时类型
 ```
-./veinmind-malicious scan --containerd
+./veinmind-malicious -m=[false/true] -r CLAMAV_HOST -p CLAMAV_PORT scan --containerd
 ```
 
 容器运行时类型
