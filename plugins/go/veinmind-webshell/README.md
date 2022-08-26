@@ -1,7 +1,7 @@
 <h1 align="center"> veinmind-webshell </h1>
 
 <p align="center">
-veinmind-weakpass 是由长亭科技自研的一款镜像 Webshell 扫描工具 
+veinmind-webshell 是由长亭科技自研的一款镜像 Webshell 扫描工具 
 </p>
 
 ## 功能特性
@@ -38,7 +38,7 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan --token [
 1. 登录[百川平台](https://rivers.chaitin.cn/)，激活关山 Webshell 检测产品
    ![](../../../docs/veinmind-webshell/readme1.png)
 
-2. 点击左下角组织配置创建 API Token
+2. 点击左下角组织配置创建 API Token (基础版每日限制检测 100 次， 高级版可联系问脉小助手/百川平台获取)
    ![](../../../docs/veinmind-webshell/readme2.png)
    ![](../../../docs/veinmind-webshell/readme3.png)
 3. 执行 `veinmind-webshell` 时填入创建的 `token`
