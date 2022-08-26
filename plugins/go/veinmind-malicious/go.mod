@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.10 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/cobra v1.3.0
-	github.com/testwill/go-clamd v0.0.0-20220811062426-05494d9c12f0
+	github.com/testwill/go-clamd v1.0.0
 	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	gorm.io/driver/sqlite v1.2.6

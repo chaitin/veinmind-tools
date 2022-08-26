@@ -361,8 +361,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
-github.com/testwill/go-clamd v0.0.0-20220811062426-05494d9c12f0 h1:/PJ/I1TNI5jq/atpCb4gZWG9RrIeYb7VasPwXgRzAO4=
-github.com/testwill/go-clamd v0.0.0-20220811062426-05494d9c12f0/go.mod h1:9RgIAXgnt9vSQKMbGQeLtRBK4i63Ys35PSubGPBQJp4=
+github.com/testwill/go-clamd v1.0.0 h1:gtGX/PYgYWTpc75DujsJa6aywFVwAsxv2FJ+It2tvU0=
+github.com/testwill/go-clamd v1.0.0/go.mod h1:9RgIAXgnt9vSQKMbGQeLtRBK4i63Ys35PSubGPBQJp4=
 github.com/thedevsaddam/gojsonq/v2 v2.5.2 h1:CoMVaYyKFsVj6TjU6APqAhAvC07hTI6IQen8PHzHYY0=
 github.com/thedevsaddam/gojsonq/v2 v2.5.2/go.mod h1:bv6Xa7kWy82uT0LnXPE2SzGqTj33TAEeR560MdJkiXs=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
