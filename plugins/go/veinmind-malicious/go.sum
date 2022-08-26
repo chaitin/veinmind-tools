@@ -74,8 +74,8 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/chaitin/libveinmind v1.0.7/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
-github.com/chaitin/libveinmind v1.1.0 h1:yqFpO1euqZGytN1wDPXJJ5hSAnbMGa5wb3ojf4yDLrQ=
-github.com/chaitin/libveinmind v1.1.0/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
+github.com/chaitin/libveinmind v1.1.1 h1:DoMJXAjw3xzOHcrAiBBQpbqudsumw5pGfRQko6f6USc=
+github.com/chaitin/libveinmind v1.1.1/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
 github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b h1:H0ZMz4yuJ8WmDVIY3UoG4r3CWmzlfgrKsP7wwIc6nS0=
 github.com/chaitin/veinmind-tools/veinmind-common/go v0.0.0-20220601112011-fe631efe8a7b/go.mod h1:UdK75T5EhRBbCIaeJzjA3b9kly3uvTvzYITDzwHPQTA=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
@@ -100,8 +100,6 @@ github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dutchcoders/go-clamd v0.0.0-20170520113014-b970184f4d9e h1:rcHHSQqzCgvlwP0I/fQ8rQMn/MpHE5gWSLdtpxtP6KQ=
-github.com/dutchcoders/go-clamd v0.0.0-20170520113014-b970184f4d9e/go.mod h1:Byz7q8MSzSPkouskHJhX0er2mZY/m0Vj5bMeMCkkyY4=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
@@ -363,6 +361,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
+github.com/testwill/go-clamd v0.0.0-20220811062426-05494d9c12f0 h1:/PJ/I1TNI5jq/atpCb4gZWG9RrIeYb7VasPwXgRzAO4=
+github.com/testwill/go-clamd v0.0.0-20220811062426-05494d9c12f0/go.mod h1:9RgIAXgnt9vSQKMbGQeLtRBK4i63Ys35PSubGPBQJp4=
 github.com/thedevsaddam/gojsonq/v2 v2.5.2 h1:CoMVaYyKFsVj6TjU6APqAhAvC07hTI6IQen8PHzHYY0=
 github.com/thedevsaddam/gojsonq/v2 v2.5.2/go.mod h1:bv6Xa7kWy82uT0LnXPE2SzGqTj33TAEeR560MdJkiXs=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
