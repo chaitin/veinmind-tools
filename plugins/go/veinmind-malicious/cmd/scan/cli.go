@@ -8,7 +8,6 @@ import (
 	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
 	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
-	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/scanner/malicious"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"

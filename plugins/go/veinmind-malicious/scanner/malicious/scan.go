@@ -1,12 +1,21 @@
 package malicious
 
 import (
-	"code.cloudfoundry.org/bytefmt"
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
 	"debug/elf"
 	"encoding/hex"
+	fs "io/fs"
+	"io/ioutil"
+	"net"
+	"os"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+
+	"code.cloudfoundry.org/bytefmt"
 	veinmindcommon "github.com/chaitin/libveinmind/go"
 	docker "github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
@@ -15,13 +24,6 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/clamav"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/virustotal"
-	fs "io/fs"
-	"io/ioutil"
-	"net"
-	"os"
-	"strings"
-	"syscall"
-	"time"
 )
 
 func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
@@ -45,161 +47,180 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 	switch v := image.(type) {
 	case *docker.Image:
 		dockerImage := v
+		var wg sync.WaitGroup
+		var maliciousResultsLock sync.Mutex
 		for i := 0; i < dockerImage.NumLayers(); i++ {
-			// 获取 Layer ID
-			layerID, err := dockerImage.GetLayerDiffID(i)
-			if err != nil {
-				log.Error("Get LayerID Error: ", err)
-				continue
-			}
+			wg.Add(1)
 
-			// 判断 Layer 是否已经扫描
-			reportLayer := model.ReportLayer{}
-			database.GetDbInstance().Where("layer_id", layerID).Find(&reportLayer)
+			var scanLayer = func(i int) {
+				defer wg.Done()
 
-			if reportLayer.LayerID != "" {
-				reportLayerCopy := model.ReportLayer{
-					ImageID:            image.ID(),
-					LayerID:            reportLayer.LayerID,
-					MaliciousFileInfos: reportLayer.MaliciousFileInfos,
-				}
-				scanReport.Layers = append(scanReport.Layers, reportLayerCopy)
-				log.Info("Skip Scan Layer: ", layerID)
-				continue
-			} else {
-				l, err := dockerImage.OpenLayer(i)
+				// 获取 Layer ID
+				layerID, err := dockerImage.GetLayerDiffID(i)
 				if err != nil {
 					log.Error(err)
+					return
 				}
 
-				log.Info("Start Scan Layer: ", l.ID())
-				l.Walk("/", func(path string, info fs.FileInfo, err error) error {
-					// 部分情况下ELF解析会产生panic
-					defer func() {
-						if err := recover(); err != nil {
-							log.Error(err)
-						}
-					}()
+				// 判断 Layer 是否已经扫描
+				reportLayer := model.ReportLayer{}
+				database.GetDbInstance().Where("layer_id", layerID).Find(&reportLayer)
 
-					// 处理错误
+				if reportLayer.LayerID != "" {
+					reportLayerCopy := model.ReportLayer{
+						ImageID:            image.ID(),
+						LayerID:            reportLayer.LayerID,
+						MaliciousFileInfos: reportLayer.MaliciousFileInfos,
+					}
+					scanReport.Layers = append(scanReport.Layers, reportLayerCopy)
+					log.Info("Skip Scan Layer: ", layerID)
+					return
+				} else {
+					l, err := dockerImage.OpenLayer(i)
 					if err != nil {
-						log.Debug(err)
-						return nil
+						log.Error(err)
 					}
 
-					// 判断文件类型，跳过特定类型文件
-					if (info.Mode() & (os.ModeDevice | os.ModeNamedPipe | os.ModeSocket | os.ModeCharDevice | os.ModeDir)) != 0 {
-						log.Debug("Skip: ", path)
-						return nil
-					}
-
-					// 忽略软链接, PS: 全局扫描终究会扫到实际的文件
-					if (info.Mode() & os.ModeSymlink) != 0 {
-						log.Debug("Skip: ", path)
-						return nil
-					}
-
-					scanReport.ScanFileCount++
-
-					f, err := l.Open(path)
-					if err != nil {
-						log.Debug(err)
-						return nil
-					}
-
-					defer func() {
-						f.Close()
-					}()
-
-					// 判断是否是ELF文件，如果不是则跳过
-					_, err = elf.NewFile(f)
-					if _, ok := err.(*elf.FormatError); ok {
-						log.Debug("Skip File: ", path)
-						return nil
-					} else if err != nil {
-						return nil
-					}
-
-					results := []av.ScanResult{}
-
-					// 使用 ClamAV 进行扫描
-					if clamav.Active() {
-						results, err = clamav.ScanStream(f)
-						if err != nil {
-							if _, ok := err.(*net.OpError); ok {
+					log.Info("Start Scan Layer: ", l.ID())
+					l.Walk("/", func(path string, info fs.FileInfo, err error) error {
+						// 部分情况下ELF解析会产生panic
+						defer func() {
+							if err := recover(); err != nil {
 								log.Error(err)
-							} else {
-								//TODO: 告知使用者其他Err
-								log.Debug(err)
+							}
+						}()
+
+						// 处理错误
+						if err != nil {
+							log.Debug(err)
+							return nil
+						}
+
+						// 判断文件类型，跳过特定类型文件
+						if (info.Mode() & (os.ModeDevice | os.ModeNamedPipe | os.ModeSocket | os.ModeCharDevice | os.ModeDir)) != 0 {
+							log.Debug("Skip: ", path)
+							return nil
+						}
+
+						// 忽略软链接, PS: 全局扫描终究会扫到实际的文件
+						if (info.Mode() & os.ModeSymlink) != 0 {
+							log.Debug("Skip: ", path)
+							return nil
+						}
+						maliciousResultsLock.Lock()
+						scanReport.ScanFileCount++
+						maliciousResultsLock.Unlock()
+
+						f, err := l.Open(path)
+						if err != nil {
+							log.Debug(err)
+							return nil
+						}
+
+						defer func() {
+							f.Close()
+						}()
+
+						// 判断是否是ELF文件，如果不是则跳过
+						_, err = elf.NewFile(f)
+						if _, ok := err.(*elf.FormatError); ok {
+							log.Debug("Skip File: ", path)
+							return nil
+						} else if err != nil {
+							return nil
+						}
+
+						results := []av.ScanResult{}
+
+						// 使用 ClamAV 进行扫描
+						if clamav.Active() {
+							results, err = clamav.ScanStream(f)
+							if err != nil {
+								if _, ok := err.(*net.OpError); ok {
+									log.Error(err)
+								} else {
+									//TODO: 告知使用者其他Err
+									log.Debug(err)
+								}
+							}
+						} else {
+							log.Error("clamav is not active")
+						}
+
+						// 使用 Virustotal 进行扫描
+						fileByte, err := ioutil.ReadAll(f)
+						hash := sha256.New()
+						fileSha256 := hex.EncodeToString(hash.Sum(fileByte))
+
+						virustotalContext, _ := context.WithTimeout(context.Background(), 10*time.Millisecond)
+						if virustotal.Active() {
+							vtResults, err := virustotal.ScanSHA256(virustotalContext, fileSha256)
+							if err == nil && vtResults != nil && len(vtResults) > 0 {
+								results = append(results, vtResults...)
 							}
 						}
-					}
 
-					// 使用 Virustotal 进行扫描
-					fileByte, err := ioutil.ReadAll(f)
-					hash := sha256.New()
-					fileSha256 := hex.EncodeToString(hash.Sum(fileByte))
+						if len(results) > 0 {
+							log.Warn("Find malicious file: ", path)
 
-					virustotalContext, _ := context.WithTimeout(context.Background(), 10*time.Millisecond)
-					if virustotal.Active() {
-						vtResults, err := virustotal.ScanSHA256(virustotalContext, fileSha256)
-						if err == nil && vtResults != nil && len(vtResults) > 0 {
-							results = append(results, vtResults...)
+							// 假设有多个结果，直接拼接 description
+							description := ""
+							engine := map[string]bool{}
+							engineName := ""
+							for _, r := range results {
+								description = description + r.Description + ","
+								engine[r.EngineName] = true
+							}
+							for e := range engine {
+								engineName = e + ","
+							}
+							engineName = strings.TrimRight(engineName, ",")
+							description = strings.TrimRight(description, ",")
+							maliciousResultsLock.Lock()
+							scanReport.MaliciousFileCount++
+							maliciousResultsLock.Unlock()
+							// 计算文件MD5
+							hash := md5.New()
+							var fileMd5 string
+							if err == nil {
+								fileMd5 = hex.EncodeToString(hash.Sum(fileByte)[:16])
+							}
+
+							// 获取文件时间
+							stat := info.Sys().(*syscall.Stat_t)
+
+							result := model.MaliciousFileInfo{
+								Engine:       engineName,
+								RelativePath: path,
+								FileName:     info.Name(),
+								FileSize:     bytefmt.ByteSize(uint64(info.Size())),
+								FileMd5:      fileMd5,
+								FileSha256:   fileSha256,
+								FileCreated:  time.Unix(int64(stat.Ctim.Sec), int64(stat.Ctim.Nsec)).Format("2006-01-02 15:04:05"),
+								Description:  description,
+							}
+							reportLayer.MaliciousFileInfos = append(reportLayer.MaliciousFileInfos, result)
 						}
-					}
-
-					if len(results) > 0 {
-						log.Warn("Find malicious file: ", path)
-
-						// 假设有多个结果，直接拼接 description
-						description := ""
-						engine := map[string]bool{}
-						engineName := ""
 						for _, r := range results {
-							description = description + r.Description + ","
-							engine[r.EngineName] = true
+							log.Warn(r)
 						}
-						for e := range engine {
-							engineName = e + ","
-						}
-						engineName = strings.TrimRight(engineName, ",")
-						description = strings.TrimRight(description, ",")
+						return nil
+					})
 
-						scanReport.MaliciousFileCount++
-
-						// 计算文件MD5
-						hash := md5.New()
-						var fileMd5 string
-						if err == nil {
-							fileMd5 = hex.EncodeToString(hash.Sum(fileByte)[:16])
-						}
-
-						// 获取文件时间
-						stat := info.Sys().(*syscall.Stat_t)
-
-						result := model.MaliciousFileInfo{
-							Engine:       engineName,
-							RelativePath: path,
-							FileName:     info.Name(),
-							FileSize:     bytefmt.ByteSize(uint64(info.Size())),
-							FileMd5:      fileMd5,
-							FileSha256:   fileSha256,
-							FileCreated:  time.Unix(int64(stat.Ctim.Sec), int64(stat.Ctim.Nsec)).Format("2006-01-02 15:04:05"),
-							Description:  description,
-						}
-						reportLayer.MaliciousFileInfos = append(reportLayer.MaliciousFileInfos, result)
+					reportLayer.LayerID = layerID
+					reportLayer.ImageID = image.ID()
+					maliciousResultsLock.Lock()
+					scanReport.Layers = append(scanReport.Layers, reportLayer)
+					maliciousResultsLock.Unlock()
+					if err != nil {
+						log.Error("Enqueue error :", err.Error())
 					}
-					for _, r := range results {
-						log.Warn(r)
-					}
-					return nil
-				})
+				}
 
-				reportLayer.LayerID = layerID
-				reportLayer.ImageID = image.ID()
-				scanReport.Layers = append(scanReport.Layers, reportLayer)
 			}
+			go scanLayer(i)
 		}
+		wg.Wait()
 	}
 
 	// 设置返回结果
