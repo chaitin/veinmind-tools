@@ -55,16 +55,16 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 PS: 目前所有工具均已支持平行容器的方式运行
 
 ## ☁️ 云原生设施兼容性
-| 名称 | 类别 | 是否兼容 |
-|------|------|----------|
-| Jenkins | CI/CD | ✔️ |
-| Gitlab CI | CI/CD | ✔️ |
-| Github Action | CI/CD | ✔️ |
-| DockerHub | 镜像仓库 | ✔️ |
-| Docker Registry | 镜像仓库 | ✔️ |
-| Harbor | 镜像仓库 | ✔️ |
-| Docker | 容器运行时 | ✔️ |
-| Containerd | 容器运行时 | ✔️ |
+| 名称                                                          | 类别 | 是否兼容 |
+|-------------------------------------------------------------|------|----------|
+| [Jenkins](https://github.com/chaitin/veinmind-jenkins)      | CI/CD | ✔️ |
+| Gitlab CI                                                   | CI/CD | ✔️ |
+| [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD | ✔️ |
+| DockerHub                                                   | 镜像仓库 | ✔️ |
+| Docker Registry                                             | 镜像仓库 | ✔️ |
+| Harbor                                                      | 镜像仓库 | ✔️ |
+| Docker                                                      | 容器运行时 | ✔️ |
+| Containerd                                                  | 容器运行时 | ✔️ |
 
 ## 🏘️ 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
