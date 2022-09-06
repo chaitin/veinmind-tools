@@ -10,8 +10,10 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -49,11 +51,17 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 		dockerImage := v
 		var wg sync.WaitGroup
 		var maliciousResultsLock sync.Mutex
+		var routineCnt, cpuCnt int32
+		cpuCnt = int32(runtime.NumCPU())
+		log.Info("cpu num :", cpuCnt, ", layers :", dockerImage.NumLayers())
 		for i := 0; i < dockerImage.NumLayers(); i++ {
 			wg.Add(1)
 
 			var scanLayer = func(i int) {
-				defer wg.Done()
+				defer func() {
+					wg.Done()
+					atomic.AddInt32(&routineCnt, -1)
+				}()
 
 				// 获取 Layer ID
 				layerID, err := dockerImage.GetLayerDiffID(i)
@@ -212,13 +220,17 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 					maliciousResultsLock.Lock()
 					scanReport.Layers = append(scanReport.Layers, reportLayer)
 					maliciousResultsLock.Unlock()
-					if err != nil {
-						log.Error("Enqueue error :", err.Error())
-					}
 				}
 
 			}
-			go scanLayer(i)
+		reScan:
+			if atomic.LoadInt32(&routineCnt) < cpuCnt {
+				atomic.AddInt32(&routineCnt, 1)
+				go scanLayer(i)
+			} else {
+				time.Sleep(time.Second)
+				goto reScan
+			}
 		}
 		wg.Wait()
 	}
