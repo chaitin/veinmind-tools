@@ -55,9 +55,9 @@ PS: All tools currently support running in parallel containers
 ## ☁️ Cloud-native infrastructure compatibility
 | Name | Type | Compatibility |
 |------|------|----------|
-| Jenkins | CI/CD | ✔️ |
+| [Jenkins](https://github.com/chaitin/veinmind-jenkins)  | CI/CD | ✔️ |
 | Gitlab CI | CI/CD | ✔️ |
-| Github Action | CI/CD | ✔️ |
+| [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD | ✔️ |
 | DockerHub | Registry | ✔️ |
 | Docker Registry | Registry | ✔️ |
 | Harbor | Registry | ✔️ |
