@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/chaitin/libveinmind v1.1.1
-	github.com/chaitin/veinmind-common-go v1.1.5
+	github.com/chaitin/libveinmind v1.2.1
+	github.com/chaitin/veinmind-common-go v1.1.8-r0
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.4.0
@@ -17,6 +17,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20220114050600-8b9d41f48198 // indirect
+	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
