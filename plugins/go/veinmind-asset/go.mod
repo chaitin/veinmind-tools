@@ -3,17 +3,17 @@ module github.com/chaitin/veinmind-tools/plugins/go/veinmind-asset
 go 1.18
 
 require (
-	github.com/aquasecurity/go-dep-parser v0.0.0-20220626060741-179d0b167e5f
+	github.com/aquasecurity/go-dep-parser v0.0.0-20220904090510-d2cb7a409fe8
 	github.com/aquasecurity/trivy v0.29.2
-	github.com/chaitin/libveinmind v1.1.2
-	github.com/chaitin/veinmind-common-go v1.0.4
+	github.com/chaitin/libveinmind v1.2.1
+	github.com/chaitin/veinmind-common-go v1.1.8-r0
 	github.com/spf13/cobra v1.5.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 )
 
 require (
 	cloud.google.com/go/iam v0.3.0 // indirect
-	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/BurntSushi/toml v1.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/aquasecurity/go-version v0.0.0-20210121072130-637058cfe492 // indirect
 	github.com/aws/aws-sdk-go v1.44.25 // indirect
@@ -44,6 +44,7 @@ require (
 	github.com/moby/buildkit v0.10.3 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20220303224323-02efb9a75ee1 // indirect
+	github.com/opencontainers/runtime-spec v1.0.3-0.20220311020903-6969a0a09ab1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
@@ -51,7 +52,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
-	github.com/stretchr/testify v1.7.3 // indirect
+	github.com/stretchr/testify v1.8.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect

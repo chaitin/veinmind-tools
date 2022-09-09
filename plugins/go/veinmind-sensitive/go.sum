@@ -190,10 +190,11 @@ github.com/certifi/gocertifi v0.0.0-20200922220541-2c3bb06c6054/go.mod h1:sGbDF6
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/chaitin/libveinmind v1.1.1 h1:DoMJXAjw3xzOHcrAiBBQpbqudsumw5pGfRQko6f6USc=
 github.com/chaitin/libveinmind v1.1.1/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
-github.com/chaitin/veinmind-common-go v1.1.5 h1:Z8/sVdxRyqnW/4n+iXsSWJG6NBI6C+0/InHJjtw4F0A=
-github.com/chaitin/veinmind-common-go v1.1.5/go.mod h1:Ap6KTM2qqKv+8tLeb38pX9DFWt/P8/1gmCO2b9tjNZo=
+github.com/chaitin/libveinmind v1.2.1 h1:Mqb2Fi9wvUlial398ar2YphowwQ/4GoQbaLEAsRQ1F0=
+github.com/chaitin/libveinmind v1.2.1/go.mod h1:HomH/TTlcmftls6IJfG1LkbYGlPRa2GxbtWLQNDvl1k=
+github.com/chaitin/veinmind-common-go v1.1.8-r0 h1:QXM8U3bR7P1UNP9nATPdfKKVlWcQc8R6mjawh1z3Tvw=
+github.com/chaitin/veinmind-common-go v1.1.8-r0/go.mod h1:Ap6KTM2qqKv+8tLeb38pX9DFWt/P8/1gmCO2b9tjNZo=
 github.com/charithe/durationcheck v0.0.9/go.mod h1:SSbRIBVfMjCi/kEB6K65XEA83D6prSM8ap1UCpNKtgg=
 github.com/chavacava/garif v0.0.0-20210405164556-e8a0a408d6af/go.mod h1:Qjyv4H3//PWVzTeCezG2b9IRn6myJxJSr4TD/xo6ojU=
 github.com/checkpoint-restore/go-criu/v4 v4.1.0/go.mod h1:xUQBLp4RLc5zJtWY++yjOoMoB5lihDt7fai+75m+rGw=
@@ -961,6 +962,7 @@ github.com/opencontainers/runtime-spec v1.0.1/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/
 github.com/opencontainers/runtime-spec v1.0.2-0.20190207185410-29686dbc5559/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
 github.com/opencontainers/runtime-spec v1.0.2/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
 github.com/opencontainers/runtime-spec v1.0.3-0.20200929063507-e6143ca7d51d/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
+github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 h1:3snG66yBm59tKhhSPQrQ/0bCrv1LQbKt40LnUPiUxdc=
 github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
 github.com/opencontainers/runtime-tools v0.0.0-20181011054405-1d69bd0f9c39/go.mod h1:r3f7wjNzSs2extwzU3Y+6pKfobzPh+kKFJ3ofN+3nfs=
 github.com/opencontainers/selinux v1.6.0/go.mod h1:VVGKuOLlE7v4PJyT6h7mNWvq1rzqiriPsEqVhc+svHE=
