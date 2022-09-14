@@ -1,37 +1,50 @@
 package capability
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/syndtr/gocapability/capability"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
 func IsPrivileged(container api.Container) bool {
-	ocispec, err := container.OCISpec()
+	state, err := container.OCIState()
 	if err != nil {
-		return false
-	}
-	if ocispec.Process == nil {
+		log.Error(err)
 		return false
 	}
 
-	// construct cap map
-	capsEffective := ocispec.Process.Capabilities.Effective
-	capsEffectiveMap := make(map[string]bool)
-	for _, c := range capsEffective {
-		capsEffectiveMap[c] = true
+	if state.Pid == 0 {
+		return false
 	}
 
-	// round all capability
-	allCaps := capability.List()
-	isPrivileged := true
-	for _, c := range allCaps {
-		if _, ok := capsEffectiveMap[c.String()]; ok {
-			continue
-		} else {
-			isPrivileged = false
-			break
+	status, err := ioutil.ReadFile(filepath.Join(func() string {
+		fs := os.Getenv("LIBVEINMIND_HOST_ROOTFS")
+		if fs == "" {
+			return "/"
 		}
+		return fs
+	}(), "proc", strconv.Itoa(state.Pid), "status"))
+	if err != nil {
+		log.Error(err)
+		return false
 	}
 
-	return isPrivileged
+	pattern := regexp.MustCompile(`(?i)capeff:\s*?([a-z0-9]+)\s`)
+	matched := pattern.FindStringSubmatch(string(status))
+
+	if len(matched) != 2 {
+		return false
+	}
+
+	if strings.HasSuffix(matched[1], "ffffffff") {
+		return true
+	}
+
+	return false
 }
