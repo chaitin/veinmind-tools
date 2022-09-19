@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	api "github.com/chaitin/libveinmind/go"
@@ -10,6 +11,8 @@ import (
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/group"
+	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/opencontainers/runtime-spec/specs-go"
 
@@ -176,6 +179,47 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 				Ambient:     ocispec.Process.Capabilities.Ambient,
 			}
 		}
+
+		// mapping username and groupname\
+		{
+			entries, err := passwd.ParseFilesystemPasswd(container)
+			if err != nil {
+				log.Error(err)
+			} else {
+				for _, e := range entries {
+					uid, err := strconv.ParseUint(e.Uid, 10, 32)
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+
+					if uint32(uid) == ocispec.Process.User.UID {
+						rootProcessDetail.Username = e.Username
+						break
+					}
+				}
+			}
+		}
+
+		{
+			entries, err := group.ParseFilesystemGroup(container)
+			if err != nil {
+				log.Error(err)
+			} else {
+				for _, e := range entries {
+					gid, err := strconv.ParseUint(e.Gid, 10, 32)
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+
+					if uint32(gid) == ocispec.Process.User.GID {
+						rootProcessDetail.Groupname = e.GroupName
+						break
+					}
+				}
+			}
+		}
 	}
 
 	// container process
@@ -204,13 +248,60 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 			createTime, _ := p.CreateTime()
 			p.Close()
 
+			// mapping username and groupname
+			usernames := make([]string, 4)
+			{
+				entries, err := passwd.ParseFilesystemPasswd(container)
+				if err != nil {
+					log.Error(err)
+				} else {
+					for _, e := range entries {
+						uid, err := strconv.ParseInt(e.Uid, 10, 32)
+						if err != nil {
+							log.Error(err)
+							continue
+						}
+
+						for index, uidT := range uids {
+							if int32(uid) == uidT {
+								usernames[index] = e.Username
+							}
+						}
+					}
+				}
+			}
+
+			groupnames := make([]string, 4)
+			{
+				entries, err := group.ParseFilesystemGroup(container)
+				if err != nil {
+					log.Error(err)
+				} else {
+					for _, e := range entries {
+						gid, err := strconv.ParseInt(e.Gid, 10, 32)
+						if err != nil {
+							log.Error(err)
+							continue
+						}
+
+						for index, gidT := range gids {
+							if int32(gid) == gidT {
+								groupnames[index] = e.GroupName
+							}
+						}
+					}
+				}
+			}
+
 			processDetails = append(processDetails, report.ProcessDetail{
 				Cmdline:    cmdline,
 				Cwd:        cwd,
 				Environ:    env,
 				Exe:        exe,
 				Gids:       gids,
+				Groupnames: groupnames,
 				Uids:       uids,
+				Usernames:  usernames,
 				Pid:        nspid,
 				Ppid:       ppid,
 				HostPid:    hostPid,
