@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	api "github.com/chaitin/libveinmind/go"
@@ -133,6 +134,14 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 			}
 		}
 	case *containerd.Container:
+		// skip moby namespace
+		splits := strings.SplitN(c.ID(), "/", 2)
+		if len(splits) == 2 {
+			if splits[0] == "moby" {
+				return nil
+			}
+		}
+
 		// runtime type
 		containerRuntime = report.Containerd
 
@@ -180,7 +189,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 			}
 		}
 
-		// mapping username and groupname\
+		// mapping username and groupname
 		{
 			entries, err := passwd.ParseFilesystemPasswd(container)
 			if err != nil {
