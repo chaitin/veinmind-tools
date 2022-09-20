@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/chaitin/libveinmind v1.2.1
-	github.com/chaitin/veinmind-common-go v1.1.8-r0
+	github.com/chaitin/veinmind-common-go v1.1.8-r1
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.4.0

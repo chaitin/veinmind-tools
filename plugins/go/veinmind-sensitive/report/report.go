@@ -11,6 +11,7 @@ import (
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 )
 
@@ -51,7 +52,7 @@ func GenerateSensitiveFileEvent(path string, rule rule.SensitiveRule, info fs.Fi
 	}
 
 	// parse passwd info
-	entries, err := passwd.ParseImagePasswd(image)
+	entries, err := passwd.ParseFilesystemPasswd(image)
 	if err != nil {
 		log.Error(err)
 	} else {
@@ -64,7 +65,7 @@ func GenerateSensitiveFileEvent(path string, rule rule.SensitiveRule, info fs.Fi
 	}
 
 	// parse group info
-	gEntries, err := group.ParseImageGroup(image)
+	gEntries, err := group.ParseFilesystemGroup(image)
 	if err != nil {
 		log.Error(err)
 	} else {
