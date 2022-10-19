@@ -27,7 +27,7 @@ func (i *redisService) GetRecords(file io.Reader) (records []model.Record, err e
 		return records, err
 	}
 	t := model.Record{}
-	reg := regexp.MustCompile(`(?m)^requirepass\s+(.*)`)
+	reg := regexp.MustCompile(`(?m)^requirepass\s+[\"|\']?([^(\"|\'|\n)]+)[\"|\']?`)
 	result := reg.FindAllStringSubmatch(content, -1)
 	for _, passwd := range result {
 		if len(passwd) != 2 {
