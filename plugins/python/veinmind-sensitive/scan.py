@@ -116,22 +116,17 @@ def scan_images(image):
                         ))
             if not report_rule_list:
                 continue
-            rule_id = [i.rule_id for i in report_rule_list]
-            rule_name = [i.rule_name for i in report_rule_list]
-            rule_desc = [i.rule_desc for i in report_rule_list]
-            rule_level = [i.rule_level for i in report_rule_list]
-
-            detail = AlertDetail.sensitive_docker_history(SensitiveDockerHistoryDetail(
-                value=command_content, rule_id=rule_id, rule_name=rule_name, rule_description=rule_desc
-            ))
-            report_event = ReportEvent(id=image.id(), level=rule_level,
-                                       detect_type=DetectType.Image.value,
-                                       event_type=EventType.Risk.value,
-                                       alert_type=AlertType.Sensitive.value,
-                                       alert_details=[detail])
-            report_event_list.append(report_event)
-            report(report_event)
-
+            for rule in report_rule_list:
+                detail = AlertDetail.sensitive_docker_history(SensitiveDockerHistoryDetail(
+                    value=command_content, rule_id=rule.rule_id, rule_name=rule.rule_name, rule_description=rule.rule_desc
+                ))
+                report_event = ReportEvent(id=image.id(), level=rule.rule_level,
+                                           detect_type=DetectType.Image.value,
+                                           event_type=EventType.Risk.value,
+                                           alert_type=AlertType.Sensitive.value,
+                                           alert_details=[detail])
+                report_event_list.append(report_event)
+                report(report_event)
 
     # detect env
     ocispec = image.ocispec_v1()
