@@ -8,6 +8,8 @@ import chardet
 import time as timep
 from veinmind import *
 from stat import *
+from typing import NamedTuple
+
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
@@ -40,19 +42,19 @@ def str2level(level):
 
 
 def tab_print(printstr: str):
-    if len(printstr) < 95:
-        print(("| " + printstr + "\t|").expandtabs(100))
+    if len(printstr) < 145:
+        print(("| " + printstr + "\t|").expandtabs(150))
     else:
         char_count = 0
         printstr_temp = ""
         for char in printstr:
             char_count = char_count + 1
             printstr_temp = printstr_temp + char
-            if char_count == 95:
+            if char_count == 145:
                 char_count = 0
-                print(("| " + printstr_temp + "\t|").expandtabs(100))
+                print(("| " + printstr_temp + "\t|").expandtabs(150))
                 printstr_temp = ""
-        print(("| " + printstr_temp + "\t|").expandtabs(100))
+        print(("| " + printstr_temp + "\t|").expandtabs(150))
 
 
 class Report():
@@ -62,6 +64,13 @@ class Report():
         self.spend_time = 0
         self.sensitive_filepath_lists = []
         self.sensitive_env_lists = []
+        self.sensitive_docker_history_lists = []
+
+class ReportRule(NamedTuple):
+    rule_id: int
+    rule_name: str
+    rule_desc: str
+    rule_level: str
 
 
 @command.group()
@@ -83,6 +92,46 @@ def scan_images(image):
         ref = image.id()
     report_local.imagename = ref
     log.info("start scan: " + ref)
+
+    # detect docker history
+    ocispec = image.ocispec_v1()
+
+    if 'history' in ocispec.keys() and len(ocispec['history']) > 0:
+        for history in ocispec['history']:
+            command_content = history['created_by']
+            report_rule_list = []
+            for r in rules["rules"]:
+                # 正则选择 可以选择docker history的正则是由哪些模块检测
+                for i in ['env', 'match', 'filepath']:
+                    regexp_s = r.get(i)
+                    if not regexp_s:
+                        continue
+                    if re.search(regexp_s, command_content, re.IGNORECASE):
+                        report_local.sensitive_docker_history_lists.append(command_content)
+                        report_rule_list.append(ReportRule(
+                            rule_id=r["id"],
+                            rule_name=r["name"],
+                            rule_desc=r["description"],
+                            rule_level=r["level"],
+                        ))
+            if not report_rule_list:
+                continue
+            rule_id = [i.rule_id for i in report_rule_list]
+            rule_name = [i.rule_name for i in report_rule_list]
+            rule_desc = [i.rule_desc for i in report_rule_list]
+            rule_level = [i.rule_level for i in report_rule_list]
+
+            detail = AlertDetail.sensitive_docker_history(SensitiveDockerHistoryDetail(
+                value=command_content, rule_id=rule_id, rule_name=rule_name, rule_description=rule_desc
+            ))
+            report_event = ReportEvent(id=image.id(), level=rule_level,
+                                       detect_type=DetectType.Image.value,
+                                       event_type=EventType.Risk.value,
+                                       alert_type=AlertType.Sensitive.value,
+                                       alert_details=[detail])
+            report_event_list.append(report_event)
+            report(report_event)
+
 
     # detect env
     ocispec = image.ocispec_v1()
@@ -260,7 +309,7 @@ def callback(result, output):
             if len(r.sensitive_filepath_lists) == 0:
                 continue
             print(
-                "+---------------------------------------------------------------------------------------------------+")
+                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+")
             tab_print("ImageName: " + r.imagename)
             tab_print("Scan Total: " + str(r.scan_counts))
             tab_print("Spend Time: " + r.spend_time.__str__() + "s")
@@ -269,7 +318,11 @@ def callback(result, output):
                 tab_print("Sensitive File: " + fp)
             for env in r.sensitive_env_lists:
                 tab_print("Sensitive Env: " + env)
-        print("+---------------------------------------------------------------------------------------------------+")
+            # 一个敏感语句可能匹配到多个正则，所以会在结果会重复输出，该操作为了去重
+            r.sensitive_docker_history_lists = list(set(r.sensitive_docker_history_lists))
+            for command_content in r.sensitive_docker_history_lists:
+                tab_print("Sensitive Docker History (Maybe): " + command_content)
+        print("+-----------------------------------------------------------------------------------------------------------------------------------------------------+")
     elif output == "json":
         with open("output.json", mode="w") as f:
             f.write(jsonpickle.dumps(report_list))

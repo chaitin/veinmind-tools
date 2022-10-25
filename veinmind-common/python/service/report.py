@@ -116,6 +116,18 @@ class SensitiveEnvDetail():
         self.rule_name = rule_name
         self.rule_description = rule_description
 
+class SensitiveDockerHistoryDetail():
+    value = ""
+    rule_id = []
+    rule_name = []
+    rule_description = []
+
+    def __init__(self, value, rule_id ,rule_name ,rule_description):
+        self.value = value
+        self.rule_id = rule_id
+        self.rule_name = rule_name
+        self.rule_description = rule_description
+
 
 class BackdoorDetail(FileDetail):
     description = ""
@@ -130,13 +142,15 @@ class AlertDetail:
     backdoor_detail = None
     sensitive_file_detail = None
     sensitive_env_detail = None
+    sensitive_docker_history = None
     history_detail = None
 
     def __init__(self, backdoor_detail=None, sensitve_file_detail=None,
-                 sensitive_env_detail=None, history_detail=None):
+                 sensitive_env_detail=None, sensitive_docker_history_detail=None, history_detail=None):
         self.backdoor_detail = backdoor_detail
         self.sensitive_file_detail = sensitve_file_detail
         self.sensitive_env_detail = sensitive_env_detail
+        self.sensitive_docker_history = sensitive_docker_history_detail
         self.history_detail = history_detail
 
     @classmethod
@@ -150,6 +164,10 @@ class AlertDetail:
     @classmethod
     def sensitive_env(cls, sensitive_env_detail):
         return cls(sensitive_env_detail=sensitive_env_detail)
+    
+    @classmethod
+    def sensitive_docker_history(cls, sensitive_docker_history_detail):
+        return cls(sensitive_docker_history_detail=sensitive_docker_history_detail)
 
     @classmethod
     def history(cls, history_detail):
