@@ -17,15 +17,17 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
+	"github.com/chaitin/veinmind-common-go/pkg/auth"
 	"github.com/chaitin/veinmind-common-go/registry"
 	commonRuntime "github.com/chaitin/veinmind-common-go/runtime"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/distribution/distribution/reference"
+	"github.com/spf13/cobra"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
-	"github.com/distribution/distribution/reference"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -253,7 +255,11 @@ var scanRegistryCmd = &cmd.Command{
 			if config == "" {
 				c, err = commonRuntime.NewDockerClient()
 			} else {
-				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuth(config))
+				authConfig, err := auth.ParseAuthConfig(config)
+				if err != nil {
+					return err
+				}
+				c, err = commonRuntime.NewDockerClient(commonRuntime.WithAuth(*authConfig))
 			}
 			if err != nil {
 				return err
@@ -359,7 +365,7 @@ var scanRegistryCmd = &cmd.Command{
 
 		for _, repo := range repos {
 			log.Infof("Start pull image: %#v\n", repo)
-			r, err := c.Pull(repo)
+			r, err := c.Pull(cmd.Context(), repo)
 			if err != nil {
 				log.Errorf("Pull image error: %#v\n", err.Error())
 				continue
@@ -408,7 +414,7 @@ var scanRegistryCmd = &cmd.Command{
 					}
 
 					for _, id := range ids {
-						err = c.Remove(id)
+						err = c.Remove(cmd.Context(), id)
 						if err != nil {
 							log.Error(err)
 						} else {
@@ -438,7 +444,7 @@ var scanRegistryCmd = &cmd.Command{
 					log.Error(err)
 				}
 
-				err = c.Remove(repoRef)
+				err = c.Remove(cmd.Context(), repoRef)
 				if err != nil {
 					log.Error(err)
 				} else {
