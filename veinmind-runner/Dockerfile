@@ -1,4 +1,4 @@
-FROM veinmind/go1.18:1.1.0-stretch as builder
+FROM veinmind/go1.18:1.3.0-stretch as builder
 WORKDIR /build
 COPY . .
 RUN chmod +x script/build.sh && /bin/bash script/build.sh
@@ -10,7 +10,7 @@ FROM veinmind/veinmind-history:latest as history
 FROM veinmind/veinmind-backdoor:latest as backdoor
 FROM veinmind/veinmind-log4j2:latest as log4j2
 
-FROM veinmind/python3:1.1.0-stretch as release
+FROM veinmind/python3:1.3.0-stretch as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
