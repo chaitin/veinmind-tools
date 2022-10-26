@@ -53,6 +53,10 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 PS: All tools currently support running in parallel containers
 
+## 🧑‍💻 Coding Plugins
+
+Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-example](example/README.en.md)  
+
 ## ☁️ Cloud-native infrastructure compatibility
 | Name | Type | Compatibility |
 |------|------|----------|
