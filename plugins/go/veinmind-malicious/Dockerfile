@@ -1,4 +1,4 @@
-FROM veinmind/base:1.3.0-stretch
+FROM veinmind/base:1.3.1-stretch
 # install clamav
 COPY dockerfiles/sources.list /etc/apt/sources.list
 RUN apt update && apt-get install -y clamav clamav-daemon && freshclam
