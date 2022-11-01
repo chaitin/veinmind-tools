@@ -12,9 +12,9 @@ import (
 	"github.com/Jeffail/tunny"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/service"
-	"github.com/chaitin/veinmind-tools/veinmind-common/go/service/report"
 )
 
 func GetImageName(image api.Image) (imageName string, err error) {

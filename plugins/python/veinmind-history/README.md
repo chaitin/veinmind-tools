@@ -25,7 +25,6 @@ veinmind-history 是由长亭科技自研的一款镜像异常历史命令扫描
 
 然后安装`veinmind-history`所需要的`python`依赖，在项目目录执行命令
 ```
-cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
 cd ./plugins/python/veinmind-history
 pip install -r requirements.txt
 ```

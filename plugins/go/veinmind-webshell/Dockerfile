@@ -1,7 +1,6 @@
 FROM veinmind/go1.18:1.3.1-stretch as builder
 WORKDIR /build
 COPY . .
-RUN sed -i 's/\.\.\/veinmind-common/\.\/veinmind-common/g' go.mod
 RUN chmod +x script/build.sh && /bin/bash script/build.sh
 
 FROM veinmind/base:1.3.1-stretch as release
