@@ -26,7 +26,6 @@ veinmind-sensitive is an image sensitive information scanning tool developed by 
 2. install python dependencies which `veinmind-sensitive` need，execute the command in the project directory
 
    ```
-   cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
    cd ./plugins/python/veinmind-sensitive
    pip install -r requirements.txt
    ```

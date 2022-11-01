@@ -15,9 +15,8 @@ import (
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
-	"github.com/opencontainers/runtime-spec/specs-go"
-
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-basic/pkg/capability"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 var (

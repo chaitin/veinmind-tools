@@ -10,7 +10,6 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
           cd ./plugins/python/veinmind-backdoor
           tar -cvzf veinmind-backdoor.tar.gz *
       - uses: actions/upload-artifact@v2
@@ -30,7 +29,6 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
           cd ./plugins/python/veinmind-sensitive
           tar -cvzf veinmind-sensitive.tar.gz *
       - uses: actions/upload-artifact@v2
@@ -50,7 +48,6 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: |
-          cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
           cd ./plugins/python/veinmind-history
           tar -cvzf veinmind-history.tar.gz *
       - uses: actions/upload-artifact@v2
@@ -223,7 +220,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -246,7 +242,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/python/veinmind-sensitive && rm -rf ./plugins/python/veinmind-sensitive/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -269,7 +264,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -325,7 +319,6 @@ jobs:
       CI_GOARCH: amd64
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/go/veinmind-weakpass && rm -rf ./plugins/go/veinmind-weakpass/veinmind-common/python
       - uses: actions/download-artifact@v2
         with:
           name: veinmind-weakpass-amd64-dynamic
@@ -351,7 +344,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/go/veinmind-asset && rm -rf ./plugins/go/veinmind-asset/veinmind-common/python
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -372,7 +364,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/go/veinmind-webshell && rm -rf ./plugins/go/veinmind-webshell/veinmind-common/python
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -393,7 +384,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./plugins/go/veinmind-log4j2 && rm -rf ./plugins/go/veinmind-log4j2/veinmind-common/python
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
@@ -415,7 +405,6 @@ jobs:
     needs: [push-veinmind-backdoor, push-veinmind-sensitive, push-veinmind-history, push-veinmind-malicious, push-veinmind-weakpass, push-veinmind-asset, push-veinmind-log4j2]
     steps:
       - uses: actions/checkout@v2
-      - run: cp -r ./veinmind-common ./veinmind-runner && rm -rf ./veinmind-runner/veinmind-common/python
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1

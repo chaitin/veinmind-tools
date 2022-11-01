@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 import pytoml as toml
 import re
-import os, sys
 import magic
 import fnmatch
 import chardet
-import time as timep
 from veinmind import *
 from stat import *
 from typing import NamedTuple
-
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
-from report import *
+from veinmind_common.service.report import *
 
 report_list = []
 report_event_list = []

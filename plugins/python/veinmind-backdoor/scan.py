@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 import register
 import click
-import jsonpickle
-import time as timep
-import os, sys
 from common import log
 from common import tools
 from veinmind import *
-from plugins import *
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../veinmind-common/python/service"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "./veinmind-common/python/service"))
-from report import *
+from veinmind_common.service.report import *
 
 results = []
 start = 0

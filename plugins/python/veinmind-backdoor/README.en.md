@@ -34,7 +34,6 @@ veinmind-backdoor is a backdoor scanning tool for image developed by Chaitin Tec
 
 2. install python dependencies which `veinmind-backdoor` need，execute the command in the project directory
     ```
-    cp -r ./veinmind-common ./plugins/python/veinmind-backdoor && rm -rf ./plugins/python/veinmind-backdoor/veinmind-common/go
     cd ./plugins/python/veinmind-backdoor
     pip install -r requirements.txt
     ```

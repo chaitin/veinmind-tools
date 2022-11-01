@@ -25,7 +25,6 @@ veinmind-history is an image anomaly history command scanning tool developed by 
 
 2. install python dependencies which `veinmind-history` need，execute the command in the project directory
     ```
-    cp -r ./veinmind-common ./plugins/python/veinmind-history && rm -rf ./plugins/python/veinmind-history/veinmind-common/go
     cd ./plugins/python/veinmind-history
     pip install -r requirements.txt
     ```
