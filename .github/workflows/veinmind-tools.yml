@@ -195,6 +195,26 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: ./plugins/go/veinmind-webshell/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+  build-amd64-veinmind-unsafe-mount:
+    runs-on: ubuntu-18.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.18.1'
+      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: cd ./plugins/go/veinmind-unsafe-mount && /bin/bash -x script/build_veinmind_unsafe_mount_amd64.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: veinmind-unsafe-mount-amd64
+          path: ./plugins/go/veinmind-unsafe-mount/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./plugins/go/veinmind-unsafe-mount/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
   build-amd64-veinmind-log4j2:
     runs-on: ubuntu-18.04
     env:
@@ -379,6 +399,26 @@ jobs:
             veinmind/veinmind-webshell:latest
             veinmind/veinmind-webshell:${{github.ref_name}}
           context: ./plugins/go/veinmind-webshell
+  push-veinmind-unsafe-mount:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+          tags: |
+            veinmind/veinmind-unsafe-mount:latest
+            veinmind/veinmind-unsafe-mount:${{github.ref_name}}
+          context: ./plugins/go/veinmind-unsafe-mount
   push-veinmind-log4j2:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-18.04
