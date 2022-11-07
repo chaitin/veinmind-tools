@@ -1,29 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"os"
-	"strconv"
-	"text/tabwriter"
-	"time"
+	"strings"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/hash"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/utils"
 
 	"github.com/spf13/cobra"
 )
 
-var results = []model.ScanImageResult{}
 var serviceName = []string{}
 var threads int
 var username string
 var dictpath string
-var scanStart = time.Now()
 
 var rootCmd = &cmd.Command{}
 var extractCmd = &cobra.Command{
@@ -35,70 +34,113 @@ var extractCmd = &cobra.Command{
 }
 var scanCmd = &cmd.Command{
 	Use:   "scan",
-	Short: "Scan image weakpass",
-	PostRun: func(cmd *cobra.Command, args []string) {
-		tabw := tabwriter.NewWriter(os.Stdout, 95, 95, 0, ' ', tabwriter.TabIndent|tabwriter.Debug)
-		fmt.Fprintln(tabw, "# ============================================================================================ #")
-		spend := time.Since(scanStart)
-		fmt.Fprintln(tabw, "| Scan Total: ", strconv.Itoa(len(results)), "\t")
-		fmt.Fprintln(tabw, "| Spend Time: ", spend.String(), "\t")
-		var weakpassImageTotal = 0
-		var weakpassTotal = 0
-		for _, r := range results {
-			if len(r.WeakpassResults) > 0 {
-				weakpassImageTotal++
-				weakpassTotal += len(r.WeakpassResults)
-			}
-		}
-		fmt.Fprintln(tabw, "| Weakpass Image Total: ", strconv.Itoa(weakpassImageTotal), "\t")
-		fmt.Fprintln(tabw, "| Weakpass Total: ", strconv.Itoa(weakpassTotal), "\t")
-		fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
-
-		for _, r := range results {
-			if len(r.WeakpassResults) > 0 {
-				fmt.Fprintln(tabw, "| ImageName: ", r.ImageName, "\t")
-				fmt.Fprintln(tabw, "| ServiceName: ", r.ServiceName, "\t")
-				fmt.Fprintln(tabw, "| Status: Unsafe", "\t")
-				for _, w := range r.WeakpassResults {
-					fmt.Fprintln(tabw, "| Username: ", w.Username, "\t")
-					fmt.Fprintln(tabw, "| Password: ", w.Password, "\t")
-					fmt.Fprintln(tabw, "| Filepath: ", w.Filepath, "\t")
-				}
-				fmt.Fprintln(tabw, "+----------------------------------------------------------------------------------------------+")
-			}
-		}
-		fmt.Fprintln(tabw, "# ============================================================================================ #")
-		tabw.Flush()
-	},
+	Short: "scan mode",
 }
 
-func scan(c *cmd.Command, image api.Image) (err error) {
+var scanImageCmd = &cmd.Command{
+	Use:   "image",
+	Short: "scan image weakpass",
+}
+
+var scanContainerCmd = &cmd.Command{
+	Use:   "container",
+	Short: "scan container weakpass",
+}
+
+func scanImage(c *cmd.Command, image api.Image) (err error) {
 	config := model.Config{Thread: threads, Username: username, Dictpath: dictpath}
 	for _, service := range serviceName {
-		ModuleResult, err := utils.StartModule(config, image, service)
+		ModuleResult, err := utils.StartModule(config, image, service, map[string]string{
+			"module_name": service,
+			"image_name": func() string {
+				refs, _ := image.RepoRefs()
+				if len(refs) > 0 {
+					return refs[0]
+				}
+
+				return ""
+			}(),
+		})
 		if err != nil {
 			log.Error(err)
 			continue
 		}
-		results = append(results, ModuleResult)
+		err = utils.GenerateImageReport(ModuleResult, image)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
 	}
 	return nil
+}
 
+func scanContainer(c *cmd.Command, container api.Container) (err error) {
+	config := model.Config{Thread: threads, Username: username, Dictpath: dictpath}
+	for _, service := range serviceName {
+		ModuleResult, err := utils.StartModule(config, container, service, map[string]string{
+			"module_name": service,
+			"image_name":  "",
+		})
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		err = utils.GenerateContainerReport(ModuleResult, container)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+
+	// match environment weak password.
+	oci, err := container.OCISpec()
+	if err != nil {
+		return nil
+	}
+	p := hash.Plain{}
+	if oci.Process != nil && oci.Process.Env != nil {
+		for _, env := range oci.Process.Env {
+			for _, d := range dict.DictMap["base"] {
+				envs := strings.Split(env, "=")
+				if len(envs) != 2 {
+					continue
+				}
+				matched, _ := p.Match(envs[1], d)
+				if matched {
+					err = utils.GenerateContainerReport([]model.WeakpassResult{
+						{
+							Password:    envs[1],
+							ServiceType: report.Env,
+							Filepath:    env,
+						},
+					}, container)
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func init() {
 
-	rootCmd.AddCommand(cmd.MapImageCommand(scanCmd, scan))
+	rootCmd.AddCommand(scanCmd)
 	rootCmd.AddCommand(extractCmd)
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
 		Name:        "veinmind-weakpass",
 		Author:      "veinmind-team",
 		Description: "veinmind-weakpass scanner image weakpass",
 	}))
-	scanCmd.Flags().IntVarP(&threads, "threads", "t", 10, "password brute threads")
-	scanCmd.Flags().StringVarP(&username, "username", "u", "", "username e.g. root")
-	scanCmd.Flags().StringVarP(&dictpath, "dictpath", "d", "", "dict path e.g. ./mypass.dict")
-	scanCmd.Flags().StringSliceVarP(&serviceName, "serviceName", "s", []string{"mysql", "tomcat", "redis", "ssh"}, "find weakpass in these service e.g. ssh")
+	scanCmd.PersistentFlags().IntVarP(&threads, "threads", "t", 10, "password brute threads")
+	scanCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "username e.g. root")
+	scanCmd.PersistentFlags().StringVarP(&dictpath, "dictpath", "d", "", "dict path e.g. ./mypass.dict")
+	scanCmd.PersistentFlags().StringSliceVarP(&serviceName, "serviceName", "s", []string{"mysql", "tomcat", "redis", "ssh"}, "find weakpass in these service e.g. ssh")
+	scanCmd.AddCommand(cmd.MapImageCommand(scanImageCmd, scanImage))
+	scanCmd.AddCommand(cmd.MapContainerCommand(scanContainerCmd, scanContainer))
 }
 
 func main() {

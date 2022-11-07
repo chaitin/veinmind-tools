@@ -50,7 +50,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 |----------------------------------------------------------------------|-------------------------------------------|
 | [veinmind-runner](veinmind-runner/README.en.md)                      | scanner host                              |
 | [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | scan images for malicious files           |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan images for weak passwords            |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan images/containers for weak passwords |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan images for log4j2(CVE-2021-44228)    |
 | [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information     |
 | [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                 |
