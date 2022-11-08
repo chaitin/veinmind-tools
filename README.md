@@ -45,7 +45,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 |-----------------------------------------------------------|-----------------|
 | [veinmind-runner](veinmind-runner/README.md)              | 扫描工具运行宿主        |
 | [veinmind-malicious](plugins/go/veinmind-malicious)       | 扫描镜像中的恶意文件      |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描镜像中的弱口令       |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描 镜像/容器 中的弱口令  |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2)             | 扫描镜像中的log4j2漏洞  |
 | [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息      |
 | [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门        |

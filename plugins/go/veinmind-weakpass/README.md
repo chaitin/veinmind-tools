@@ -6,7 +6,7 @@ veinmind-weakpass 是由长亭科技自研的一款镜像弱口令扫描工具
 
 ## 功能特性
 
-- 快速扫描镜像中的弱口令
+- 快速扫描 镜像/容器 中的弱口令
 - 支持弱口令宏定义
 - 支持并发扫描弱口令
 - 支持自定义用户名以及字典
@@ -29,12 +29,12 @@ veinmind-weakpass 是由长亭科技自研的一款镜像弱口令扫描工具
 
 基于平行容器的模式，获取 `veinmind-weakpass` 的镜像并启动
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan image
 ```
 
 或者使用项目提供的脚本启动
 ```
-chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
+chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan image
 ```
 
 ## 使用
@@ -42,36 +42,43 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-./veinmind-weakpass scan [imagename/imageid]
+./veinmind-weakpass scan image [imagename/imageid]
 ```
 
-2.扫描所有本地镜像
+2.指定容器名称或容器ID并扫描 (需要本地存在对应的容器)
 
 ```
-./veinmind-weakpass scan
+./veinmind-weakpass scan container [containername/containerid]
 ```
 
-3.指定容器运行时类型
+3.扫描所有本地镜像
+
 ```
-./veinmind-weakpass scan --containerd
+./veinmind-weakpass scan image
+```
+
+4.指定容器运行时类型
+```
+./veinmind-weakpass scan image --containerd
 ```
 
 容器运行时类型
 - dockerd
 - containerd
 
-4.指定扫描用户名类型
+5.指定扫描用户名类型
 ```
-./veinmind-weakpass scan -u username
+./veinmind-weakpass scan image -u username
 ```
 
-5.指定自定义扫描字典
+6.指定自定义扫描字典
 ```
-./veinmind-weakpass scan -d ./pass.dict
+./veinmind-weakpass scan image -d ./pass.dict
 ```
-6.指定自定义扫描的服务
+
+7.指定自定义扫描的服务
 ```
-./veinmind-weakpass scan -a ssh,mysql,redis
+./veinmind-weakpass scan image -a ssh,mysql,redis
 ```
 - 目前已经支持的服务
 
@@ -82,7 +89,7 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
     |    redis   |   all   |
     |   tomcat   |   all   |
 
-7.解压默认字典到本地磁盘
+8.解压默认字典到本地磁盘
 ```
 ./veinmind-weakpass extract
 ```

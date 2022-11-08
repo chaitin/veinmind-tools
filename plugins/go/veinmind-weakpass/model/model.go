@@ -1,5 +1,9 @@
 package model
 
+import (
+	"github.com/chaitin/veinmind-common-go/service/report"
+)
+
 type ScanImageResult struct {
 	// 镜像名称
 	ImageName string
@@ -16,9 +20,10 @@ type ScanImageResult struct {
 
 // 弱密码相关信息
 type WeakpassResult struct {
-	Username string
-	Password string
-	Filepath string
+	Username    string
+	Password    string
+	Filepath    string
+	ServiceType report.WeakpassService
 }
 
 // 从文件中解析出来的相关信息

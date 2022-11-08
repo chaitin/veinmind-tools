@@ -3,7 +3,6 @@ package utils
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -13,6 +12,7 @@ import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/service"
 )
@@ -30,27 +30,16 @@ func GetImageName(image api.Image) (imageName string, err error) {
 	return imageName, nil
 }
 
-func StartModule(config model.Config, image api.Image, modname string) (result model.ScanImageResult, err error) {
-	// 初始化一个镜像扫描结果
-	result = model.ScanImageResult{}
-	result.ServiceName = modname
-	imagename, err := GetImageName(image)
-	if err != nil {
-		// 告知镜像名称有问题,使用unknown替代
-		log.Warn(err)
-	}
-	result.ImageName = imagename
-	result.ImageID = image.ID()
-
+func StartModule(config model.Config, fs api.FileSystem, modname string, marco map[string]string) (results []model.WeakpassResult, err error) {
 	// 获取对应的服务模块
 	mod, err := service.GetModuleByName(modname)
 	if err != nil {
-		return result, err
+		return results, err
 	}
 	// 获取对应模块的加密算法
 	hash, err := service.GetHash(modname)
 	if err != nil {
-		return result, err
+		return results, err
 	}
 
 	// 最终需要爆破的字典
@@ -71,21 +60,19 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 			}
 			f.Close()
 		}
-
 	}
 
 	// 获取对应模块的filepaths
 	filepaths := mod.FilePath()
-	log.Info(fmt.Sprintf("start to scan %s weakpass: %s", modname, imagename))
 	// 开始从路径中爆破密码
 	WeakpassResults := []model.WeakpassResult{}
 	for _, path := range filepaths {
-		_, err := image.Stat(path)
+		_, err := fs.Stat(path)
 		if err != nil {
 			// 如果镜像中不存在配置文件,直接跳过
 			continue
 		}
-		file, err := image.Open(path)
+		file, err := fs.Open(path)
 		if err != nil {
 			log.Warn(err)
 			continue
@@ -103,9 +90,10 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 			}
 			if match {
 				w := model.WeakpassResult{
-					Username: bruteOpt.Records.Username,
-					Password: bruteOpt.Guess,
-					Filepath: path,
+					Username:    bruteOpt.Records.Username,
+					Password:    bruteOpt.Guess,
+					Filepath:    path,
+					ServiceType: service.GetType(mod),
 				}
 				weakpassResultsLock.Lock()
 				WeakpassResults = append(WeakpassResults, w)
@@ -128,11 +116,9 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 			}
 			for _, guess := range finalDict {
 				// 替换镜像名相关的宏
-				if imagename != "" {
-					guess = strings.Replace(guess, "${image_name}", imagename, -1)
-				}
+				guess = strings.Replace(guess, "${image_name}", marco["image_name"], -1)
 				// 替换服务名相关的宏
-				guess = strings.Replace(guess, "${module_name}", modname, -1)
+				guess = strings.Replace(guess, "${module_name}", marco["module_name"], -1)
 
 				match, err := pool.ProcessTimed(model.BruteOption{
 					Records: item,
@@ -153,26 +139,23 @@ func StartModule(config model.Config, image api.Image, modname string) (result m
 
 	}
 
-	// Report
 	if len(WeakpassResults) > 0 {
-		err = GenerateReport(WeakpassResults, image)
-		if err != nil {
-			log.Error(err)
-		}
-		result.WeakpassResults = WeakpassResults
+		results = append(results, WeakpassResults...)
 	}
 
-	return result, nil
+	return results, nil
 
 }
 
-func GenerateReport(weakpassResults []model.WeakpassResult, image api.Image) (err error) {
+func GenerateImageReport(weakpassResults []model.WeakpassResult, image api.Image) (err error) {
 	details := []report.AlertDetail{}
 	for _, wr := range weakpassResults {
 		details = append(details, report.AlertDetail{
 			WeakpassDetail: &report.WeakpassDetail{
 				Username: wr.Username,
 				Password: wr.Password,
+				Service:  wr.ServiceType,
+				Path:     wr.Filepath,
 			},
 		})
 	}
@@ -182,6 +165,36 @@ func GenerateReport(weakpassResults []model.WeakpassResult, image api.Image) (er
 			Time:         time.Now(),
 			Level:        report.High,
 			DetectType:   report.Image,
+			EventType:    report.Risk,
+			AlertType:    report.Weakpass,
+			AlertDetails: details,
+		}
+		err = report.DefaultReportClient().Report(Reportevent)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func GenerateContainerReport(weakpassResults []model.WeakpassResult, container api.Container) (err error) {
+	details := []report.AlertDetail{}
+	for _, wr := range weakpassResults {
+		details = append(details, report.AlertDetail{
+			WeakpassDetail: &report.WeakpassDetail{
+				Username: wr.Username,
+				Password: wr.Password,
+				Service:  wr.ServiceType,
+				Path:     wr.Filepath,
+			},
+		})
+	}
+	if len(details) > 0 {
+		Reportevent := report.ReportEvent{
+			ID:           container.ID(),
+			Time:         time.Now(),
+			Level:        report.High,
+			DetectType:   report.Container,
 			EventType:    report.Risk,
 			AlertType:    report.Weakpass,
 			AlertDetails: details,

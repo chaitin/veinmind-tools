@@ -28,47 +28,53 @@ veinmind-weakpass is a weak password scanning tool for image developed by Chaiti
 ### install by parallel container
 - Install by Parallel Container，pull `veinmind-weakpass` iamge  and start
     ```
-    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan
+    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan image
     ```
 - or start with the script which we provided
     ```
-    chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
+    chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan image
     ```
 
 ## How to use
 
 1. Scan image with specified image name or ID(need to have a corresponding image locally)
     ```
-    ./veinmind-weakpass scan [imagename/imageid]
+    ./veinmind-weakpass scan image [imagename/imageid]
+    ```
+   
+2. Scan container with specified container name or ID(need to have a corresponding container locally)
+    ```
+    ./veinmind-weakpass scan container [imagename/imageid]
     ```
 
-2. Scan all local images
+
+3. Scan all local images
 
     ```
-    ./veinmind-weakpass scan
+    ./veinmind-weakpass scan image
     ```
 
-3. Specify container runtime type
+4. Specify container runtime type
     ```
-    ./veinmind-weakpass scan --containerd
+    ./veinmind-weakpass scan image --containerd
     ```
 
     container runtime type
     - dockerd
     - containerd
 
-4. Specify the username which you want to scan
+5. Specify the username which you want to scan
     ```
-    ./veinmind-weakpass scan -u username
+    ./veinmind-weakpass scan image -u username
     ```
 
-5. Specify the custom dict
+6. Specify the custom dict
     ```
-    ./veinmind-weakpass scan -d ./pass.dict
+    ./veinmind-weakpass scan image -d ./pass.dict
     ```
-6. Specify the services name
+7. Specify the services name
     ```
-    ./veinmind-weakpass scan -a ssh,mysql,redis
+    ./veinmind-weakpass scan image -a ssh,mysql,redis
     ```
     - support these service currently
 
@@ -79,7 +85,7 @@ veinmind-weakpass is a weak password scanning tool for image developed by Chaiti
         |    redis   |   all   |
         |   tomcat   |   all   |
 
-7. Extract default dictionary to local disk
+8. Extract default dictionary to local disk
     ```
     ./veinmind-weakpass extract
     ```
