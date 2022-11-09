@@ -41,7 +41,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ### 4. Quick scan local images
 
 ```
-./run.sh scan-host
+./run.sh scan-host image
 ```
 
 ## 🔨 Toolset
