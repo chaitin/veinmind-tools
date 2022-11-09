@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/output"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/scanner"
 	"github.com/open-policy-agent/opa/ast"
@@ -61,22 +62,46 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 
 	uniqueAppend(res)
 
-	// todo:report iac type event
-	// if you want display at runner report, you should send your result to report event
-	//reportEvent := report.ReportEvent{
-	//	ID:             "",                       // image id info
-	//	Time:           time.Now(),               // report time, usually use time.Now
-	//	Level:          report.None,              // report event level
-	//	DetectType:     report.Image,             // report scan object type
-	//	EventType:      report.Info,              // report event type: Risk/Invasion/Info
-	//	AlertType:      report.Asset,             // report alert type, we provide some clearly types of security events,
-	//	AlertDetails:   []report.AlertDetail{},   // add report detail data in there
-	//	GeneralDetails: []report.GeneralDetail{}, // if your report event does not in alert type, you can use GeneralDetails type which consists of json bytes
-	//}
-	//err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
-	//if err != nil {
-	//	return err
-	//}
+	reportDetails := make([]report.AlertDetail, 0)
+	for _, data := range res {
+		for _, risk := range data.Risks {
+			reportDetails = append(reportDetails, report.AlertDetail{
+				IaCDetail: &report.IaCDetail{
+					RuleInfo: report.IaCRule{
+						Id:          data.Rule.Id,
+						Name:        data.Rule.Name,
+						Description: data.Rule.Description,
+						Reference:   data.Rule.Reference,
+						Severity:    data.Rule.Severity,
+						Solution:    data.Rule.Solution,
+						Type:        data.Rule.Type,
+					},
+					FileInfo: report.IaCData{
+						StartLine: risk.StartLine,
+						EndLine:   risk.EndLine,
+						FilePath:  risk.FilePath,
+						Original:  risk.Original,
+					},
+				},
+			})
+		}
+	}
+
+	//if you want display at runner report, you should send your result to report event
+	reportEvent := report.ReportEvent{
+		ID:             "",                       // image id info
+		Time:           time.Now(),               // report time, usually use time.Now
+		Level:          report.None,              // report event level
+		DetectType:     report.IaC,               // report scan object type
+		EventType:      report.Risk,              // report event type: Risk/Invasion/Info
+		AlertType:      report.IaCRisk,           // report alert type, we provide some clearly types of security events,
+		AlertDetails:   reportDetails,            // add report detail data in there
+		GeneralDetails: []report.GeneralDetail{}, // if your report event does not in alert type, you can use GeneralDetails type which consists of json bytes
+	}
+	err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

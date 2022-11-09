@@ -2,4 +2,4 @@
 
 go env -w GOPROXY=https://goproxy.io,direct
 go mod tidy
-go build -ldflags="-w -s"  -a -o veinmind-iac ./cmd/cli.go
+go build -ldflags '-s -w' -trimpath -a -o veinmind-iac ./cmd/cli.go

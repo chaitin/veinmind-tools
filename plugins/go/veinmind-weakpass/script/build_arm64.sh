@@ -4,5 +4,5 @@ export CC="aarch64-linux-gnu-gcc" CXX="aarch64-linux-gnu-g++"
 export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
 go mod tidy
 mkdir -p ./artifacts/${CI_GOOS}-${CI_GOARCH}
-export CGO_LDFLAGS_ALLOW='-Wl,.*' CGO_ENABLED=1 GOOS="$CI_GOOS" GOARCH="$CI_GOARCH"
-go build -a -tags community -o ./artifacts/${CI_GOOS}-${CI_GOARCH}/veinmind-malicious_${CI_GOOS}_${CI_GOARCH} ./cmd/scan/
+export CGO_ENABLED=1 GOOS="$CI_GOOS" GOARCH="$CI_GOARCH" TAGS="$TAGS"
+go build -ldflags '-s -w' -trimpath -a -tags ${TAGS} -o ./artifacts/${CI_GOOS}-${CI_GOARCH}/veinmind-weakpass_${CI_GOOS}_${CI_GOARCH} ./cmd/cli.go

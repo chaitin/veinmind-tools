@@ -65,25 +65,38 @@ helm install veinmind .
 1.specify the image name or image ID and scan (need to have a corresponding image locally)
 
 ```
-./veinmind-runner scan-host [imagename/imageid]
+./veinmind-runner scan-host image [imagename/imageid]
 ```
 
 2.scan all local images
 
 ```
-./veinmind-runner scan-host
+./veinmind-runner scan-host image
 ```
 
-3.scan the `centos` image in the remote repository (the default is `index.docker.io` if the repository is not specified)
+
+3.scan all local containers
 
 ```
-./veinmind-runner scan-registry centos
+./veinmind-runner scan-host container
 ```
 
-4.scan `registry.private.net/library/nginx` image in the remote private registry, where `auth.toml` is the authentication information configuration file, which contains the corresponding authentication information
+4.scan iac file
 
 ```
-./veinmind-runner scan-registry -c auth.toml registry.private.net/library/nginx
+./veinmind-runner scan-host iac
+```
+
+5.scan the `centos` image in the remote repository (the default is `index.docker.io` if the repository is not specified)
+
+```
+./veinmind-runner scan-registry image centos
+```
+
+6.scan `registry.private.net/library/nginx` image in the remote private registry, where `auth.toml` is the authentication information configuration file, which contains the corresponding authentication information
+
+```
+./veinmind-runner scan-registry image -c auth.toml registry.private.net/library/nginx
 ```
 
 the format of `auth.toml` is as follows, `registry` represents the repository address, `username` represents the username, `password` represents the password or token
@@ -98,35 +111,35 @@ the format of `auth.toml` is as follows, `registry` represents the repository ad
 	password = "password"
 ```
 
-5.specify the container runtime type
+7.specify the container runtime type
 
 ```
-./veinmind-runner scan-host --containerd
+./veinmind-runner scan-host image --containerd
 ```
 
 container runtime type
 - dockerd
 - containerd
 
-6.filtering with `glob` requires running the plugin
+8.filtering with `glob` requires running the plugin
 ```
-./veinmind-runner scan-host -g "**/veinmind-malicious"
+./veinmind-runner scan-host image -g "**/veinmind-malicious"
 ```
 
-7.list plugin
+9.list plugin
 ```
 ./veinmind-runner list plugin
 ```
 
-8.specify the container runtime path
+10.specify the container runtime path
 ```
-./veinmind-runner scan-host --docker-data-root [your_path]
+./veinmind-runner scan-host image --docker-data-root [your_path]
 ```
 ```
-./veinmind-runner scan-host --containerd-root [your_path]
+./veinmind-runner scan-host image --containerd-root [your_path]
 ```
 
-9.support docker plugin for authorization
+11.support docker plugin for authorization
 ```bash
 # first
 ./veinmind-runner authz -c config.toml

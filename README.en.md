@@ -57,7 +57,8 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands |
 | [veinmind-asset](plugins/go/veinmind-asset/README.en.md)             | scan images for asset information         |
 | [veinmind-webshell](plugins/go/veinmind-webshell)                    | scan images for webshell                  |
-| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | scan containers for unsafe mount          |
+| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)            | scan containers for unsafe mount          |
+| [veinmind-iac](plugins/go/veinmind-iac)                              | scan IaC file                             |
 
 PS: All tools currently support running in parallel containers
 

@@ -48,9 +48,8 @@ initGoPlugin() {
   initCommon
   cp -r ./example/go/* $dir
   # init script
-  mv $dir/script/build_veinmind_example_amd64.sh $dir/script/build_${filename}_amd64.sh
   sed "s/veinmind-example/${name}/g" $dir/Dockerfile
-  sed "s/veinmind-example/${name}/g" $dir/script/build_${filename}_amd64.sh
+  sed "s/veinmind-example/${name}/g" $dir/script/build_amd64.sh
   sed "s/veinmind-example/${name}/g" $dir/script/build.sh
   sed "s/veinmind-example/${name}/g" $dir/go.mod
   sed "s/veinmind-example/${name}/g" $dir/cmd/cli.go

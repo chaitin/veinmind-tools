@@ -79,13 +79,19 @@ helm install veinmind .
 ./veinmind-runner scan-host container
 ```
 
-4.扫描远程仓库中的`centos`镜像(不指定仓库默认为`index.docker.io`)
+4.扫描IaC文件
+
+```
+./veinmind-runner scan-host iac
+```
+
+5.扫描远程仓库中的`centos`镜像(不指定仓库默认为`index.docker.io`)
 
 ```
 ./veinmind-runner scan-registry image centos
 ```
 
-5.扫描远程私有仓库中的镜像`registry.private.net/library/nginx`镜像，其中`auth.toml`为认证信息配置文件，里面包含了对应的认证信息
+6.扫描远程私有仓库中的镜像`registry.private.net/library/nginx`镜像，其中`auth.toml`为认证信息配置文件，里面包含了对应的认证信息
 
 ```
 ./veinmind-runner scan-registry image -c auth.toml registry.private.net/library/nginx
@@ -103,7 +109,7 @@ helm install veinmind .
 	password = "password"
 ```
 
-6.指定容器运行时类型
+7.指定容器运行时类型
 
 ```
 ./veinmind-runner scan-host image --containerd
@@ -114,17 +120,17 @@ helm install veinmind .
 - containerd
 
 
-7.使用`glob`筛选需要运行插件
+8.使用`glob`筛选需要运行插件
 ```
 ./veinmind-runner scan-host image -g "**/veinmind-malicious"
 ```
 
-8.列出当前插件列表
+9.列出当前插件列表
 ```
 ./veinmind-runner list plugin
 ```
 
-9.指定容器运行时路径
+10.指定容器运行时路径
 ```
 ./veinmind-runner scan-host image --docker-data-root [your_path]
 ```
@@ -132,7 +138,7 @@ helm install veinmind .
 ./veinmind-runner scan-host image --containerd-root [your_path]
 ```
 
-10.支持 docker 镜像阻断功能
+11.支持 docker 镜像阻断功能
 ```bash
 # first
 ./veinmind-runner authz -c config.toml 
