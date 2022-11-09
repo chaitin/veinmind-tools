@@ -7,6 +7,16 @@ green="\033[32m"
 red="\033[31m"
 blue="\033[96m"
 
+# macOs
+shopt -s expand_aliases
+if [[ $(uname) == "Darwin" ]]; then
+  echo "darwin"
+  alias sed='sed -i ""'
+elif [[ $(uname) == "Linux" ]]; then
+  echo "linux"
+  alias sed='sed -i'
+fi
+
 # first you need tell the script the plugin name && plugin language
 echo -e "${green}~~~~~~~~~~~~~~~~~~~~~~~~~~~ Welcome to Veinmind Tools ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo -e "pwd is $(pwd)"
@@ -31,7 +41,7 @@ initCommon() {
   # init README
   echo -e "# ${name}  \n\n这是描述文件" >$dir/README.md
   echo -e "# ${name}  \n\nthis is description file" >$dir/README.en.md
-  sed -i "s/veinmind-example/${name}/g" $dir/parallel-container-run.sh
+  sed "s/veinmind-example/${name}/g" $dir/parallel-container-run.sh
 }
 
 initGoPlugin() {
@@ -39,18 +49,18 @@ initGoPlugin() {
   cp -r ./example/go/* $dir
   # init script
   mv $dir/script/build_veinmind_example_amd64.sh $dir/script/build_${filename}_amd64.sh
-  sed -i "s/veinmind-example/${name}/g" $dir/Dockerfile
-  sed -i "s/veinmind-example/${name}/g" $dir/script/build_${filename}_amd64.sh
-  sed -i "s/veinmind-example/${name}/g" $dir/script/build.sh
-  sed -i "s/veinmind-example/${name}/g" $dir/go.mod
-  sed -i "s/veinmind-example/${name}/g" $dir/cmd/cli.go
+  sed "s/veinmind-example/${name}/g" $dir/Dockerfile
+  sed "s/veinmind-example/${name}/g" $dir/script/build_${filename}_amd64.sh
+  sed "s/veinmind-example/${name}/g" $dir/script/build.sh
+  sed "s/veinmind-example/${name}/g" $dir/go.mod
+  sed "s/veinmind-example/${name}/g" $dir/cmd/cli.go
 }
 
 initPythonPlugin() {
   initCommon
   cp -r ./example/python/* $dir
-  sed -i "s/veinmind-example/${name}/g" $dir/Dockerfile
-  sed -i "s/veinmind-example/${name}/g" $dir/scan.py
+  sed "s/veinmind-example/${name}/g" $dir/Dockerfile
+  sed "s/veinmind-example/${name}/g" $dir/scan.py
 }
 
 #add2Runner() {
