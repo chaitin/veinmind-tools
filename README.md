@@ -53,6 +53,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-asset](plugins/go/veinmind-asset)               | 扫描镜像中的资产信息      |
 | [veinmind-webshell](plugins/go/veinmind-webshell)         | 扫描镜像中的 Webshell |
 | [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | 扫描容器中的不安全挂载目录   |
+| [veinmind-iac](plugins/go/veinmind-iac)                   | 扫描IaC文件         |
     
 PS: 目前所有工具均已支持平行容器的方式运行
 

@@ -1,0 +1,174 @@
+name: veinmind-tools-build
+on:
+  workflow_call:
+
+jobs:
+  build-amd64-veinmind-malicious:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-malicious
+      file: veinmind-malicious
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  build-amd64-veinmind-asset:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-asset
+      file: veinmind-asset
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  build-amd64-veinmind-webshell:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-webshell
+      file: veinmind-webshell
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  build-amd64-veinmind-unsafe-mount:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-unsafe-mount
+      file: veinmind-unsafe-mount
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  build-amd64-veinmind-log4j2:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-log4j2
+      file: veinmind-log4j2
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  test-veinmind-weakpass:
+    runs-on: ubuntu-20.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: |
+          cd ./plugins/go/veinmind-weakpass && go mod tidy 
+          cd hash && go test -tags static  && go test -tags dynamic
+          cd ../service && go test -tags static  && go test -tags dynamic 
+
+
+  # statics build need ubuntu
+  build-amd64-static-veinmind-weakpass:
+    runs-on: ubuntu-20.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+      TAGS: "static"
+    needs: test-veinmind-weakpass
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.3'
+      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: cd ./plugins/go/veinmind-weakpass && /bin/bash -x script/build_amd64.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: veinmind-weakpass-amd64
+          path: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+
+  build-amd64-dynamic-veinmind-weakpass:
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: ./.github/workflows/build.yml
+    needs: test-veinmind-weakpass
+    with:
+      path: ./plugins/go/veinmind-weakpass
+      file: veinmind-weakpass
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+      TAGS: "dynamic"
+
+  build-amd64-veinmind-iac:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-iac
+      file: veinmind-iac
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
+  # runner need tar so just write a standalone build job
+  build-amd64-veinmind-runner:
+    runs-on: ubuntu-latest
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    needs: [
+      build-amd64-veinmind-malicious,
+      build-amd64-veinmind-asset,
+      build-amd64-veinmind-webshell,
+      build-amd64-veinmind-unsafe-mount,
+      build-amd64-veinmind-log4j2,
+      build-amd64-static-veinmind-weakpass,
+      build-amd64-veinmind-iac,
+    ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.3'
+      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: cd veinmind-runner && /bin/bash -x script/build_veinmind_runner_amd64.sh
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-malicious-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-asset-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-webshell-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-unsafe-mount-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-log4j2-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-weakpass-amd64
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-iac-amd64
+      - run: |
+          mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-malicious  
+          mv veinmind-asset_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-asset 
+          mv veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-webshell 
+          mv veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-unsafe-mount 
+          mv veinmind-log4j2_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-log4j2 
+          mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-weakpass 
+          mv veinmind-iac_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-iac 
+          mv ./plugins/python/veinmind-sensitive ./veinmind-sensitive 
+          mv ./plugins/python/veinmind-history ./veinmind-history
+          mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
+          mv ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner-entrypoint
+          rm -rf ./veinmind-runner && mv veinmind-runner-entrypoint veinmind-runner
+          chmod +x veinmind-runner veinmind-malicious veinmind-asset veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac 
+          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-asset veinmind-webshell \
+          veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac \
+          ./veinmind-sensitive \
+          ./veinmind-history \
+          ./veinmind-backdoor \
+      - uses: actions/upload-artifact@v3
+        with:
+          name: veinmind-runner.tar.gz
+          path: veinmind-runner.tar.gz
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: veinmind-runner.tar.gz

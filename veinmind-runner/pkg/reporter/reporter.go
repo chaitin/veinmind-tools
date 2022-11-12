@@ -95,6 +95,11 @@ func (r *Reporter) GetEvents() ([]ReportEvent, error) {
 }
 
 func (r *Reporter) convert(event report.ReportEvent) (ReportEvent, error) {
+	if event.DetectType == report.IaC {
+		return ReportEvent{
+			ReportEvent: event,
+		}, nil
+	}
 	dr, _ := docker.New()
 	cr, _ := containerd.New()
 	runtimes := []api.Runtime{dr, cr}

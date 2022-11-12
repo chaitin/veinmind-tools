@@ -1,0 +1,22 @@
+name: veinmind-tools-pacakge
+on:
+  workflow_call:
+
+jobs:
+  package-veinmind-backdoor:
+    uses: ./.github/workflows/package.yml
+    with:
+      path: ./plugins/python/veinmind-backdoor
+      file: veinmind-backdoor.tar.gz
+
+  package-veinmind-sensitive:
+    uses: ./.github/workflows/package.yml
+    with:
+      path: ./plugins/python/veinmind-sensitive
+      file: veinmind-sensitive.tar.gz
+
+  package-veinmind-history:
+    uses: ./.github/workflows/package.yml
+    with:
+      path: ./plugins/python/veinmind-history
+      file: veinmind-history.tar.gz
