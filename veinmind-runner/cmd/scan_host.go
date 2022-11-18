@@ -4,7 +4,6 @@ import (
 	"context"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
-	iacApi "github.com/chaitin/libveinmind/go/iac"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
@@ -26,12 +25,6 @@ var scanHostImageCmd = &cmd.Command{
 var scanHostContainerCmd = &cmd.Command{
 	Use:      "container",
 	Short:    "perform hosted container scan",
-	PreRunE:  scanPreRunE,
-	PostRunE: scanPostRunE,
-}
-var scanHostIaCCmd = &cmd.Command{
-	Use:      "iac",
-	Short:    "perform hosted iac file scan",
 	PreRunE:  scanPreRunE,
 	PostRunE: scanPostRunE,
 }
@@ -103,33 +96,10 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	return nil
 }
 
-func scanIac(c *cmd.Command, iac iacApi.IAC) error {
-	log.Infof("scanIac: %s, filetype: %s", iac.Path, iac.Type)
-	if err := cmd.ScanIAC(ctx, ps, iac,
-		plugin.WithExecInterceptor(func(
-			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
-		) error {
-			// Register Service
-			reg := service.NewRegistry()
-			reg.AddServices(log.WithFields(log.Fields{
-				"plugin":  plug.Name,
-				"command": path.Join(c.Path...),
-			}))
-			reg.AddServices(reportService)
-
-			// Next Plugin
-			return next(ctx, reg.Bind())
-		})); err != nil {
-		return err
-	}
-	return nil
-}
-
 func init() {
 
 	scanHostCmd.AddCommand(cmd.MapImageCommand(scanHostImageCmd, scanImage))
 	scanHostCmd.AddCommand(cmd.MapContainerCommand(scanHostContainerCmd, scanContainer))
-	scanHostCmd.AddCommand(cmd.MapIACCommand(scanHostIaCCmd, scanIac))
 
 	scanHostCmd.PersistentFlags().Int("threads", 5, "threads for scan action")
 	scanHostCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")

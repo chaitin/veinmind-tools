@@ -155,6 +155,7 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(scanHostCmd)
+	rootCmd.AddCommand(scanIaCCmd)
 	rootCmd.AddCommand(scanRegistryCmd)
 
 	// control exit
