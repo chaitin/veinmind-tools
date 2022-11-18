@@ -79,6 +79,9 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 | Docker | Runtime | ✔️ |
 | Containerd | Runtime | ✔️ |
 
+## 🛴 Architecture
+![](docs/architecture.png)
+
 ## 🏘️ Contact Us
 
 1. You can make bug feedback and feature suggestions directly through GitHub Issues.
