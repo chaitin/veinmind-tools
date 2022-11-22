@@ -40,7 +40,8 @@ var scanRegistryImageCmd = &cmd.Command{
 		runtime, _ := cmd.Flags().GetString("runtime")
 		// tags, _ := cmd.Flags().GetStringSlice("tags")
 
-		if parallelContainerMode {
+		// fix: no config need not join path
+		if config != "" && parallelContainerMode {
 			config = filepath.Join(resourceDirectoryPath, config)
 		}
 
