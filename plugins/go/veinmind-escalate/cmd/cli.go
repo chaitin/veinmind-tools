@@ -30,7 +30,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 		}
 	}()
 	// do something here
-	log.Info(image.ID())
+
 	utils.ImagesScanRun(image)
 
 	// if you want display at runner report, you should send your result to report event
@@ -40,11 +40,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 // scanContainer is func that used to do some action with container
 // you can write your plugin scan code herex
 func scanContainer(c *cmd.Command, container api.Container) error {
-
-	// do something here
-	log.Info(container.ID())
 	utils.ContainersScanRun(container)
-	// if you want display at runner report, you should send your result to report event
 	return nil
 }
 
@@ -56,8 +52,6 @@ func init() {
 		Author:      "veinmind-team",
 		Description: "veinmind-escalate Description",
 	}))
-	//scanCmd.AddCommand(cmd.MapImageCommand(scanImageCmd, scanImage))
-	//scanCmd.AddCommand(cmd.MapContainerCommand(scanContainerCmd, scanContainer))
 }
 
 func main() {

@@ -10,10 +10,10 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escalate/models"
 	_ "github.com/docker/docker/api/types/mount"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -68,9 +68,10 @@ var CAPStringsList = []string{
 // 不安全的suid配置中判断某个可执行文件是否配置了suid
 
 func IsBelongToRoot(content os.FileInfo, s string) bool {
-	uid := reflect.ValueOf(content.Sys()).Elem().FieldByName("Uid")
+
+	uid := content.Sys().(*syscall.Stat_t).Uid
 	//log.Info(uid.Interface().(uint32))
-	if uid.Interface().(uint32) == uint32(0) {
+	if uid == uint32(0) {
 		return true
 	}
 	return false
@@ -88,7 +89,7 @@ func IsContainSUID(content os.FileInfo, s string) bool {
 
 // 不安全的suid配置
 
-func FindSuid(fs api.FileSystem, wg *sync.WaitGroup) {
+func FindSuid(fs api.FileSystem) {
 	var binaryName = []string{"bash", "nmap", "vim", "find", "more", "less", "nano", "cp", "awk"}
 	var filepath = []string{"/bin/", "/usr/bin/"}
 	for i := 0; i < len(filepath); i++ {
@@ -105,24 +106,23 @@ func FindSuid(fs api.FileSystem, wg *sync.WaitGroup) {
 			}
 		}
 	}
-	defer wg.Done()
 
 }
 
 // 空密码高权限用户
 
-func CheckEmptyPasswdRoot(fs api.FileSystem, wg *sync.WaitGroup) {
-	defer wg.Done()
+func CheckEmptyPasswdRoot(fs api.FileSystem) {
+	//更改为shadow
+
 	path := "/etc/passwd"
 	file, err := fs.Open(path)
+	defer file.Close()
 	if err == nil {
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			attr := strings.Split(scanner.Text(), ":")
 			if attr[1] == "" && attr[2] == "0" {
 				AddResult(attr[0], "EmptyPasswdRoot")
-				//log.Info(attr[0])
-				//log.Info(111111111)
 			}
 		}
 	}
@@ -146,8 +146,7 @@ func FileWriteCheck(s string) bool {
 
 // 不安全的权限配置，如所有用户可写/etc/passwd，/etc/crontab的定时任务中有某个脚本所有人可写
 
-func UnsafePrivilege(fs api.FileSystem, wg *sync.WaitGroup) {
-	defer wg.Done()
+func UnsafePrivilege(fs api.FileSystem) {
 	unsafepath := []string{"/etc/passwd", "/etc/crontab"}
 	for i := 0; i < len(unsafepath); i++ {
 		content, err := fs.Stat(unsafepath[i])
@@ -205,12 +204,6 @@ func SensitiveFileMountCheck(fs1 api.Container) {
 	}
 }
 
-// 检测内核版本
-func KernelVersionCheck(fs1 api.Container) {
-	KernelVersionFile := "/proc/version"
-	log.Info(KernelVersionFile)
-}
-
 // 检测docker remote api是否开启
 func RemoteApiCheck(fs1 api.Container) {
 
@@ -253,17 +246,15 @@ func GenerateImageRoport(image api.Image) error {
 	return nil
 }
 func ImagesScanRun(fs api.Image) {
-	wg := &sync.WaitGroup{}
-	wg.Add(3)
-	FindSuid(fs, wg)
-	CheckEmptyPasswdRoot(fs, wg)
-	UnsafePrivilege(fs, wg)
-	wg.Wait()
+
+	go FindSuid(fs)
+	go CheckEmptyPasswdRoot(fs)
+	go UnsafePrivilege(fs)
+
 	GenerateImageRoport(fs)
 }
 
 func GenerateContainerRoport(image api.Container) error {
-	//log.Info(len(res))
 	if len(res) > 0 {
 		detail, err := json.Marshal(res)
 		if err == nil {
@@ -288,14 +279,13 @@ func GenerateContainerRoport(image api.Container) error {
 	return nil
 }
 func ContainersScanRun(fs api.Container) {
-	var wg sync.WaitGroup
-	wg.Add(4)
-	FindSuid(fs, &wg)
-	CheckEmptyPasswdRoot(fs, &wg)
-	UnsafePrivilege(fs, &wg)
+
+	FindSuid(fs)
+	CheckEmptyPasswdRoot(fs)
+	UnsafePrivilege(fs)
 	//PrivilegeModeCheck(fs)
 	SensitiveFileMountCheck(fs)
-	wg.Wait()
+
 	GenerateContainerRoport(fs)
 
 }
