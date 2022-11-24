@@ -3,7 +3,7 @@ WORKDIR /build
 COPY . .
 RUN chmod +x script/build.sh && /bin/bash script/build.sh
 
-FROM veinmind/veinmind-malicious:latest as malicious
+# FROM veinmind/veinmind-malicious:latest as malicious
 FROM veinmind/veinmind-weakpass:latest as weakpass
 FROM veinmind/veinmind-sensitive:latest as sensitive
 FROM veinmind/veinmind-history:latest as history
@@ -21,7 +21,7 @@ COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 
 COPY --from=builder /build/veinmind-runner .
 COPY --from=weakpass /tool/veinmind-weakpass .
-COPY --from=malicious /tool/veinmind-malicious_linux_amd64 .
+# COPY --from=malicious /tool/veinmind-malicious_linux_amd64 .
 COPY --from=sensitive /tool /tool/veinmind-sensitive
 COPY --from=history /tool /tool/veinmind-history
 COPY --from=backdoor /tool /tool/veinmind-backdoor
