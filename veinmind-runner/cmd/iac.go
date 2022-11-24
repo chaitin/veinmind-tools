@@ -66,6 +66,15 @@ func scanGitRepoIaCFile(c *cmd.Command, args []string) error {
 		return err
 	}
 
+	proxy, err := c.Flags().GetString("proxy")
+	if err != nil {
+		return err
+	}
+
+	if proxy != "" {
+		os.Setenv("ALL_PROXY", proxy)
+	}
+
 	for _, arg := range args {
 		isGitUrl, err := regexp.MatchString("^(http(s)?://([^/]+?/){2}|git@[^:]+:[^/]+?/).*?.git$", arg)
 		if err != nil {
@@ -78,6 +87,8 @@ func scanGitRepoIaCFile(c *cmd.Command, args []string) error {
 				err = git.Clone(tempDir, arg, key, insecure)
 				if err != nil {
 					log.Errorf("git download failed: %s", err)
+					// nil point fix
+					return
 				}
 				defer os.RemoveAll(tempDir)
 				discovered, err := iacApi.DiscoverIACs(tempDir, opt...)
@@ -103,6 +114,7 @@ func init() {
 	scanIaCCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")
 	scanIaCCmd.PersistentFlags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 
+	scanGitRepoCmd.Flags().String("proxy", "", "proxy to git like: https://xxxxx or socks5://xxxx")
 	scanGitRepoCmd.Flags().String("ssh-pubkey", "", "auth to git if use by ssh proto")
-	scanGitRepoCmd.Flags().Bool("insecure-skip", false, "auth to git if use by ssh proto")
+	scanGitRepoCmd.Flags().Bool("insecure-skip", false, "skip tls config")
 }

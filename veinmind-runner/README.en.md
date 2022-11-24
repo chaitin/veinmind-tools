@@ -91,10 +91,13 @@ helm install veinmind .
 5.scan IaC file in remote git repository
 
 ```
-./veinmind-runner scan-iac git git@xxxxxx
 ./veinmind-runner scan-iac git http://xxxxxx.git 
 # auth
 ./veinmind-runner scan-iac git git@xxxxxx --ssh-pubkey=/your/ssh/key/path
+./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
+# add proxy
+./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan-iac git http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
 # disable tls
 ./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
 ```
