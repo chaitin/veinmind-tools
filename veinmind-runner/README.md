@@ -5,8 +5,9 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 </p>
 
 ## 基本介绍
-长亭团队以丰富的研发经验为背景， 在 [veinmind-sdk]() 中设计了一套插件系统。
-在该插件系统的支持下，只需要调用 [veinmind-sdk]() 所提供的API，即可自动化的生成符合标准规范的插件。(具体代码示例可查看[example](./example))
+
+长亭团队以丰富的研发经验为背景， 在 [veinmind-sdk]() 中设计了一套插件系统。 在该插件系统的支持下，只需要调用 [veinmind-sdk]() 所提供的API，即可自动化的生成符合标准规范的插件。(
+具体代码示例可查看[example](./example))
 `veinmind-runner`作为插件平台，会自动化的扫描符合规范的插件，并将需要扫描的镜像信息传递给对应的插件。
 ![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220321150601.png)
 
@@ -35,22 +36,26 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 ### 安装方式二
 
 基于平行容器的模式，获取 `veinmind-runner` 的镜像并启动
+
 ```
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' \
 -v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
 ```
 
 或者使用项目提供的脚本启动
+
 ```
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
 ### 安装方式三
+
 基于`Kubernetes`环境，使用`Helm`安装`veinmind-runner`，定时执行扫描任务
 
 请先安装`Helm`， 安装方法可以参考[官方文档](https://helm.sh/zh/docs/intro/install/)
 
-安装`veinmind-runner`之前，可配置执行参数，可参考[文档](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.md)
+安装`veinmind-runner`
+之前，可配置执行参数，可参考[文档](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.md)
 
 使用`Helm`安装 `veinmind-runner`
 
@@ -89,10 +94,13 @@ helm install veinmind .
 5.扫描远端 git 仓库的 IaC 文件
 
 ```
-./veinmind-runner scan-iac git git@xxxxxx
 ./veinmind-runner scan-iac git http://xxxxxx.git 
 # auth
 ./veinmind-runner scan-iac git git@xxxxxx --ssh-pubkey=/your/ssh/key/path
+./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
+# add proxy
+./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan-iac git http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
 # disable tls
 ./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
 ```
@@ -110,6 +118,7 @@ helm install veinmind .
 ```
 
 `auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
+
 ```
 [[auths]]
 	registry = "index.docker.io"
@@ -128,35 +137,41 @@ helm install veinmind .
 ```
 
 容器运行时类型
+
 - dockerd
 - containerd
 
-
 9.使用`glob`筛选需要运行插件
+
 ```
 ./veinmind-runner scan-host image -g "**/veinmind-malicious"
 ```
 
 10.列出当前插件列表
+
 ```
 ./veinmind-runner list plugin
 ```
 
 11.指定容器运行时路径
+
 ```
 ./veinmind-runner scan-host image --docker-data-root [your_path]
 ```
+
 ```
 ./veinmind-runner scan-host image --containerd-root [your_path]
 ```
 
 12.支持 docker 镜像阻断功能
+
 ```bash
 # first
 ./veinmind-runner authz -c config.toml 
 # second
 dockerd --authorization-plugin=veinmind-broker
 ```
+
 其中`config.toml`,包含如下字段
 
 |  | **字段名**           | **字段属性** | **含义**  |
@@ -171,7 +186,8 @@ dockerd --authorization-plugin=veinmind-broker
 |          | authz_log_path    | string   | 阻断服务日志  |
 
 - action 原则上支持[DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/)所提供的操作接口
-- 如下的配置表示：当 `创建容器`或`推送镜像` 时，使用 `veinmind-weakpass` 插件扫描`ssh`服务，如果发现有弱密码存在，并且风险等级为 `High` 则阻止此操作，并发出警告。最终将扫描结果存放至`plugin.log`,将风险结果存放至`auth.log`。
+- 如下的配置表示：当 `创建容器`或`推送镜像` 时，使用 `veinmind-weakpass` 插件扫描`ssh`服务，如果发现有弱密码存在，并且风险等级为 `High`
+  则阻止此操作，并发出警告。最终将扫描结果存放至`plugin.log`,将风险结果存放至`auth.log`。
 
 ``` toml
 [log]
