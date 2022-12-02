@@ -92,12 +92,26 @@ func dockerfile(file *os.File, path string) (interface{}, error) {
 }
 
 type KubernetesInput struct {
-	ApiVersion string      `yaml:"apiVersion" json:"apiVersion"`
-	Path       string      `yaml:"path" json:"Path"`
-	Kind       string      `yaml:"kind" json:"kind"`
-	Meta       interface{} `yaml:"metadata" json:"metadata"`
-	Spec       interface{} `yaml:"spec" json:"spec"`
-	Status     interface{} `yaml:"status" json:"status"`
+	ApiVersion      string      `yaml:"apiVersion" json:"apiVersion"`
+	Path            string      `yaml:"path" json:"Path"`
+	Kind            string      `yaml:"kind" json:"kind"`
+	Meta            interface{} `yaml:"metadata" json:"metadata"`
+	Spec            interface{} `yaml:"spec" json:"spec"`
+	RoleRef         interface{} `yaml:"roleRef" json:"roleRef"`
+	Status          interface{} `yaml:"status" json:"status"`
+	Authentication  interface{} `yaml:"authentication" json:"authentication"`
+	Authorization   interface{} `yaml:"authorization" json:"authorization"`
+	Template        interface{} `yaml:"template" json:"template"`
+	Containers      interface{} `yaml:"containers" json:"containers"`
+	Args            interface{} `yaml:"args" json:"args"`
+	Command         interface{} `yaml:"command" json:"command"`
+	SecurityContext interface{} `yaml:"securityContext" json:"securityContext"`
+	Privileged      interface{} `yaml:"privileged" json:"privileged"`
+	Capabilities    interface{} `yaml:"capabilities" json:"capabilities"`
+	Add             interface{} `yaml:"add" json:"add"`
+	Volumes         interface{} `yaml:"volumes" json:"volumes"`
+	HostPath        interface{} `yaml:"hostPath" json:"hostPath"`
+	HostPID         bool        `yaml:"hostPID" json:"hostPID"`
 }
 
 func kubernetes(file *os.File, path string) (interface{}, error) {
