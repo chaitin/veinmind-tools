@@ -1,13 +1,24 @@
 # ref https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks.toml
+# ref https://github.com/zricethezav/gitleaks
+# update at: 2022/12/08
 
 [whitelist]
-paths = ["/usr/**", "/lib/**", "/lib32/**", "/bin/**", "/sbin/**" ,"/var/lib/**", "/var/log/**"]
+paths = [
+    "/usr/**", "/lib/**", "/lib32/**", "/bin/**", "/sbin/**" ,"/var/lib/**", "/var/log/**",
+    # node
+    "**/node_modules/**/*.md",
+    "**/node_modules/**/test/**",
+    # aws package example
+    "**/service/iam/examples_test.go",
+    # grafana js
+    "**/grafana/public/build/*.js"
+]
 
 [[rules]]
 id = 1
 name = "gitlab_personal_access_token"
 description = "GitLab Personal Access Token"
-match = '''glpat-[0-9a-zA-Z\-]{20}'''
+match = '''glpat-[0-9a-zA-Z_\-]{20}'''
 level = 'high'
 
 [[rules]]
@@ -142,28 +153,29 @@ id = 20
 name = "Google (GCP) Service-account"
 description = "Google (GCP) Service-account"
 match = '''\"type\": \"service_account\"'''
+level = 'medium'
 
 [[rules]]
 # demo of this match not matching passwords in urls that contain env vars:
-# https://match101.com/r/rT9Lv9/3
+# https://regex101.com/r/rT9Lv9/6
 id = 21
 name = "Password in URL"
 description = "Password in URL"
-match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
+match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/\n]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
 level = 'high'
 
 [[rules]]
 id = 22
 name = "Heroku API Key"
 description = "Heroku API Key"
-match = '''(?i)(heroku[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})['\"]'''
+match = '''(?i)(?:heroku)(?:[0-9a-z\-_\t .]{0,20})(?:[\s|']|[\s|"]){0,3}(?:=|>|:=|\|\|:|<=|=>|:)(?:'|\"|\s|=|\x60){0,5}([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})(?:['|\"|\n|\r|\s|\x60]|$)'''
 level = 'high'
 
 [[rules]]
 id = 23
 name = "Slack Webhook"
 description = "Slack Webhook"
-match = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
+match = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8,12}/[a-zA-Z0-9_]{24}'''
 level = 'medium'
 
 [[rules]]
@@ -205,15 +217,17 @@ level = 'medium'
 id = 29
 name = "Adobe Client Secret"
 description = "Adobe Client Secret"
-match = '''(?i)(p8e-)[a-z0-9]{32}'''
+match = '''(p8e-)(?i)[a-z0-9]{32}'''
 level = 'high'
 
+# change LTAI => LTAI5t
 [[rules]]
 id = 30
 name = "Alibaba AccessKey ID"
 description = "Alibaba AccessKey ID"
-match = '''(?i)(LTAI)[a-z0-9]{20}'''
+match = '''(LTAI5t)(?i)[a-z0-9]{18}'''
 level = 'medium'
+lock = true
 
 [[rules]]
 id = 31
@@ -268,7 +282,7 @@ level = 'high'
 id = 38
 name = "Clojars API token"
 description = "Clojars API token"
-match = '''(?i)(CLOJARS_)[a-z0-9]{60}'''
+match = '''(CLOJARS_)(?i)[a-z0-9]{60}'''
 level = 'high'
 
 [[rules]]
@@ -317,7 +331,7 @@ level = 'high'
 id = 45
 name = "Doppler API token"
 description = "Doppler API token"
-match = '''(?i)['\"](dp\.pt\.)[a-z0-9]{43}['\"]'''
+match = '''['\"](dp\.pt\.)(?i)[a-z0-9]{43}['\"]'''
 level = 'high'
 
 [[rules]]
@@ -345,28 +359,28 @@ level = 'high'
 id = 49
 name = "Duffel API token"
 description = "Duffel API token"
-match = '''(?i)['\"]duffel_(test|live)_[a-z0-9_-]{43}['\"]'''
+match = '''['\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\"]'''
 level = 'high'
 
 [[rules]]
 id = 50
 name = "Dynatrace API token"
 description = "Dynatrace API token"
-match = '''(?i)['\"]dt0c01\.[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
+match = '''['\"]dt0c01\.(?i)[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
 level = 'high'
 
 [[rules]]
 id = 51
 name = "EasyPost API token"
 description = "EasyPost API token"
-match = '''(?i)['\"]EZAK[a-z0-9]{54}['\"]'''
+match = '''['\"]EZAK(?i)[a-z0-9]{54}['\"]'''
 level = 'high'
 
 [[rules]]
 id = 52
 name = "EasyPost test API token"
 description = "EasyPost test API token"
-match = '''(?i)['\"]EZTK[a-z0-9]{54}['\"]'''
+match = '''['\"]EZTK(?i)[a-z0-9]{54}['\"]'''
 level = 'high'
 
 [[rules]]
@@ -416,28 +430,28 @@ level = 'high'
 id = 59
 name = "Frame.io API token"
 description = "Frame.io API token"
-match = '''(?i)fio-u-[a-z0-9-_=]{64}'''
+match = '''fio-u-(?i)[a-z0-9-_=]{64}'''
 level = 'high'
 
 [[rules]]
 id = 60
 name = "GoCardless API token"
 description = "GoCardless API token"
-match = '''(?i)['\"]live_[a-z0-9-_=]{40}['\"]'''
+match = '''['\"]live_(?i)[a-z0-9-_=]{40}['\"]'''
 level = 'high'
 
 [[rules]]
 id = 61
 name = "Grafana API token"
 description = "Grafana API token"
-match = '''(?i)['\"]eyJrIjoi[a-z0-9-_=]{72,92}['\"]'''
+match = '''['\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\"]'''
 level = 'high'
 
 [[rules]]
 id = 62
 name = "Hashicorp Terraform user/org API token"
 description = "Hashicorp Terraform user/org API token"
-match = '''(?i)['\"][a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
+match = '''['\"](?i)[a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
 level = 'high'
 
 [[rules]]
@@ -472,14 +486,14 @@ level = 'high'
 id = 67
 name = "Ionic API token"
 description = "Ionic API token"
-match = '''(?i)ion_[a-z0-9]{42}'''
+match = '''ion_(?i)[a-z0-9]{42}'''
 level = 'high'
 
 [[rules]]
 id = 68
 name = "Linear API token"
 description = "Linear API token"
-match = '''(?i)lin_api_[a-z0-9]{40}'''
+match = '''lin_api_(?i)[a-z0-9]{40}'''
 level = 'high'
 
 [[rules]]
@@ -577,28 +591,28 @@ level = 'high'
 id = 82
 name = "npm access token"
 description = "npm access token"
-match = '''(?i)['\"](npm_[a-z0-9]{36})['\"]'''
+match = '''['\"](npm_(?i)[a-z0-9]{36})['\"]'''
 level = 'high'
 
 [[rules]]
 id = 83
 name = "Planetscale password"
 description = "Planetscale password"
-match = '''(?i)pscale_pw_[a-z0-9\-_\.]{43}'''
+match = '''pscale_pw_(?i)[a-z0-9\-_\.]{43}'''
 level = 'high'
 
 [[rules]]
 id = 84
 name = "Planetscale API token"
 description = "Planetscale API token"
-match = '''(?i)pscale_tkn_[a-z0-9\-_\.]{43}'''
+match = '''pscale_tkn_(?i)[a-z0-9\-_\.]{43}'''
 level = 'high'
 
 [[rules]]
 id = 85
 name = "Postman API token"
 description = "Postman API token"
-match = '''(?i)PMAK-[a-f0-9]{24}\-[a-f0-9]{34}'''
+match = '''PMAK-(?i)[a-f0-9]{24}\-[a-f0-9]{34}'''
 level = 'high'
 
 [[rules]]
@@ -619,14 +633,14 @@ level = 'high'
 id = 88
 name = "Sendgrid API token"
 description = "Sendgrid API token"
-match = '''(?i)SG\.[a-z0-9_\-\.]{66}'''
+match = '''SG\.(?i)[a-z0-9_\-\.]{66}'''
 level = 'high'
 
 [[rules]]
 id = 89
 name = "Sendinblue API token"
 description = "Sendinblue API token"
-match = '''(?i)xkeysib-[a-f0-9]{64}\-[a-z0-9]{16}'''
+match = '''xkeysib-[a-f0-9]{64}\-(?i)[a-z0-9]{16}'''
 level = 'high'
 
 [[rules]]
@@ -817,3 +831,108 @@ name = "Potential MSBuild publish profile"
 description = "Potential MSBuild publish profile"
 filepath = '''.*\/\.pubxml(\.user)?$'''
 level = 'low'
+
+[[rules]]
+id = 117
+name = "Potential Tencent Accesskey"
+description = "Might contain Tencent Accesskey"
+match = '''AKID(?i)[a-z0-9]{32}'''
+level = 'high'
+
+[[rules]]
+id = 118
+name = "Potential aws Accesskey"
+description = "Might contain aws Accesskey"
+match = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+level = 'high'
+
+[[rules]]
+id = 119
+name = "Potential UCloud Accesskey"
+description = "Might contain UCloud Accesskey"
+match = '''JDC_[A-z,0-9]{28}'''
+level = 'high'
+
+[[rules]]
+id = 120
+name = "JWT TOKEN"
+description = "Might JWT Token "
+match = '''ey[0-9a-zA-Z]{30,34}\.ey[0-9a-zA-Z-\/_]{30,500}\.[0-9a-zA-Z-\/_]{10,200}={0,2}'''
+level = 'medium'
+
+[[rules]]
+id = 121
+name = "Google API"
+description = "Might Google API Key "
+match = '''AIza[0-9A-Za-z\-_]{35}'''
+level = 'medium'
+
+[[rules]]
+id = 122
+name = "gitlab_pipeline_trigger_token"
+description = "GitLab Pipeline Trigger Token"
+match = '''glptt-[0-9a-zA-Z_\-]{20}'''
+level = 'high'
+
+[[rules]]
+id = 123
+name = "gitlab_runner_registration_token"
+description = "GitLab Runner Registration Token"
+match = '''GR1348941[0-9a-zA-Z_\-]{20}'''
+level = 'high'
+
+[[rules]]
+id = 124
+name = "Flutterwave public key"
+description = "Flutterwave public key"
+match = '''FLWPUBK_TEST-(?i)[a-h0-9]{32}-X'''
+level = 'high'
+
+[[rules]]
+id = 125
+name = "Flutterwave secret key"
+description = "Flutterwave secret key"
+match = '''FLWSECK_TEST-(?i)[a-h0-9]{32}-X'''
+level = 'high'
+
+[[rules]]
+id = 126
+name = "Flutterwave encrypted key"
+description = "Flutterwave encrypted key"
+match = '''FLWSECK_TEST[a-h0-9]{12}'''
+level = 'high'
+
+[[rules]]
+id = 127
+name = "github-app-token"
+description = "GitHub App Token"
+match = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+level = 'high'
+
+[[rules]]
+id = 128
+name = "github-fine-grained-pat"
+description = "GitHub Fine-Grained Personal Access Token"
+match = '''github_pat_[0-9a-zA-Z_]{82}'''
+level = 'high'
+
+[[rules]]
+id = 129
+name = "grafana-cloud-api-token"
+description = "Grafana cloud api token"
+match = '''glc_[A-Za-z0-9+/]{32,400}={0,2}'''
+level = 'high'
+
+[[rules]]
+id = 130
+name = "grafana-service-account-token"
+description = "Grafana service account token"
+match = '''glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}'''
+level = 'high'
+
+[[rules]]
+id = 131
+name = "prefect-api-token"
+description = "Prefect API token"
+match = '''pnu_[a-z0-9]{36}'''
+level = 'medium'
