@@ -6,6 +6,6 @@ import future.keywords.contains
 import future.keywords.if
 
 risks[res]{
-    input.spec.template.spec.containers[0].args[i]=="--enable-skip-login"
-	res := common.result({"original":input.spec.template.spec.containers[0].args[i], "Path": input.Path}, "KN-008")
+    contains(input.spec.containers[0].args[i],"enable-skip-login")
+	res := common.result({"original":"UnSafeSettings:`spec.containers.args`", "Path": input.Path}, "KN-008")
 }

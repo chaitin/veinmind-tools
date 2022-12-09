@@ -8,5 +8,5 @@ import future.keywords.if
 risks[res]{
     input.metadata.name=="system:anonymous"
     input.roleRef.name=="cluster-admin"
-    res := common.result({"original":input.metadata.name, "Path": input.Path}, "KN-006")
+    res := common.result({"original":"UnSafeSettings:`metadata.name`,`roleRef.name`", "Path": input.Path}, "KN-006")
 }
