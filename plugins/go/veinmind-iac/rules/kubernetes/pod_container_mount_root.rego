@@ -4,16 +4,14 @@ import data.common
 import future.keywords.if
 import future.keywords.in
 
-unsafe_mount_root[d]{
-	inner := input.spec.volumes[i].hostPath
-    some val in inner
-    val=="/"
-    d:=input.spec.volumes[i].name
-}
-unSafe_mount_root:={
-    "UnSafeVolumnsName":unsafe_mount_root
-}
+
 risks[res]{
-    count(unsafe_mount_root)>=1
-    res := common.result({"original":json.marshal(unSafe_mount_root), "Path": input.Path}, "KN-018")
+        inner := input.spec.volumes[i].hostPath
+        some val in inner
+        val=="/"
+        Name:=input.spec.volumes[i].name
+        Names:=[Name]
+        Hints:=["UnSafeVolumeName"]
+        Combine:=array.concat(Hints,Names)
+        res := common.result({"original":concat(":",Combine), "Path": input.Path}, "KN-018")
 }

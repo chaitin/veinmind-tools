@@ -8,5 +8,5 @@ import future.keywords.if
 risks[res]{
 	input.authentication.anonymous.enabled==true
     input.authorization.mode=="AlwaysAllow"
-    res := common.result({"original":input.authorization.mode, "Path": input.Path}, "KN-007")
+    res := common.result({"original":"UnSafeSettings:`authentication.anonymous`,`authorization.mode`", "Path": input.Path}, "KN-007")
 }

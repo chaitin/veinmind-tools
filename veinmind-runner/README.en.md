@@ -93,7 +93,7 @@ helm install veinmind .
 ```
 ./veinmind-runner scan-iac git http://xxxxxx.git 
 # auth
-./veinmind-runner scan-iac git git@xxxxxx --ssh-pubkey=/your/ssh/key/path
+./veinmind-runner scan-iac git git@xxxxxx --sshkey=/your/ssh/key/path
 ./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
 # add proxy
 ./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
@@ -102,14 +102,18 @@ helm install veinmind .
 ./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
 ```
 
+6.scan remote kubernetes IaC config(needs kubeconfig file)
+```
+./veinmind-runner scan-iac k8s --kubeconfig=/your/k8sConfig/path
+```
 
-6.scan the `centos` image in the remote repository (the default is `index.docker.io` if the repository is not specified)
+7.scan the `centos` image in the remote repository (the default is `index.docker.io` if the repository is not specified)
 
 ```
 ./veinmind-runner scan-registry image centos
 ```
 
-7.scan `registry.private.net/library/nginx` image in the remote private registry, where `auth.toml` is the authentication information configuration file, which contains the corresponding authentication information
+8.scan `registry.private.net/library/nginx` image in the remote private registry, where `auth.toml` is the authentication information configuration file, which contains the corresponding authentication information
 
 ```
 ./veinmind-runner scan-registry image -c auth.toml registry.private.net/library/nginx
@@ -127,7 +131,7 @@ the format of `auth.toml` is as follows, `registry` represents the repository ad
 	password = "password"
 ```
 
-8.specify the container runtime type
+9.specify the container runtime type
 
 ```
 ./veinmind-runner scan-host image --containerd
@@ -137,17 +141,17 @@ container runtime type
 - dockerd
 - containerd
 
-9.filtering with `glob` requires running the plugin
+10.filtering with `glob` requires running the plugin
 ```
 ./veinmind-runner scan-host image -g "**/veinmind-malicious"
 ```
 
-10.list plugin
+11.list plugin
 ```
 ./veinmind-runner list plugin
 ```
 
-11.specify the container runtime path
+12.specify the container runtime path
 ```
 ./veinmind-runner scan-host image --docker-data-root [your_path]
 ```
@@ -155,7 +159,7 @@ container runtime type
 ./veinmind-runner scan-host image --containerd-root [your_path]
 ```
 
-12.support docker plugin for authorization
+13.support docker plugin for authorization
 ```bash
 # first
 ./veinmind-runner authz -c config.toml

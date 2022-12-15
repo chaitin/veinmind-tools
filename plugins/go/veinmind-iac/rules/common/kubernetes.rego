@@ -54,7 +54,7 @@ meta_data["KN-006"] = {
     "type": "kubernetes",
     "severity": "Medium",
     "description": "如果错误地将`system:anonymous`用户绑定到`cluster-admin`用户组，则6443 端口允许匿名用户以管理员权限向集群内部下发指令",
-    "solution": "删除 /etc/kubernetes/manifest/kube-apiserver.yaml中的`--insecure-port=xxx`选项",
+    "solution": "删除错误的system:anonymous clusterrolebinding配置",
     "reference": "",
 }
 meta_data["KN-007"] = {

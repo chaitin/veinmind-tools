@@ -4,16 +4,13 @@ import data.common
 import future.keywords.if
 import future.keywords.in
 
-unsafe_mount_dockersock[d]{
-	inner := input.spec.volumes[i].hostPath
+risks[res]{
+    inner := input.spec.volumes[i].hostPath
     some val in inner
     contains(val,"docker.sock")
-    d:=input.spec.volumes[i].name
-}
-unSafe_mount_dockersock:={
-    "UnSafeVolumnsName":unsafe_mount_dockersock
-}
-risks[res]{
-    count(unsafe_mount_dockersock)>=1
-    res := common.result({"original":json.marshal(unSafe_mount_dockersock), "Path": input.Path}, "KN-016")
+    Name:=input.spec.volumes[i].name
+    Names:=[Name]
+    Hints:=["UnSafeVolumeName"]
+    Combine:=array.concat(Hints,Names)
+    res := common.result({"original":concat(":",Combine), "Path": input.Path}, "KN-016")
 }

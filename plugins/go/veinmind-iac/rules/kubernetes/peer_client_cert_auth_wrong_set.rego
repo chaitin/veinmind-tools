@@ -12,5 +12,5 @@ risks[res]{
 	every val in input.spec.containers[i].command{
     not contains(val,"--peer-client-cert-auth=true")
     }
-    res := common.result({"original":"missing --peer-client-cert-auth=true", "Path": input.Path}, "KN-010")
+    res := common.result({"original":"UnSafeSettings:`spec.containers.command missing --peer-client-cert-auth=true", "Path": input.Path}, "KN-010")
 }

@@ -19,6 +19,12 @@ var (
 	scanStart = time.Now()
 	scanTotal = 0
 
+	reportLevelMap = map[string]report.Level{
+		"Low":      report.Low,
+		"Medium":   report.Medium,
+		"High":     report.High,
+		"Critical": report.Critical,
+	}
 	rootCmd    = &cmd.Command{}
 	scanIaCCmd = &cmd.Command{
 		Use:   "scan-iac",
@@ -63,8 +69,12 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 	uniqueAppend(res)
 
 	reportDetails := make([]report.AlertDetail, 0)
+	reportLevel := report.Low
 	for _, data := range res {
 		for _, risk := range data.Risks {
+			if reportLevel < reportLevelMap[data.Rule.Severity] {
+				reportLevel = reportLevelMap[data.Rule.Severity]
+			}
 			reportDetails = append(reportDetails, report.AlertDetail{
 				IaCDetail: &report.IaCDetail{
 					RuleInfo: report.IaCRule{
@@ -87,20 +97,22 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 		}
 	}
 
-	//if you want display at runner report, you should send your result to report event
-	reportEvent := report.ReportEvent{
-		ID:             "",                       // image id info
-		Time:           time.Now(),               // report time, usually use time.Now
-		Level:          report.None,              // report event level
-		DetectType:     report.IaC,               // report scan object type
-		EventType:      report.Risk,              // report event type: Risk/Invasion/Info
-		AlertType:      report.IaCRisk,           // report alert type, we provide some clearly types of security events,
-		AlertDetails:   reportDetails,            // add report detail data in there
-		GeneralDetails: []report.GeneralDetail{}, // if your report event does not in alert type, you can use GeneralDetails type which consists of json bytes
-	}
-	err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
-	if err != nil {
-		return err
+	if len(reportDetails) > 0 {
+		//if you want display at runner report, you should send your result to report event
+		reportEvent := report.ReportEvent{
+			ID:             iac.Path,                 // image id info
+			Time:           time.Now(),               // report time, usually use time.Now
+			Level:          reportLevel,              // report event level
+			DetectType:     report.IaC,               // report scan object type
+			EventType:      report.Risk,              // report event type: Risk/Invasion/Info
+			AlertType:      report.IaCRisk,           // report alert type, we provide some clearly types of security events,
+			AlertDetails:   reportDetails,            // add report detail data in there
+			GeneralDetails: []report.GeneralDetail{}, // if your report event does not in alert type, you can use GeneralDetails type which consists of json bytes
+		}
+		err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

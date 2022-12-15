@@ -12,5 +12,5 @@ risks[res] {
 risks[res] {
    count(securityContexts) > 0
    count(allowPrivilegeEscalations)  < 1
-   res := common.result({"original":"unset allowPrivilegeEscalation=false", "Path": input[i].Path}, "KN-002")
+   res := common.result({"original":"UnSafeSettings:`unset allowPrivilegeEscalation=false`", "Path": input[i].Path}, "KN-002")
 }
