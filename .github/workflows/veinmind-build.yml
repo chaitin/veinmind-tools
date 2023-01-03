@@ -102,6 +102,14 @@ jobs:
       CI_GOOS: linux
       CI_GOARCH: amd64
 
+  build-amd64-veinmind-sensitive-go:
+    uses: ./.github/workflows/build.yml
+    with:
+      path: ./plugins/go/veinmind-sensitive
+      file: veinmind-sensitive-go
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+
   # runner need tar so just write a standalone build job
   build-amd64-veinmind-runner:
     runs-on: ubuntu-latest

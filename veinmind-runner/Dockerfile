@@ -5,7 +5,8 @@ RUN chmod +x script/build.sh && /bin/bash script/build.sh
 
 # FROM veinmind/veinmind-malicious:latest as malicious
 FROM veinmind/veinmind-weakpass:latest as weakpass
-FROM veinmind/veinmind-sensitive:latest as sensitive
+# update sensitive
+FROM veinmind/veinmind-sensitive-go:latest as sensitive
 FROM veinmind/veinmind-history:latest as history
 FROM veinmind/veinmind-backdoor:latest as backdoor
 FROM veinmind/veinmind-log4j2:latest as log4j2

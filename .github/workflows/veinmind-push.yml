@@ -17,14 +17,16 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  push-veinmind-sensitive:
-    uses: ./.github/workflows/push.yml
-    with:
-      path: ./plugins/python/veinmind-sensitive
-      file: veinmind-sensitive
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  #  Deprecated
+  #  push-veinmind-sensitive:
+  #    uses: ./.github/workflows/push.yml
+  #    with:
+  #      path: ./plugins/python/veinmind-sensitive
+  #      file: veinmind-sensitive
+  #    secrets:
+  #      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  #      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
 
   push-veinmind-history:
     uses: ./.github/workflows/push.yml
@@ -112,9 +114,28 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+  push-veinmind-sensitive-go:
+    uses: ./.github/workflows/push-amd64.yml
+    with:
+      path: ./plugins/go/veinmind-sensitive
+      file: veinmind-sensitive-go
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
   push-veinmind-runner:
     uses: ./.github/workflows/push-amd64.yml
-    needs: [push-veinmind-backdoor, push-veinmind-sensitive, push-veinmind-history, push-veinmind-malicious, push-veinmind-weakpass, push-veinmind-asset, push-veinmind-log4j2, push-veinmind-unsafe-mount, push-veinmind-iac]
+    needs: [ push-veinmind-backdoor,
+             push-veinmind-sensitive-go,
+             push-veinmind-history,
+             push-veinmind-malicious,
+             push-veinmind-weakpass,
+             push-veinmind-asset,
+             push-veinmind-log4j2,
+             push-veinmind-unsafe-mount,
+             push-veinmind-iac ]
     with:
       path: ./veinmind-runner
       file: veinmind-runner
@@ -122,4 +143,4 @@ jobs:
       CI_GOARCH: amd64
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN:  ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -1,9 +1,7 @@
 package report
 
 import (
-	"io/fs"
 	"strconv"
-	"syscall"
 	"time"
 
 	api "github.com/chaitin/libveinmind/go"
@@ -11,8 +9,8 @@ import (
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
-
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/veinfs"
 )
 
 func localRuleLevel2EventLevel(level string) report.Level {
@@ -30,22 +28,20 @@ func localRuleLevel2EventLevel(level string) report.Level {
 	return report.None
 }
 
-func file2FileDetail(info fs.FileInfo, path string) (report.FileDetail, error) {
-	sys := info.Sys().(*syscall.Stat_t)
-
+func file2FileDetail(info *veinfs.FileInfo, path string) (report.FileDetail, error) {
 	return report.FileDetail{
 		Path: path,
-		Perm: info.Mode(),
-		Size: info.Size(),
-		Uid:  int64(sys.Uid),
-		Gid:  int64(sys.Gid),
-		Ctim: int64(sys.Ctim.Sec),
-		Mtim: int64(sys.Mtim.Sec),
-		Atim: int64(sys.Mtim.Sec),
+		Perm: info.Perm,
+		Size: int64(info.Size),
+		Uid:  int64(info.Uid),
+		Gid:  int64(info.Gid),
+		Ctim: info.CreateTime.Unix(),
+		Mtim: info.ModifyTime.Unix(),
+		Atim: info.AccessTime.Unix(),
 	}, nil
 }
 
-func GenerateSensitiveFileEvent(path string, rule rule.SensitiveRule, info fs.FileInfo, image api.Image) (*report.ReportEvent, error) {
+func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileInfo, image api.Image, contextContent string, contextContentHighlightLocation []int64) (*report.ReportEvent, error) {
 	fDetail, err := file2FileDetail(info, path)
 	if err != nil {
 		return nil, err
@@ -87,10 +83,12 @@ func GenerateSensitiveFileEvent(path string, rule rule.SensitiveRule, info fs.Fi
 		AlertDetails: []report.AlertDetail{
 			{
 				SensitiveFileDetail: &report.SensitveFileDetail{
-					FileDetail:      fDetail,
-					RuleID:          rule.Id,
-					RuleName:        rule.Name,
-					RuleDescription: rule.Description,
+					FileDetail:                   fDetail,
+					RuleID:                       rule.Id,
+					RuleName:                     rule.Name,
+					RuleDescription:              rule.Description,
+					ContextContent:               contextContent,
+					ContextContentHighlightRange: contextContentHighlightLocation,
 				},
 			},
 		},
