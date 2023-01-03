@@ -2,165 +2,102 @@ package rule
 
 import (
 	"errors"
+	"io"
+
 	"github.com/BurntSushi/toml"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/conf"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/embed"
-	"github.com/gobwas/glob"
-	"io/ioutil"
-	"regexp"
-	"strings"
+	"github.com/gogf/gf/errors/gerror"
 )
 
-type SensitiveConfig struct {
-	WhiteList SensitiveWhiteList `json:"white_list" toml:"white_list"`
-	Rules     []SensitiveRule    `json:"rules" toml:"rules"`
+type Config struct {
+	WhiteList WhiteList `json:"white_list" toml:"white_list"`
+	Rule      []Rule    `json:"rule" toml:"rule"`
 	MIMEMap   map[string]bool
 }
 
-type SensitiveWhiteList struct {
-	Paths     []string `json:"paths" toml:"paths"`
-	PathsGlob []glob.Glob
+type WhiteList struct {
+	PathPattern []string `json:"path_pattern" toml:"path_pattern"`
 }
 
-type SensitiveRule struct {
-	Id             int64  `json:"id" toml:"id"`
-	Name           string `json:"name" toml:"name"`
-	Description    string `json:"description" toml:"description"`
-	Filepath       string `json:"filepath" ,toml:"filepath"`
-	FilepathRegexp *regexp.Regexp
-	Level          string `json:"level" toml:"level"`
-	MIME           string `json:"mime" toml:"mime"`
-	Match          string `json:"match" toml:"match"`
-	MatchContains  string
-	MatchRegex     *regexp.Regexp
-	Env            string `json:"env" toml:"env"`
+type Rule struct {
+	Id              int64  `json:"id" toml:"id"`
+	Name            string `json:"name" toml:"name"`
+	Description     string `json:"description" toml:"description"`
+	FilePathPattern string `json:"file_path_pattern" toml:"file_path_pattern"`
+	Level           string `json:"level" toml:"level"`
+	MIME            string `json:"mime" toml:"mime"`
+	MatchPattern    string `json:"match_pattern" toml:"match_pattern"`
+	Env             string `json:"env" toml:"env"`
 }
 
-var sensitiveConfig *SensitiveConfig
+var config *Config
 
-func loadConfigFromService() (*SensitiveConfig, error) {
-	confBytes, err := conf.DefaultConfClient().Pull(conf.Sensitive)
+func loadConfigFromService() (*Config, error) {
+	data, err := conf.DefaultConfClient().Pull(conf.Sensitive)
 	if err != nil {
 		return nil, err
 	}
 
-	confE := SensitiveConfig{}
-	err = toml.Unmarshal(confBytes, &confE)
+	c := &Config{}
+	err = toml.Unmarshal(data, c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &confE, nil
+	return c, nil
 }
 
-func loadConfigFromEmbed() (*SensitiveConfig, error) {
-	confFile, err := embed.FS.Open("rules.toml")
+func loadConfigFromEmbed() (*Config, error) {
+	fp, err := embed.FS.Open("rules.toml")
 	if err != nil {
 		return nil, err
 	}
 
-	confBytes, err := ioutil.ReadAll(confFile)
+	data, err := io.ReadAll(fp)
 	if err != nil {
 		return nil, err
 	}
 
-	confE := SensitiveConfig{}
-	err = toml.Unmarshal(confBytes, &confE)
+	c := &Config{}
+	err = toml.Unmarshal(data, c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &confE, nil
+	return c, nil
 }
 
-func compileGlob() error {
-	if sensitiveConfig == nil {
-		return errors.New("rules: can't compile glob because sensitiveConfig is nil")
-	}
-
-	for _, whitePath := range sensitiveConfig.WhiteList.Paths {
-		g, err := glob.Compile(whitePath)
-		if err != nil {
-			log.Error(err)
-		}
-
-		sensitiveConfig.WhiteList.PathsGlob = append(sensitiveConfig.WhiteList.PathsGlob, g)
-	}
-
-	return nil
-}
-
-func compileRule() error {
-	if sensitiveConfig == nil {
-		return errors.New("rules: can't compile rule because sensitiveConfig is nil")
-	}
-
-	if sensitiveConfig.MIMEMap == nil {
-		sensitiveConfig.MIMEMap = make(map[string]bool)
-	}
-
-	for i, rule := range sensitiveConfig.Rules {
-		if rule.Match != "" {
-			if strings.HasPrefix(rule.Match, "$contains:") {
-				sensitiveConfig.Rules[i].MatchContains = rule.Match
-			} else {
-				r, err := regexp.Compile(rule.Match)
-				if err != nil {
-					log.Error(err)
-				} else {
-					sensitiveConfig.Rules[i].MatchRegex = r
-				}
-			}
-		}
-
-		if rule.Filepath != "" {
-			r, err := regexp.Compile(rule.Filepath)
-			if err != nil {
-				log.Error(err)
-			} else {
-				sensitiveConfig.Rules[i].FilepathRegexp = r
-			}
-		}
-
-		if rule.MIME != "" {
-			sensitiveConfig.MIMEMap[rule.MIME] = true
-		}
-	}
-
-	return nil
-}
-
-func SingletonConf() *SensitiveConfig {
-	return sensitiveConfig
+func SingletonConf() *Config {
+	return config
 }
 
 func Init() {
-	confFromService, err := loadConfigFromService()
+	conf, err := loadConfigFromService()
 	if err != nil {
-		log.Error(err)
-
-		confFromEmbed, err := loadConfigFromEmbed()
-		if err != nil {
-			log.Error(err)
-		} else {
-			sensitiveConfig = confFromEmbed
+		c, e := loadConfigFromEmbed()
+		if e != nil {
+			e = gerror.Wrap(e, err.Error())
+			log.Errorf("%+v", e)
+			return
 		}
-	} else {
-		sensitiveConfig = confFromService
-	}
 
-	if sensitiveConfig == nil {
+		conf = c
+	}
+	config = conf
+
+	if conf == nil {
 		panic(errors.New("rule: can't init sensitiveConfig from service or local"))
 	}
 
-	err = compileGlob()
-	if err != nil {
-		panic(err)
+	if conf.MIMEMap == nil {
+		conf.MIMEMap = make(map[string]bool)
 	}
 
-	err = compileRule()
-	if err != nil {
-		panic(err)
+	for _, r := range conf.Rule {
+		if r.MIME != "" {
+			conf.MIMEMap[r.MIME] = true
+		}
 	}
 }

@@ -2,937 +2,937 @@
 # ref https://github.com/zricethezav/gitleaks
 # update at: 2022/12/08
 
-[whitelist]
-paths = [
-    "/usr/**", "/lib/**", "/lib32/**", "/bin/**", "/sbin/**" ,"/var/lib/**", "/var/log/**",
+[white_list]
+path_pattern = [
+    "/usr/*", "/lib/*", "/lib32/*", "/bin/*", "/sbin/*" ,"/var/lib/*", "/var/log/*",
     # node
-    "**/node_modules/**/*.md",
-    "**/node_modules/**/test/**",
+    "*/node_modules/*/*.md",
+    "*/node_modules/*/test/*",
     # aws package example
-    "**/service/iam/examples_test.go",
+    "*/service/iam/examples_test.go",
     # grafana js
-    "**/grafana/public/build/*.js"
+    "*/grafana/public/build/*.js"
 ]
 
-[[rules]]
+[[rule]]
 id = 1
 name = "gitlab_personal_access_token"
 description = "GitLab Personal Access Token"
-match = '''glpat-[0-9a-zA-Z_\-]{20}'''
+match_pattern = '''glpat-[0-9a-zA-Z_\-]{20}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 2
 name = "AWS"
 description = "AWS Access Token"
-match = '''AKIA[0-9A-Z]{16}'''
+match_pattern = '''AKIA[0-9A-Z]{16}'''
 level = 'high'
 
 # Cryptographic keys
-[[rules]]
+[[rule]]
 id = 3
 name = "PKCS8 private key"
 description = "PKCS8 private key"
-match = '''-----BEGIN PRIVATE KEY-----'''
+match_pattern = '''-----BEGIN PRIVATE KEY-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 4
 name = "RSA private key"
 description = "RSA private key"
-match = '''-----BEGIN RSA PRIVATE KEY-----'''
+match_pattern = '''-----BEGIN RSA PRIVATE KEY-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id= 5
 name = "SSH private key"
 description = "SSH private key"
-match = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
+match_pattern = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 6
 name = "PGP private key"
 description = "PGP private key"
-match = '''-----BEGIN PGP PRIVATE KEY BLOCK-----'''
+match_pattern = '''-----BEGIN PGP PRIVATE KEY BLOCK-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 7
 name = "Github Personal Access Token"
 description = "Github Personal Access Token"
-match = '''ghp_[0-9a-zA-Z]{36}'''
+match_pattern = '''ghp_[0-9a-zA-Z]{36}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 8
 name = "Github OAuth Access Token"
 description = "Github OAuth Access Token"
-match = '''gho_[0-9a-zA-Z]{36}'''
+match_pattern = '''gho_[0-9a-zA-Z]{36}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 9
 name = "SSH (DSA) private key"
 description = "SSH (DSA) private key"
-match = '''-----BEGIN DSA PRIVATE KEY-----'''
+match_pattern = '''-----BEGIN DSA PRIVATE KEY-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 10
 name = "SSH (EC) private key"
 description = "SSH (EC) private key"
-match = '''-----BEGIN EC PRIVATE KEY-----'''
+match_pattern = '''-----BEGIN EC PRIVATE KEY-----'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 11
 name = "Github App Token"
 description = "Github App Token"
-match = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+match_pattern = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 12
 name = "Github Refresh Token"
 description = "Github Refresh Token"
-match = '''ghr_[0-9a-zA-Z]{76}'''
+match_pattern = '''ghr_[0-9a-zA-Z]{76}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 13
 name = "Shopify shared secret"
 description = "Shopify shared secret"
-match = '''shpss_[a-fA-F0-9]{32}'''
+match_pattern = '''shpss_[a-fA-F0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 14
 name = "Shopify access token"
 description = "Shopify access token"
-match = '''shpat_[a-fA-F0-9]{32}'''
+match_pattern = '''shpat_[a-fA-F0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 15
 name = "Shopify custom app access token"
 description = "Shopify custom app access token"
-match = '''shpca_[a-fA-F0-9]{32}'''
+match_pattern = '''shpca_[a-fA-F0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 16
 name = "Shopify private app access token"
 description = "Shopify private app access token"
-match = '''shppa_[a-fA-F0-9]{32}'''
+match_pattern = '''shppa_[a-fA-F0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 17
 name = "Slack token"
 description = "Slack token"
-match = '''xox[baprs]-([0-9a-zA-Z]{10,48})?'''
+match_pattern = '''xox[baprs]-([0-9a-zA-Z]{10,48})?'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 18
 name = "Stripe"
 description = "Stripe"
-match = '''(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}'''
+match_pattern = '''(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 19
 name = "PyPI upload token"
 description = "PyPI upload token"
-match = '''pypi-AgEIcHlwaS5vcmc[A-Za-z0-9-_]{50,1000}'''
+match_pattern = '''pypi-AgEIcHlwaS5vcmc[A-Za-z0-9-_]{50,1000}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 20
 name = "Google (GCP) Service-account"
 description = "Google (GCP) Service-account"
-match = '''\"type\": \"service_account\"'''
+match_pattern = '''\"type\": \"service_account\"'''
 level = 'medium'
 
-[[rules]]
-# demo of this match not matching passwords in urls that contain env vars:
-# https://regex101.com/r/rT9Lv9/6
-id = 21
-name = "Password in URL"
-description = "Password in URL"
-match = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/\n]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
-level = 'high'
+#[[rule]]
+## demo of this match_pattern not match_patterning passwords in urls that contain env vars:
+## https://regex101.com/r/rT9Lv9/6
+#id = 21
+#name = "Password in URL"
+#description = "Password in URL"
+#match_pattern = '''[a-zA-Z]{3,10}:\/\/[^$][^:@\/\n]{3,20}:[^$][^:@\n\/]{3,40}@.{1,100}'''
+#level = 'high'
 
-[[rules]]
+[[rule]]
 id = 22
 name = "Heroku API Key"
 description = "Heroku API Key"
-match = '''(?i)(?:heroku)(?:[0-9a-z\-_\t .]{0,20})(?:[\s|']|[\s|"]){0,3}(?:=|>|:=|\|\|:|<=|=>|:)(?:'|\"|\s|=|\x60){0,5}([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})(?:['|\"|\n|\r|\s|\x60]|$)'''
+match_pattern = '''(?i)(?:heroku)(?:[0-9a-z\-_\t .]{0,20})(?:[\s|']|[\s|"]){0,3}(?:=|>|:=|\|\|:|<=|=>|:)(?:'|\"|\s|=|\x60){0,5}([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})(?:['|\"|\n|\r|\s|\x60]|$)'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 23
 name = "Slack Webhook"
 description = "Slack Webhook"
-match = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8,12}/[a-zA-Z0-9_]{24}'''
+match_pattern = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8,12}/[a-zA-Z0-9_]{24}'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 24
 name = "Twilio API Key"
 description = "Twilio API Key"
-match = '''SK[0-9a-fA-F]{32}'''
+match_pattern = '''SK[0-9a-fA-F]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 25
 name = "Age secret key"
 description = "Age secret key"
-match = '''AGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}'''
+match_pattern = '''AGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 26
 name = "Facebook token"
 description = "Facebook token"
-match = '''(?i)(facebook[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(facebook[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 27
 name = "Twitter token"
 description = "Twitter token"
-match = '''(?i)(twitter[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{35,44})['\"]'''
+match_pattern = '''(?i)(twitter[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{35,44})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 28
 name = "Adobe Client ID (Oauth Web)"
 description = "Adobe Client ID (Oauth Web)"
-match = '''(?i)(adobe[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(adobe[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 29
 name = "Adobe Client Secret"
 description = "Adobe Client Secret"
-match = '''(p8e-)(?i)[a-z0-9]{32}'''
+match_pattern = '''(p8e-)(?i)[a-z0-9]{32}'''
 level = 'high'
 
 # change LTAI => LTAI5t
-[[rules]]
+[[rule]]
 id = 30
 name = "Alibaba AccessKey ID"
 description = "Alibaba AccessKey ID"
-match = '''(LTAI5t)(?i)[a-z0-9]{18}'''
+match_pattern = '''(LTAI5t)(?i)[a-z0-9]{18}'''
 level = 'medium'
 lock = true
 
-[[rules]]
+[[rule]]
 id = 31
 name = "Alibaba Secret Key"
 description = "Alibaba Secret Key"
-match = '''(?i)(alibaba[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+match_pattern = '''(?i)(alibaba[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 32
 name = "Asana Client ID"
 description = "Asana Client ID"
-match = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{16})['\"]'''
+match_pattern = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{16})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 33
 name = "Asana Client Secret"
 description = "Asana Client Secret"
-match = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+match_pattern = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 34
 name = "Atlassian API token"
 description = "Atlassian API token"
-match = '''(?i)(atlassian[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{24})['\"]'''
+match_pattern = '''(?i)(atlassian[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{24})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 35
 name = "Bitbucket client ID"
 description = "Bitbucket client ID"
-match = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+match_pattern = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 36
 name = "Bitbucket client secret"
 description = "Bitbucket client secret"
-match = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9_\-]{64})['\"]'''
+match_pattern = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9_\-]{64})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 37
 name = "Beamer API token"
 description = "Beamer API token"
-match = '''(?i)(beamer[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](b_[a-z0-9=_\-]{44})['\"]'''
+match_pattern = '''(?i)(beamer[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](b_[a-z0-9=_\-]{44})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 38
 name = "Clojars API token"
 description = "Clojars API token"
-match = '''(CLOJARS_)(?i)[a-z0-9]{60}'''
+match_pattern = '''(CLOJARS_)(?i)[a-z0-9]{60}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 39
 name = "Contentful delivery API token"
 description = "Contentful delivery API token"
-match = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+match_pattern = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 40
 name = "Contentful preview API token"
 description = "Contentful preview API token"
-match = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+match_pattern = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 41
 name = "Databricks API token"
 description = "Databricks API token"
-match = '''dapi[a-h0-9]{32}'''
+match_pattern = '''dapi[a-h0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 42
 name = "Discord API key"
 description = "Discord API key"
-match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{64})['\"]'''
+match_pattern = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{64})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 43
 name = "Discord client ID"
 description = "Discord client ID"
-match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{18})['\"]'''
+match_pattern = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{18})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 44
 name = "Discord client secret"
 description = "Discord client secret"
-match = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_\-]{32})['\"]'''
+match_pattern = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_\-]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 45
 name = "Doppler API token"
 description = "Doppler API token"
-match = '''['\"](dp\.pt\.)(?i)[a-z0-9]{43}['\"]'''
+match_pattern = '''['\"](dp\.pt\.)(?i)[a-z0-9]{43}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 46
 name = "Dropbox API secret/key"
 description = "Dropbox API secret/key"
-match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{15})['\"]'''
+match_pattern = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{15})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 47
 name = "Dropbox short lived API token"
 description = "Dropbox short lived API token"
-match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](sl\.[a-z0-9\-=_]{135})['\"]'''
+match_pattern = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](sl\.[a-z0-9\-=_]{135})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 48
 name = "Dropbox long lived API token"
 description = "Dropbox long lived API token"
-match = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"][a-z0-9]{11}(AAAAAAAAAA)[a-z0-9\-_=]{43}['\"]'''
+match_pattern = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"][a-z0-9]{11}(AAAAAAAAAA)[a-z0-9\-_=]{43}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 49
 name = "Duffel API token"
 description = "Duffel API token"
-match = '''['\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\"]'''
+match_pattern = '''['\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 50
 name = "Dynatrace API token"
 description = "Dynatrace API token"
-match = '''['\"]dt0c01\.(?i)[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
+match_pattern = '''['\"]dt0c01\.(?i)[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 51
 name = "EasyPost API token"
 description = "EasyPost API token"
-match = '''['\"]EZAK(?i)[a-z0-9]{54}['\"]'''
+match_pattern = '''['\"]EZAK(?i)[a-z0-9]{54}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 52
 name = "EasyPost test API token"
 description = "EasyPost test API token"
-match = '''['\"]EZTK(?i)[a-z0-9]{54}['\"]'''
+match_pattern = '''['\"]EZTK(?i)[a-z0-9]{54}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 53
 name = "Fastly API token"
 description = "Fastly API token"
-match = '''(?i)(fastly[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{32})['\"]'''
+match_pattern = '''(?i)(fastly[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 54
 name = "Finicity client secret"
 description = "Finicity client secret"
-match = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{20})['\"]'''
+match_pattern = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{20})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 55
 name = "Finicity API token"
 description = "Finicity API token"
-match = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
 level = 'high'
 
 
-[[rules]]
+[[rule]]
 id = 56
 name = "Flutterweave public key"
 description = "Flutterweave public key"
-match = '''(?i)FLWPUBK_TEST-[a-h0-9]{32}-X'''
+match_pattern = '''(?i)FLWPUBK_TEST-[a-h0-9]{32}-X'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 57
 name = "Flutterweave secret key"
 description = "Flutterweave secret key"
-match = '''(?i)FLWSECK_TEST-[a-h0-9]{32}-X'''
+match_pattern = '''(?i)FLWSECK_TEST-[a-h0-9]{32}-X'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 58
 name = "Flutterweave encrypted key"
 description = "Flutterweave encrypted key"
-match = '''FLWSECK_TEST[a-h0-9]{12}'''
+match_pattern = '''FLWSECK_TEST[a-h0-9]{12}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 59
 name = "Frame.io API token"
 description = "Frame.io API token"
-match = '''fio-u-(?i)[a-z0-9-_=]{64}'''
+match_pattern = '''fio-u-(?i)[a-z0-9-_=]{64}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 60
 name = "GoCardless API token"
 description = "GoCardless API token"
-match = '''['\"]live_(?i)[a-z0-9-_=]{40}['\"]'''
+match_pattern = '''['\"]live_(?i)[a-z0-9-_=]{40}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 61
 name = "Grafana API token"
 description = "Grafana API token"
-match = '''['\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\"]'''
+match_pattern = '''['\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 62
 name = "Hashicorp Terraform user/org API token"
 description = "Hashicorp Terraform user/org API token"
-match = '''['\"](?i)[a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
+match_pattern = '''['\"](?i)[a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 63
 name = "Hashicorp Vault batch token"
 description = "Hashicorp Vault batch token"
-match = '''b\.AAAAAQ[0-9a-zA-Z_-]{156}'''
+match_pattern = '''b\.AAAAAQ[0-9a-zA-Z_-]{156}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 64
 name = "Hubspot API token"
 description = "Hubspot API token"
-match = '''(?i)(hubspot[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+match_pattern = '''(?i)(hubspot[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 65
 name = "Intercom API token"
 description = "Intercom API token"
-match = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_]{60})['\"]'''
+match_pattern = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_]{60})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 66
 name = "Intercom client secret/ID"
 description = "Intercom client secret/ID"
-match = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+match_pattern = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 67
 name = "Ionic API token"
 description = "Ionic API token"
-match = '''ion_(?i)[a-z0-9]{42}'''
+match_pattern = '''ion_(?i)[a-z0-9]{42}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 68
 name = "Linear API token"
 description = "Linear API token"
-match = '''lin_api_(?i)[a-z0-9]{40}'''
+match_pattern = '''lin_api_(?i)[a-z0-9]{40}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 69
 name = "Linear client secret/ID"
 description = "Linear client secret/ID"
-match = '''(?i)(linear[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(linear[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 70
 name = "Lob API Key"
 description = "Lob API Key"
-match = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((live|test)_[a-f0-9]{35})['\"]'''
+match_pattern = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((live|test)_[a-f0-9]{35})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 71
 name = "Lob Publishable API Key"
 description = "Lob Publishable API Key"
-match = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((test|live)_pub_[a-f0-9]{31})['\"]'''
+match_pattern = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((test|live)_pub_[a-f0-9]{31})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 72
 name = "Mailchimp API key"
 description = "Mailchimp API key"
-match = '''(?i)(mailchimp[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32}-us20)['\"]'''
+match_pattern = '''(?i)(mailchimp[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32}-us20)['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 73
 name = "Mailgun private API token"
 description = "Mailgun private API token"
-match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](key-[a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](key-[a-f0-9]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 74
 name = "Mailgun public validation key"
 description = "Mailgun public validation key"
-match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](pubkey-[a-f0-9]{32})['\"]'''
+match_pattern = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](pubkey-[a-f0-9]{32})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 75
 name = "Mailgun webhook signing key"
 description = "Mailgun webhook signing key"
-match = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8})['\"]'''
+match_pattern = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 76
 name = "Mapbox API token"
 description = "Mapbox API token"
-match = '''(?i)(pk\.[a-z0-9]{60}\.[a-z0-9]{22})'''
+match_pattern = '''(?i)(pk\.[a-z0-9]{60}\.[a-z0-9]{22})'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 77
 name = "messagebird-api-token"
 description = "MessageBird API token"
-match = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{25})['\"]'''
+match_pattern = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{25})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 78
 name = "MessageBird API client ID"
 description = "MessageBird API client ID"
-match = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+match_pattern = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 79
 name = "New Relic user API Key"
 description = "New Relic user API Key"
-match = '''['\"](NRAK-[A-Z0-9]{27})['\"]'''
+match_pattern = '''['\"](NRAK-[A-Z0-9]{27})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 80
 name = "New Relic user API ID"
 description = "New Relic user API ID"
-match = '''(?i)(newrelic[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([A-Z0-9]{64})['\"]'''
+match_pattern = '''(?i)(newrelic[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([A-Z0-9]{64})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 81
 name = "New Relic ingest browser API token"
 description = "New Relic ingest browser API token"
-match = '''['\"](NRJS-[a-f0-9]{19})['\"]'''
+match_pattern = '''['\"](NRJS-[a-f0-9]{19})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 82
 name = "npm access token"
 description = "npm access token"
-match = '''['\"](npm_(?i)[a-z0-9]{36})['\"]'''
+match_pattern = '''['\"](npm_(?i)[a-z0-9]{36})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 83
 name = "Planetscale password"
 description = "Planetscale password"
-match = '''pscale_pw_(?i)[a-z0-9\-_\.]{43}'''
+match_pattern = '''pscale_pw_(?i)[a-z0-9\-_\.]{43}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 84
 name = "Planetscale API token"
 description = "Planetscale API token"
-match = '''pscale_tkn_(?i)[a-z0-9\-_\.]{43}'''
+match_pattern = '''pscale_tkn_(?i)[a-z0-9\-_\.]{43}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 85
 name = "Postman API token"
 description = "Postman API token"
-match = '''PMAK-(?i)[a-f0-9]{24}\-[a-f0-9]{34}'''
+match_pattern = '''PMAK-(?i)[a-f0-9]{24}\-[a-f0-9]{34}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 86
 name = "Pulumi API token"
 description = "Pulumi API token"
-match = '''pul-[a-f0-9]{40}'''
+match_pattern = '''pul-[a-f0-9]{40}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 87
 name = "Rubygem API token"
 description = "Rubygem API token"
-match = '''rubygems_[a-f0-9]{48}'''
+match_pattern = '''rubygems_[a-f0-9]{48}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 88
 name = "Sendgrid API token"
 description = "Sendgrid API token"
-match = '''SG\.(?i)[a-z0-9_\-\.]{66}'''
+match_pattern = '''SG\.(?i)[a-z0-9_\-\.]{66}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 89
 name = "Sendinblue API token"
 description = "Sendinblue API token"
-match = '''xkeysib-[a-f0-9]{64}\-(?i)[a-z0-9]{16}'''
+match_pattern = '''xkeysib-[a-f0-9]{64}\-(?i)[a-z0-9]{16}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 90
 name = "Shippo API token"
 description = "Shippo API token"
-match = '''shippo_(live|test)_[a-f0-9]{40}'''
+match_pattern = '''shippo_(live|test)_[a-f0-9]{40}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 91
 name = "Linkedin Client secret"
 description = "Linkedin Client secret"
-match = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z]{16})['\"]'''
+match_pattern = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z]{16})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 92
 name = "Linkedin Client ID"
 description = "Linkedin Client ID"
-match = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{14})['\"]'''
+match_pattern = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{14})['\"]'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 93
 name = "Twitch API token"
 description = "Twitch API token"
-match = '''(?i)(twitch[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+match_pattern = '''(?i)(twitch[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 94
 name = "Typeform API token"
 description = "Typeform API token"
-match = '''(?i)(typeform[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}(tfp_[a-z0-9\-_\.=]{59})'''
+match_pattern = '''(?i)(typeform[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}(tfp_[a-z0-9\-_\.=]{59})'''
 level = 'high'
 
-[[rules]]
-id = 95
-name = "Social Security Number"
-description = "Social Security Number"
-match = '''\d{3}-\d{2}-\d{4}'''
-level = 'low'
+#[[rule]]
+#id = 95
+#name = "Social Security Number"
+#description = "Social Security Number"
+#match_pattern = '''\d{3}-\d{2}-\d{4}'''
+#level = 'low'
 
-[[rules]]
+[[rule]]
 id = 96
 name = "Version Control File"
 description = "Version Control File"
-filepath = '''.*\/\.(git|svn)$'''
+file_path_pattern = '''.*\/\.(git|svn)$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 97
 name = "Config File"
 description = "Config File"
-filepath = '''.*\/config\.ini$'''
+file_path_pattern = '''.*\/config\.ini$'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 98
 name = "Password In Enviroment"
 description = "Password In Enviroment"
 env = '''[^=]*(auth|pass|key|secret|token)[^=]*=.*'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 99
 name = "Desktop Services Store"
 description = "Desktop Services Store"
-filepath = ''' .*\/\.DS_Store$'''
+file_path_pattern = ''' .*\/\.DS_Store$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 100
 name = "MySQL client command history file"
 description = "MySQL client command history file"
-filepath = '''.*\/\.(mysql|psql|irb)_history$'''
+file_path_pattern = '''.*\/\.(mysql|psql|irb)_history$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 101
 name = "Recon-ng web reconnaissance framework API key database"
 description = "Recon-ng web reconnaissance framework API key database"
-filepath = '''.*\/\.recon-ng\/keys\.db$'''
+file_path_pattern = '''.*\/\.recon-ng\/keys\.db$'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 102
 name = "DBeaver SQL database manager configuration file"
 description = "DBeaver SQL database manager configuration file"
-filepath = '''.*\/\.dbeaver-data-sources\.xml$'''
+file_path_pattern = '''.*\/\.dbeaver-data-sources\.xml$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 103
 name = "S3cmd configuration file"
 description = "S3cmd configuration file"
-filepath = '''.*\/\.s3cfg$'''
+file_path_pattern = '''.*\/\.s3cfg$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 104
 name = "Ruby On Rails secret token configuration file"
 description = "If the Rails secret token is known, it can allow for remote code execution. (http://www.exploit-db.com/exploits/27527/)"
-filepath = '''.*\/secret_token\.rb$'''
+file_path_pattern = '''.*\/secret_token\.rb$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 105
 name = "OmniAuth configuration file"
 description = "The OmniAuth configuration file might contain client application secrets."
-filepath = '''.*\/omniauth\.rb$'''
+file_path_pattern = '''.*\/omniauth\.rb$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 106
 name = "Carrierwave configuration file"
 description = "Can contain credentials for online storage systems such as Amazon S3 and Google Storage."
-filepath = '''.*\/carrierwave\.rb$'''
+file_path_pattern = '''.*\/carrierwave\.rb$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 107
 name = "Potential Ruby On Rails database configuration file"
 description = "Might contain database credentials."
-filepath = '''.*\/database\.yml$'''
+file_path_pattern = '''.*\/database\.yml$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 108
 name = "Django configuration file"
 description = "Might contain database credentials, online storage system credentials, secret keys, etc."
-filepath = '''.*\/settings\.py$'''
+file_path_pattern = '''.*\/settings\.py$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 109
 name = "PHP configuration file"
 description = "Might contain credentials and keys."
-filepath = '''.*\/config(\.inc)?\.php$'''
+file_path_pattern = '''.*\/config(\.inc)?\.php$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 110
 name = "Jenkins publish over SSH plugin file"
 description = "Jenkins publish over SSH plugin file"
-filepath = '''.*\/jenkins\.plugins\.publish_over_ssh\.BapSshPublisherPlugin\.xml$'''
+file_path_pattern = '''.*\/jenkins\.plugins\.publish_over_ssh\.BapSshPublisherPlugin\.xml$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 111
 name = "Potential Jenkins credentials file"
 description = "Potential Jenkins credentials file"
-filepath = '''.*\/credentials\.xml$'''
+file_path_pattern = '''.*\/credentials\.xml$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 112
 name = "Apache htpasswd file"
 description = "Apache htpasswd file"
-filepath = '''.*\/\.htpasswd$'''
+file_path_pattern = '''.*\/\.htpasswd$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 113
 name = "Configuration file for auto-login process"
 description = "Might contain username and password."
-filepath = '''.*\/\.(netrc|git-credentials)$'''
+file_path_pattern = '''.*\/\.(netrc|git-credentials)$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 114
 name = "Potential MediaWiki configuration file"
 description = "Potential MediaWiki configuration file"
-filepath = '''.*\/LocalSettings\.php$'''
+file_path_pattern = '''.*\/LocalSettings\.php$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 115
 name = "Rubygems credentials file"
 description = "Might contain API key for a rubygems.org account."
-filepath = '''.*\/\.gem\/credentials$'''
+file_path_pattern = '''.*\/\.gem\/credentials$'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 116
 name = "Potential MSBuild publish profile"
 description = "Potential MSBuild publish profile"
-filepath = '''.*\/\.pubxml(\.user)?$'''
+file_path_pattern = '''.*\/\.pubxml(\.user)?$'''
 level = 'low'
 
-[[rules]]
+[[rule]]
 id = 117
 name = "Potential Tencent Accesskey"
 description = "Might contain Tencent Accesskey"
-match = '''AKID(?i)[a-z0-9]{32}'''
+match_pattern = '''AKID(?i)[a-z0-9]{32}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 118
 name = "Potential aws Accesskey"
 description = "Might contain aws Accesskey"
-match = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+match_pattern = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 119
 name = "Potential UCloud Accesskey"
 description = "Might contain UCloud Accesskey"
-match = '''JDC_[A-z,0-9]{28}'''
+match_pattern = '''JDC_[A-z,0-9]{28}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 120
 name = "JWT TOKEN"
 description = "Might JWT Token "
-match = '''ey[0-9a-zA-Z]{30,34}\.ey[0-9a-zA-Z-\/_]{30,500}\.[0-9a-zA-Z-\/_]{10,200}={0,2}'''
+match_pattern = '''ey[0-9a-zA-Z]{30,34}\.ey[0-9a-zA-Z-\/_]{30,500}\.[0-9a-zA-Z-\/_]{10,200}={0,2}'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 121
 name = "Google API"
 description = "Might Google API Key "
-match = '''AIza[0-9A-Za-z\-_]{35}'''
+match_pattern = '''AIza[0-9A-Za-z\-_]{35}'''
 level = 'medium'
 
-[[rules]]
+[[rule]]
 id = 122
 name = "gitlab_pipeline_trigger_token"
 description = "GitLab Pipeline Trigger Token"
-match = '''glptt-[0-9a-zA-Z_\-]{20}'''
+match_pattern = '''glptt-[0-9a-zA-Z_\-]{20}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 123
 name = "gitlab_runner_registration_token"
 description = "GitLab Runner Registration Token"
-match = '''GR1348941[0-9a-zA-Z_\-]{20}'''
+match_pattern = '''GR1348941[0-9a-zA-Z_\-]{20}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 124
 name = "Flutterwave public key"
 description = "Flutterwave public key"
-match = '''FLWPUBK_TEST-(?i)[a-h0-9]{32}-X'''
+match_pattern = '''FLWPUBK_TEST-(?i)[a-h0-9]{32}-X'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 125
 name = "Flutterwave secret key"
 description = "Flutterwave secret key"
-match = '''FLWSECK_TEST-(?i)[a-h0-9]{32}-X'''
+match_pattern = '''FLWSECK_TEST-(?i)[a-h0-9]{32}-X'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 126
 name = "Flutterwave encrypted key"
 description = "Flutterwave encrypted key"
-match = '''FLWSECK_TEST[a-h0-9]{12}'''
+match_pattern = '''FLWSECK_TEST[a-h0-9]{12}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 127
 name = "github-app-token"
 description = "GitHub App Token"
-match = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+match_pattern = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 128
 name = "github-fine-grained-pat"
 description = "GitHub Fine-Grained Personal Access Token"
-match = '''github_pat_[0-9a-zA-Z_]{82}'''
+match_pattern = '''github_pat_[0-9a-zA-Z_]{82}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 129
 name = "grafana-cloud-api-token"
 description = "Grafana cloud api token"
-match = '''glc_[A-Za-z0-9+/]{32,400}={0,2}'''
+match_pattern = '''glc_[A-Za-z0-9+/]{32,400}={0,2}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 130
 name = "grafana-service-account-token"
 description = "Grafana service account token"
-match = '''glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}'''
+match_pattern = '''glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}'''
 level = 'high'
 
-[[rules]]
+[[rule]]
 id = 131
 name = "prefect-api-token"
 description = "Prefect API token"
-match = '''pnu_[a-z0-9]{36}'''
+match_pattern = '''pnu_[a-z0-9]{36}'''
 level = 'medium'
