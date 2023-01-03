@@ -4,9 +4,9 @@ name = "veinmind-malicious"
 [[plugin.service]]
 name = "clamd"
 command = "/usr/sbin/clamd -F --config-file=/etc/clamav/clamd.conf" # 服务启动命令
-stdout = "clamerr.log"
-stderr = "clamout.log"
-timeout=100
+stdout = "clamout.log"
+stderr = "clamerr.log"
+timeout=60
 [[plugin.service.check]]
 type="port"
 value="3310"

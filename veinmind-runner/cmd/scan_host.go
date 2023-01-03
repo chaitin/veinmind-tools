@@ -49,6 +49,14 @@ func scanImage(c *cmd.Command, image api.Image) error {
 		plugin.WithExecInterceptor(func(
 			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
 		) error {
+			// Init Service
+			log.Infof("Discovered plugin: %#v\n", plug.Name)
+			// IaC need not init any service
+			err = serviceManager.StartWithContext(ctx, plug.Name)
+			if err != nil {
+				log.Errorf("%#v can not work: %#v\n", plug.Name, err)
+				return err
+			}
 			// Register Service
 			reg := service.NewRegistry()
 			reg.AddServices(log.WithFields(log.Fields{

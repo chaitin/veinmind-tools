@@ -46,9 +46,9 @@ var (
 
 		glob, err := c.Flags().GetString("glob")
 		if err == nil && glob != "" {
-			allPlugins, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
+			ps, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
 		} else {
-			allPlugins, err = plugin.DiscoverPlugins(ctx, ".")
+			ps, err = plugin.DiscoverPlugins(ctx, ".")
 		}
 		if err != nil {
 			return err
@@ -57,16 +57,6 @@ var (
 		serviceManager, err = plugind.NewManager()
 		if err != nil {
 			return err
-		}
-
-		for _, p := range allPlugins {
-			log.Infof("Discovered plugin: %#v\n", p.Name)
-			err = serviceManager.StartWithContext(ctx, p.Name)
-			if err != nil {
-				log.Errorf("%#v can not work: %#v\n", p.Name, err)
-				continue
-			}
-			ps = append(ps, p)
 		}
 
 		// reporter channel listen

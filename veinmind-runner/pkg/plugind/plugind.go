@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"github.com/BurntSushi/toml"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 	"golang.org/x/sync/errgroup"
 	"sync"
 )
@@ -27,9 +28,13 @@ func (c *Manager) StartWithContext(ctx context.Context, name string) error {
 			continue
 		}
 		for _, s := range plugin.Service {
-			err := svcManager.Start(ctx, s)
-			if err != nil {
-				return err
+			if !s.Running {
+				log.Infof("Plugin: %s Service: %s Will Start", plugin.Name, s.Name)
+				err := svcManager.Start(ctx, s)
+				if err != nil {
+					return err
+				}
+				log.Infof("Plugin: %s Service: %s Success Started", plugin.Name, s.Name)
 			}
 		}
 	}
@@ -76,6 +81,8 @@ func (s *serviceManager) Start(ctx context.Context, conf *Service) error {
 	if err := g.Wait(); err != nil {
 		return err
 	}
+
+	conf.Running = true
 
 	go svc.daemon()
 

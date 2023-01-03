@@ -70,9 +70,9 @@ var (
 
 		glob, err := c.Flags().GetString("glob")
 		if err == nil && glob != "" {
-			allPlugins, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
+			ps, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
 		} else {
-			allPlugins, err = plugin.DiscoverPlugins(ctx, ".")
+			ps, err = plugin.DiscoverPlugins(ctx, ".")
 		}
 		if err != nil {
 			return err
@@ -81,16 +81,6 @@ var (
 		serviceManager, err = plugind.NewManager()
 		if err != nil {
 			return err
-		}
-
-		for _, p := range allPlugins {
-			log.Infof("Discovered plugin: %#v\n", p.Name)
-			err = serviceManager.StartWithContext(ctx, p.Name)
-			if err != nil {
-				log.Errorf("%#v can not work: %#v\n", p.Name, err)
-				continue
-			}
-			ps = append(ps, p)
 		}
 
 		// reporter channel listen
@@ -133,6 +123,13 @@ func scanIaCFile(c *cmd.Command, iac iacApi.IAC) error {
 		plugin.WithExecInterceptor(func(
 			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
 		) error {
+			// Init Service
+			log.Infof("Discovered plugin: %#v\n", plug.Name)
+			err := serviceManager.StartWithContext(ctx, plug.Name)
+			if err != nil {
+				log.Errorf("%#v can not work: %#v\n", plug.Name, err)
+				return err
+			}
 			// Register Service
 			reg := service.NewRegistry()
 			reg.AddServices(log.WithFields(log.Fields{
