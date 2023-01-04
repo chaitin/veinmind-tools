@@ -121,9 +121,11 @@ func scan(_ *cmd.Command, image api.Image) error {
 			AlertType:    reportService.MaliciousFile,
 			AlertDetails: details,
 		}
-		err = reportService.DefaultReportClient().Report(reportEvent)
-		if err != nil {
-			return err
+		if len(details) > 0 {
+			err = reportService.DefaultReportClient().Report(reportEvent)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

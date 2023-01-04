@@ -26,7 +26,7 @@ import (
 
 func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
-	database.GetDbInstance().Where("image_id = ?", image.ID()).Find(&scanReport)
+	database.GetDbInstance().Preload("Layers").Preload("Layers.MaliciousFileInfos").Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {
 		log.Info(image.ID(), " Has been detected")
 		return scanReport, nil
@@ -55,7 +55,7 @@ func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) 
 
 			// 判断 Layer 是否已经扫描
 			reportLayer := model.ReportLayer{}
-			database.GetDbInstance().Where("layer_id", layerID).Find(&reportLayer)
+			database.GetDbInstance().Preload("MaliciousFileInfos").Where("layer_id", layerID).Find(&reportLayer)
 
 			if reportLayer.LayerID != "" {
 				reportLayerCopy := model.ReportLayer{

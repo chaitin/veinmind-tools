@@ -16,6 +16,7 @@ type Service struct {
 	Stderr  string          `toml:"stderr"`
 	Check   []*ServiceCheck `toml:"check"`
 	Timeout int             `toml:"timeout"`
+	Running bool
 }
 
 type ServiceCheck struct {
