@@ -3,16 +3,19 @@ package main
 import (
 	_ "embed"
 	"errors"
-	api "github.com/chaitin/libveinmind/go"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/remote"
 	"github.com/chaitin/veinmind-common-go/pkg/auth"
 	"github.com/chaitin/veinmind-common-go/registry"
 	"github.com/distribution/distribution/reference"
+	"github.com/rs/xid"
 	"github.com/spf13/cobra"
-	"path/filepath"
-	"strings"
 )
 
 var scanRegistryCmd = &cmd.Command{
@@ -21,161 +24,163 @@ var scanRegistryCmd = &cmd.Command{
 }
 
 var scanRegistryImageCmd = &cmd.Command{
-	Use:     "image",
-	Short:   "perform registry image scan command",
-	PreRunE: scanPreRunE,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Use:      "image",
+	Short:    "perform registry image scan command",
+	PreRunE:  scanPreRunE,
+	RunE:     ScanRegistry,
+	PostRunE: scanPostRunE,
+}
 
-		server, _ := cmd.Flags().GetString("server")
-		config, _ := cmd.Flags().GetString("config")
-		namespace, _ := cmd.Flags().GetString("namespace")
-		// tags, _ := cmd.Flags().GetStringSlice("tags")
-		var (
-			r   *registry.Client
-			err error
-		)
-		// fix: no config need not join path
-		if config != "" && parallelContainerMode {
-			config = filepath.Join(resourceDirectoryPath, config)
+func ScanRegistry(cmd *cobra.Command, args []string) error {
+	server, _ := cmd.Flags().GetString("server")
+	config, _ := cmd.Flags().GetString("config")
+	namespace, _ := cmd.Flags().GetString("namespace")
+	// tags, _ := cmd.Flags().GetStringSlice("tags")
+	var (
+		r   *registry.Client
+		err error
+	)
+	// fix: no config need not join path
+	if config != "" && parallelContainerMode {
+		config = filepath.Join(resourceDirectoryPath, config)
+	}
+	if config == "" {
+		r, err = registry.NewClient()
+		if err != nil {
+			return err
 		}
-
-		// If no repo is specified, then query all repo through catalog
-		repos := []string{}
-		if len(args) == 0 {
-			if config == "" {
-				r, err = registry.NewClient()
-				if err != nil {
-					return err
-				}
-			} else {
-				r, err = registry.NewClient(registry.WithAuthFromPath(config))
-				if err != nil {
-					return err
-				}
-			}
-			repos, err = r.GetRepos(server)
-			if err != nil {
-				return err
-			}
-		} else {
-			// If it doesn't start with registry, autofill registry
-			for _, r := range args {
-				rParse, err := reference.Parse(r)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-				repos = append(repos, rParse.String())
-			}
+	} else {
+		r, err = registry.NewClient(registry.WithAuthFromPath(config))
+		if err != nil {
+			return err
 		}
+	}
 
-		if namespace != "" {
-			namespaceMaps := map[string][]string{}
-			for _, repo := range repos {
-				rNamed, err := reference.ParseNamed(repo)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
+	// If no repo is specified, then query all repo through catalog
+	repos := []string{}
+	if len(args) == 0 {
 
-				p := reference.Path(rNamed)
-				ns := strings.Split(p, "/")[0]
-				namespaceMaps[ns] = append(namespaceMaps[ns], repo)
-			}
-
-			_, ok := namespaceMaps[namespace]
-			if ok {
-				repos = namespaceMaps[namespace]
-			} else {
-				return errors.New("Namespace doesn't match any repos")
-			}
+		repos, err = r.GetRepos(server)
+		if err != nil {
+			return err
 		}
-
-		// get repos tags
-		reposN := []string{}
-		for _, repo := range repos {
-			repoR, err := reference.Parse(repo)
-			if err != nil {
-				reposN = append(reposN, repo)
-				continue
-			}
-
-			switch repoR.(type) {
-			case reference.Tagged:
-				reposN = append(reposN, repo)
-				continue
-			}
-
-			// get repos tags from remote registry
-			if config == "" {
-				r, err = registry.NewClient()
-			} else {
-				r, err = registry.NewClient(registry.WithAuthFromPath(config))
-			}
-			if err != nil {
-				return err
-			}
-
-			tags, err := r.GetRepoTags(repo)
-			if err != nil {
-				reposN = append(reposN, repo)
-				continue
-			}
-
-			for _, tag := range tags {
-				reposN = append(reposN, strings.Join([]string{repo, tag}, ":"))
-			}
-		}
-		repos = reposN
-
-		for _, repo := range repos {
-			log.Infof("Start pull image: %#v\n", repo)
-			runtime, err := remote.New("/tmp/remote")
+	} else {
+		// If it doesn't start with registry, autofill registry
+		for _, r := range args {
+			rParse, err := reference.Parse(r)
 			if err != nil {
 				log.Error(err)
+				continue
 			}
-			myRuntime, _ := runtime.(*remote.Runtime)
-			ids := make([]string, 0)
-			if config != "" {
-				var username, password string
-				authConfig, err := auth.ParseAuthConfig(config)
-				if err != nil {
-					return err
-				}
-				for _, value := range authConfig.Auths {
-					if strings.HasPrefix(repo, value.Registry) {
-						username = value.Username
-						password = value.Password
-					}
-				}
-				ids, _ = myRuntime.Load(repo, remote.WithAuth(username, password))
-			} else {
-				ids, _ = myRuntime.Load(repo)
-			}
-
-			log.Infof("Pull image success: %#v\n", repo)
-			for _, id := range ids {
-				image, err := runtime.OpenImageByID(id)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-				err = scanImage(cmd, image.(api.Image))
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-			}
-
+			repos = append(repos, rParse.String())
 		}
-		return nil
-	},
-	PostRunE: scanPostRunE,
+	}
+
+	if namespace != "" {
+		namespaceMaps := map[string][]string{}
+		for _, repo := range repos {
+			rNamed, err := reference.ParseNamed(repo)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+
+			p := reference.Path(rNamed)
+			ns := strings.Split(p, "/")[0]
+			namespaceMaps[ns] = append(namespaceMaps[ns], repo)
+		}
+
+		_, ok := namespaceMaps[namespace]
+		if ok {
+			repos = namespaceMaps[namespace]
+		} else {
+			return errors.New("Namespace doesn't match any repos")
+		}
+	}
+
+	// get repos tags
+	reposN := []string{}
+	for _, repo := range repos {
+		repoR, err := reference.Parse(repo)
+		if err != nil {
+			reposN = append(reposN, repo)
+			continue
+		}
+
+		switch repoR.(type) {
+		case reference.Tagged:
+			reposN = append(reposN, repo)
+			continue
+		}
+
+		// get repos tags from remote registry
+
+		tags, err := r.GetRepoTags(repo)
+		if err != nil {
+			reposN = append(reposN, repo)
+			continue
+		}
+
+		for _, tag := range tags {
+			reposN = append(reposN, strings.Join([]string{repo, tag}, ":"))
+		}
+	}
+	repos = reposN
+
+	for _, repo := range repos {
+		log.Infof("Start pull image: %#v\n", repo)
+		path := filepath.Join("/tmp/", xid.NewWithTime(time.Now()).String())
+		runtime, err := remote.New(path)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		RemoteRuntime, _ := runtime.(*remote.Runtime)
+		ids := make([]string, 0)
+		if config != "" {
+			var username, password string
+			authConfig, err := auth.ParseAuthConfig(config)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			for _, value := range authConfig.Auths {
+				if strings.HasPrefix(repo, value.Registry) {
+					username = value.Username
+					password = value.Password
+				}
+			}
+			ids, _ = RemoteRuntime.Load(repo, remote.WithAuth(username, password))
+		} else {
+			ids, _ = RemoteRuntime.Load(repo)
+		}
+
+		log.Infof("Pull image success: %#v\n", repo)
+		for _, id := range ids {
+			image, err := runtime.OpenImageByID(id)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			err = scanImage(cmd, image)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+		}
+		err = os.RemoveAll(path)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		log.Infof("Remove image success: %#v\n", repo)
+
+	}
+	return nil
 }
 
 func init() {
 	scanRegistryCmd.AddCommand(scanRegistryImageCmd)
-
 	scanRegistryCmd.PersistentFlags().Int("threads", 5, "threads for scan action")
 	scanRegistryCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")
 	scanRegistryCmd.PersistentFlags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")

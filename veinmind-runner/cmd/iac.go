@@ -201,13 +201,12 @@ func scanK8sConfig(c *cmd.Command, args []string) error {
 	iacList := make([]iacApi.IAC, 0)
 	dataList := map[string][]byte{}
 
-	option := kubernetes.WithKubeConfig(kubeconfig)
-	kubeRoot, err := kubernetes.New(option)
+	kubeRoot, err := kubernetes.New()
 
 	if err != nil {
 		return err
 	}
-	kubeNamespaces, err := kubeRoot.Resource("namespaces")
+	kubeNamespaces, err := kubeRoot.Resource("", "namespaces")
 	if err != nil {
 		return err
 	}
@@ -219,10 +218,9 @@ func scanK8sConfig(c *cmd.Command, args []string) error {
 
 	log.Infof("download remote k8s cluster config at %s", tempDir)
 	for _, namespace := range namespaces {
-		optionForNamespace := kubernetes.WithNamespace(namespace)
-		if kubeC, errName := kubernetes.New(option, optionForNamespace); errName == nil {
+		if kubeC, errName := kubernetes.New(); errName == nil {
 			// pods
-			if resourcePod, errResource := kubeC.Resource("pods"); errResource == nil {
+			if resourcePod, errResource := kubeC.Resource(namespace, "pods"); errResource == nil {
 				if pods, errPod := resourcePod.List(scanCtx); errPod == nil {
 					for _, pod := range pods {
 						if podsConfig, errConfig := resourcePod.Get(scanCtx, pod); errConfig == nil {
@@ -232,7 +230,7 @@ func scanK8sConfig(c *cmd.Command, args []string) error {
 				}
 			}
 			// configMaps
-			if resourceConfigMaps, errResource := kubeC.Resource("configmaps"); errResource == nil {
+			if resourceConfigMaps, errResource := kubeC.Resource(namespace, "configmaps"); errResource == nil {
 				if configmaps, errCM := resourceConfigMaps.List(scanCtx); errCM == nil {
 					for _, configmap := range configmaps {
 						if kubeletconfig, errConfig := resourceConfigMaps.Get(scanCtx, configmap); errConfig == nil {
@@ -245,7 +243,7 @@ func scanK8sConfig(c *cmd.Command, args []string) error {
 	}
 
 	// some Others
-	if resourceClusterRole, errResource := kubeRoot.Resource("clusterrolebindings"); errResource == nil {
+	if resourceClusterRole, errResource := kubeRoot.Resource("", "clusterrolebindings"); errResource == nil {
 		if clusterRoleBindings, errClusterRolebinding := resourceClusterRole.List(scanCtx); errClusterRolebinding == nil {
 			for _, clusterRoleBinding := range clusterRoleBindings {
 				if clusterRolebindingConfig, errConfig := resourceClusterRole.Get(scanCtx, clusterRoleBinding); errConfig == nil {
