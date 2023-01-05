@@ -37,29 +37,39 @@ func ScanRegistry(cmd *cobra.Command, args []string) error {
 	namespace, _ := cmd.Flags().GetString("namespace")
 	// tags, _ := cmd.Flags().GetStringSlice("tags")
 	var (
-		r   *registry.Client
-		err error
+		r                  *registry.Client
+		err                error
+		ids                []string
+		username, password string
 	)
-	// fix: no config need not join path
-	if config != "" && parallelContainerMode {
-		config = filepath.Join(resourceDirectoryPath, config)
+	authConfig := &auth.AuthConfig{
+		Auths: nil,
 	}
+	// fix: no config need not join path
 	if config == "" {
 		r, err = registry.NewClient()
 		if err != nil {
 			return err
 		}
 	} else {
+		if parallelContainerMode {
+			config = filepath.Join(resourceDirectoryPath, config)
+		}
+		authConfig, err = auth.ParseAuthConfig(config)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 		r, err = registry.NewClient(registry.WithAuthFromPath(config))
 		if err != nil {
 			return err
 		}
+
 	}
 
 	// If no repo is specified, then query all repo through catalog
 	repos := []string{}
 	if len(args) == 0 {
-
 		repos, err = r.GetRepos(server)
 		if err != nil {
 			return err
@@ -135,27 +145,31 @@ func ScanRegistry(cmd *cobra.Command, args []string) error {
 			log.Error(err)
 			continue
 		}
-		RemoteRuntime, _ := runtime.(*remote.Runtime)
-		ids := make([]string, 0)
-		if config != "" {
-			var username, password string
-			authConfig, err := auth.ParseAuthConfig(config)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-			for _, value := range authConfig.Auths {
-				if strings.HasPrefix(repo, value.Registry) {
-					username = value.Username
-					password = value.Password
-				}
-			}
-			ids, _ = RemoteRuntime.Load(repo, remote.WithAuth(username, password))
-		} else {
-			ids, _ = RemoteRuntime.Load(repo)
+		remoteRuntime, errAssert := runtime.(*remote.Runtime)
+		if errAssert != true {
+			log.Error(err)
+			continue
 		}
-
+		for _, value := range authConfig.Auths {
+			if strings.HasPrefix(repo, value.Registry) {
+				username = value.Username
+				password = value.Password
+			}
+		}
+		ids, _ = remoteRuntime.Load(repo, remote.WithAuth(username, password))
 		log.Infof("Pull image success: %#v\n", repo)
+		defer func() {
+			_, errClose := os.Stat(path)
+			if errClose == nil {
+				errRemove := os.RemoveAll(path)
+				if errRemove != nil {
+					log.Error(errRemove)
+				}
+				log.Infof("Remove image success: %#v\n", repo)
+			} else {
+				log.Error(errClose)
+			}
+		}()
 		for _, id := range ids {
 			image, err := runtime.OpenImageByID(id)
 			if err != nil {
@@ -168,12 +182,6 @@ func ScanRegistry(cmd *cobra.Command, args []string) error {
 				continue
 			}
 		}
-		err = os.RemoveAll(path)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		log.Infof("Remove image success: %#v\n", repo)
 
 	}
 	return nil
@@ -181,6 +189,7 @@ func ScanRegistry(cmd *cobra.Command, args []string) error {
 
 func init() {
 	scanRegistryCmd.AddCommand(scanRegistryImageCmd)
+
 	scanRegistryCmd.PersistentFlags().Int("threads", 5, "threads for scan action")
 	scanRegistryCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")
 	scanRegistryCmd.PersistentFlags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
