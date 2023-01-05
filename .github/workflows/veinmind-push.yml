@@ -59,11 +59,11 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  push-veinmind-asset:
+  push-veinmind-vuln:
     uses: ./.github/workflows/push-amd64.yml
     with:
-      path: ./plugins/go/veinmind-asset
-      file: veinmind-asset
+      path: ./plugins/go/veinmind-vuln
+      file: veinmind-vuln
       CI_GOOS: linux
       CI_GOARCH: amd64
     secrets:
@@ -132,7 +132,7 @@ jobs:
              push-veinmind-history,
              push-veinmind-malicious,
              push-veinmind-weakpass,
-             push-veinmind-asset,
+             push-veinmind-vuln,
              push-veinmind-log4j2,
              push-veinmind-unsafe-mount,
              push-veinmind-iac ]

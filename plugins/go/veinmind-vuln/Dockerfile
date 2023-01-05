@@ -5,6 +5,6 @@ RUN chmod +x script/build.sh && /bin/bash script/build.sh
 
 FROM veinmind/base:1.5.1-stretch as release
 WORKDIR /tool
-COPY --from=builder /build/veinmind-asset .
-RUN echo "#!/bin/bash\n\n./veinmind-asset \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-asset
+COPY --from=builder /build/veinmind-vuln .
+RUN echo "#!/bin/bash\n\n./veinmind-vuln \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-vuln
 ENTRYPOINT ["/tool/entrypoint.sh"]
