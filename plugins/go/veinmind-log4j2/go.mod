@@ -3,7 +3,7 @@ module github.com/chaitin/veinmind-tools/plugins/go/veinmind-log4j2
 go 1.18
 
 require (
-	github.com/chaitin/libveinmind v1.3.1
+	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.1.9
 )
 

@@ -3,7 +3,7 @@ module veinmind-webshell
 go 1.18
 
 require (
-	github.com/chaitin/libveinmind v1.3.1
+	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.1.6
 	github.com/magiconair/properties v1.8.5
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde

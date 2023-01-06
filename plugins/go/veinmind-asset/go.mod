@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20220904090510-d2cb7a409fe8
 	github.com/aquasecurity/trivy v0.29.2
-	github.com/chaitin/libveinmind v1.3.1
+	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.1.8-r0
 	github.com/spf13/cobra v1.5.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4

@@ -3,7 +3,7 @@ module github.com/chaitin/veinmind-tools/plugins/go/veinmind-unsafe-mount
 go 1.16
 
 require (
-	github.com/chaitin/libveinmind v1.3.1
+	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.1.9
 )
 
