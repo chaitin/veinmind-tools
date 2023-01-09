@@ -2,7 +2,6 @@ package reporter
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 
 	api "github.com/chaitin/libveinmind/go"
@@ -110,8 +109,6 @@ func (r *Reporter) convert(event report.ReportEvent) (ReportEvent, error) {
 		if runtime != nil {
 			i, err := runtime.OpenImageByID(event.ID)
 			if err != nil {
-				fmt.Println("continue err")
-				fmt.Println(err)
 				continue
 			}
 			image = i
