@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/containerd"
@@ -64,40 +63,11 @@ func ScanImageDocker(c *cmd.Command, arg string) error {
 
 	for _, id := range ids {
 		image, err := r.OpenImageByID(id)
-		refs, err := image.RepoRefs()
-		fmt.Println(refs)
-		ref := ""
-		if err == nil && len(refs) > 0 {
-			ref = refs[0]
-		} else {
-			ref = image.ID()
-		}
-
-		// Get threads value
-		t, err := c.Flags().GetInt("threads")
 		if err != nil {
-			t = 5
-		}
-
-		log.Infof("Scan image: %#v\n", ref)
-		if err := cmd.ScanImage(ctx, ps, image,
-			plugin.WithExecInterceptor(func(
-				ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
-			) error {
-				// Register Service
-				reg := service.NewRegistry()
-				reg.AddServices(log.WithFields(log.Fields{
-					"plugin":  plug.Name,
-					"command": path.Join(c.Path...),
-				}))
-				reg.AddServices(reportService)
-
-				// Next Plugin
-				return next(ctx, reg.Bind())
-			}), plugin.WithExecParallelism(t)); err != nil {
+			log.Error(err)
 			return err
 		}
-		return nil
+		scan(c, image)
 	}
 	return nil
 }
@@ -113,39 +83,11 @@ func ScanImageContainerd(c *cmd.Command, arg string) error {
 	ids, err := r.FindImageIDs(matchArr[1])
 	for _, id := range ids {
 		image, err := r.OpenImageByID(id)
-		refs, err := image.RepoRefs()
-		ref := ""
-		if err == nil && len(refs) > 0 {
-			ref = refs[0]
-		} else {
-			ref = image.ID()
-		}
-
-		// Get threads value
-		t, err := c.Flags().GetInt("threads")
 		if err != nil {
-			t = 5
-		}
-
-		log.Infof("Scan image: %#v\n", ref)
-		if err := cmd.ScanImage(ctx, ps, image,
-			plugin.WithExecInterceptor(func(
-				ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
-			) error {
-				// Register Service
-				reg := service.NewRegistry()
-				reg.AddServices(log.WithFields(log.Fields{
-					"plugin":  plug.Name,
-					"command": path.Join(c.Path...),
-				}))
-				reg.AddServices(reportService)
-
-				// Next Plugin
-				return next(ctx, reg.Bind())
-			}), plugin.WithExecParallelism(t)); err != nil {
+			log.Error(err)
 			return err
 		}
-		return nil
+		scan(c, image)
 	}
 	return nil
 }
@@ -170,7 +112,6 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 		Username: username,
 		Password: password,
 	}))
-	cache, err := c.Flags().GetBool("cache")
 	if err != nil {
 		return err
 	}
@@ -201,12 +142,8 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 
 		}
 	}
-	if err != nil {
-		log.Error(err)
-		return err
-	}
 	for i := 0; i < len(repos); i++ {
-		repos[i] = repos[0] + "/" + repos[i]
+		repos[i] = parserRegistry[0] + "/" + repos[i]
 	}
 
 	//将registry中所有的image Load进来
@@ -231,9 +168,12 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 		}
 	}
 
-	//判断是否指定了image名称
+	//判断是否指定了image名称,如果没指定就根据输入解析namespace,提取指定namespace下的所有image
 	if parserRegistry[2] != "" {
-		ids, err = remoteRuntime.FindImageIDs(registryString)
+		tmp, err := remoteRuntime.FindImageIDs(registryString)
+		for _, id := range tmp {
+			ids = append(ids, id)
+		}
 		if err != nil {
 			log.Error(err)
 			return err
@@ -262,21 +202,14 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 			}
 		}
 		for _, repo := range repos {
-			ids, err = remoteRuntime.FindImageIDs(repo)
+			tmp, err := remoteRuntime.FindImageIDs(repo)
+			for _, id := range tmp {
+				ids = append(ids, id)
+			}
 			if err != nil {
 				log.Error(err)
 				continue
 			}
-		}
-	}
-
-	//如果指定了cache参数则先从oss中查询是否有该报告的缓存 若有则直接输出，否则进行扫描
-	if cache == true {
-		if res, ok := FindOSS("", repos); ok == true {
-			fmt.Println(res)
-			return nil
-		} else {
-			log.Error("something wrong in find report cache in oss ")
 		}
 	}
 
@@ -313,11 +246,6 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 		}()
 	}
 	return nil
-}
-
-func FindOSS(bucketName string, filename []string) ([]string, bool) {
-
-	return nil, false
 }
 
 func scan(c *cmd.Command, image api.Image) error {

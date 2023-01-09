@@ -251,7 +251,6 @@ func init() {
 
 	// Scan Flags
 	scanImageCmd.Flags().StringP("config", "c", "", "auth config path")
-	scanImageCmd.Flags().BoolP("cache", "C", false, "if query the result from oss or not")
 	// Service client init
 	reportService = report.NewReportService()
 
