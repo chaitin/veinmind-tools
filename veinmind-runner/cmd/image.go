@@ -17,6 +17,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	RegistryRemote "github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/rs/xid"
+	"github.com/spf13/cobra"
 	"os"
 	"path"
 	"path/filepath"
@@ -32,6 +33,13 @@ var scanImageCmd = &cmd.Command{
 	PreRunE:  scanReportPreRunE,
 	RunE:     ScanImage,
 	PostRunE: scanReportPostRunE,
+}
+
+func splitArgs(cmd *cobra.Command, args []string) ([]string, []string) {
+	if cmd.ArgsLenAtDash() >= 0 {
+		return args[:cmd.ArgsLenAtDash()], args[cmd.ArgsLenAtDash():]
+	}
+	return args, []string{}
 }
 
 func ScanImage(c *cmd.Command, args []string) error {

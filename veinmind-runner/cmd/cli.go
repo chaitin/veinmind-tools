@@ -238,7 +238,6 @@ func init() {
 	// Cobra init
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)
-	rootCmd.AddCommand(scanHostCmd)
 	rootCmd.AddCommand(scanIaCCmd)
 	rootCmd.AddCommand(scanContainerCmd)
 	rootCmd.AddCommand(scanImageCmd)
