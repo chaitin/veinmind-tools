@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	_ "encoding/json"
+	"fmt"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
@@ -67,10 +68,8 @@ var CAPStringsList = []string{
 
 // 不安全的suid配置中判断某个可执行文件是否配置了suid
 
-func IsBelongToRoot(content os.FileInfo, s string) bool {
-
+func IsBelongToRoot(content os.FileInfo) bool {
 	uid := content.Sys().(*syscall.Stat_t).Uid
-	//log.Info(uid.Interface().(uint32))
 	if uid == uint32(0) {
 		return true
 	}
@@ -79,9 +78,9 @@ func IsBelongToRoot(content os.FileInfo, s string) bool {
 
 // 不安全的suid配置中判断某个配置了suid权限的可执行文件的属主是否是root
 
-func IsContainSUID(content os.FileInfo, s string) bool {
-	res := content.Mode().String()
-	if strings.Contains(res, "u") {
+func IsContainSUID(content os.FileInfo) bool {
+	res := fmt.Sprintf("%o", uint32(content.Mode()))
+	if strings.HasPrefix(res, "40000") {
 		return true
 	}
 	return false
@@ -95,10 +94,9 @@ func FindSuid(fs api.FileSystem) {
 	for i := 0; i < len(filepath); i++ {
 		for j := 0; j < len(binaryName); j++ {
 			files := filepath[i] + binaryName[j]
-			//log.Info(files)
 			content, err := fs.Stat(files)
 			if err == nil {
-				if IsBelongToRoot(content, files) && IsContainSUID(content, files) {
+				if IsBelongToRoot(content) && IsContainSUID(content) {
 					AddResult(files, "UnSafeSuid")
 				}
 			} else {
@@ -113,7 +111,6 @@ func FindSuid(fs api.FileSystem) {
 
 func CheckEmptyPasswdRoot(fs api.FileSystem) {
 	//更改为shadow
-
 	path := "/etc/passwd"
 	file, err := fs.Open(path)
 	defer file.Close()
@@ -130,43 +127,26 @@ func CheckEmptyPasswdRoot(fs api.FileSystem) {
 
 // 检查文件权限
 
-func FileWriteCheck(s string) bool {
-	resW := 0
-	for i := 0; i < len(s); i++ {
-		if s[i] == 'w' {
-			resW++
-		}
-	}
-	if resW > 1 {
-		return true
-	} else {
-		return false
-	}
-}
+// 不安全的权限配置，passwd任何用户可写，shadow任何用户可读,crontab任何用户可写，crontab内文件所有用户可写,/etc/sudoers为用户赋予了过多的sudo权限或者为某些可以执行命令的二进制文件赋予了sudo权限
 
-// 不安全的权限配置，如所有用户可写/etc/passwd，/etc/crontab的定时任务中有某个脚本所有人可写
-
-func UnsafePrivilege(fs api.FileSystem) {
-	unsafepath := []string{"/etc/passwd", "/etc/crontab"}
-	for i := 0; i < len(unsafepath); i++ {
-		content, err := fs.Stat(unsafepath[i])
-		if err == nil {
-			priv := content.Mode()
-			if FileWriteCheck(priv.String()) {
-				AddResult(unsafepath[i], "UnsafePrivilege")
-			}
-		}
+func UnsafePasswdPrivilege(fs api.FileSystem) error {
+	content, err := fs.Stat("/etc/passwd")
+	if err != nil {
+		log.Error(err)
+		return err
 	}
-
+	priv := fmt.Sprintf("%o", uint32(content.Mode()))
+	priv = string(priv)
+	strings.LastIndex(priv, "")
+	//rw-rw-rw-
+	return nil
 }
 
 //----------------------------容器逃逸相关------------------------------------
 
 // 特权模式检查 --privileged --cap-add sys-admin 通过/proc/self/status中的CapEff判断，CapEff需要进行解析
 func ParseCapEff(capHex string) ([]string, error) {
-
 	var capTextList []string
-
 	numb, err := strconv.ParseUint(capHex, 16, 64)
 	if err != nil {
 		return nil, err
@@ -202,11 +182,6 @@ func SensitiveFileMountCheck(fs1 api.Container) {
 	} else {
 		log.Info(err)
 	}
-}
-
-// 检测docker remote api是否开启
-func RemoteApiCheck(fs1 api.Container) {
-
 }
 
 // ----------------------------处理-------------------------------------------
@@ -246,12 +221,11 @@ func GenerateImageRoport(image api.Image) error {
 	return nil
 }
 func ImagesScanRun(fs api.Image) {
-
-	go FindSuid(fs)
-	go CheckEmptyPasswdRoot(fs)
-	go UnsafePrivilege(fs)
-
-	GenerateImageRoport(fs)
+	//
+	// FindSuid(fs)
+	// CheckEmptyPasswdRoot(fs)
+	// UnsafePrivilege(fs)
+	//GenerateImageRoport(fs)
 }
 
 func GenerateContainerRoport(image api.Container) error {
@@ -280,12 +254,17 @@ func GenerateContainerRoport(image api.Container) error {
 }
 func ContainersScanRun(fs api.Container) {
 
-	FindSuid(fs)
-	CheckEmptyPasswdRoot(fs)
-	UnsafePrivilege(fs)
-	//PrivilegeModeCheck(fs)
-	SensitiveFileMountCheck(fs)
+	//FindSuid(fs)
+	//CheckEmptyPasswdRoot(fs)
+	//UnsafePrivilege(fs)
+	////PrivilegeModeCheck(fs)
+	//SensitiveFileMountCheck(fs)
+	//
+	//GenerateContainerRoport(fs)
 
-	GenerateContainerRoport(fs)
+	content, _ := fs.Stat("/etc/passwd")
+	test := fmt.Sprintf("%o", uint32(content.Mode()))
+	test1 := string(test)
+	fmt.Println(strings.HasPrefix(test1, "40000"))
 
 }
