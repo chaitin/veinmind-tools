@@ -9,111 +9,25 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/git"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
-	"github.com/google/uuid"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 var (
-	tempDir    = ""
-	scanIaCCmd = &cmd.Command{
-		Use:   "scan-iac",
-		Short: "perform iac file scan",
-	}
-	scanLocalCmd = &cmd.Command{
-		Use:      "local",
-		Short:    "perform local iac file scan",
-		PreRunE:  scanPreRunE,
-		PostRunE: scanPostRunE,
-	}
-	scanGitRepoCmd = &cmd.Command{
-		Use:      "git",
-		Short:    "perform git repo iac file scan",
-		PreRunE:  scanIacPreRunE,
-		RunE:     scanGitRepoIaCFile,
-		PostRunE: scanIacPostRunE,
-	}
-	scanK8sConfigCmd = &cmd.Command{
-		Use:      "k8s",
-		Short:    "perform scan iac by k8s config",
-		PreRunE:  scanIacPreRunE,
-		RunE:     scanK8sConfig,
-		PostRunE: scanIacPostRunE,
-	}
+	Regix = ""
 
-	// replace path
-	scanIacPreRunE = func(c *cmd.Command, args []string) error {
-		// init tempDir
-		dir, err := os.MkdirTemp("", uuid.NewString())
-		if err != nil {
-			return err
-		}
-		tempDir = dir
-		// create resource directory if not exist
-		if _, err := os.Open(resourceDirectoryPath); os.IsNotExist(err) {
-			err = os.Mkdir(resourceDirectoryPath, 0600)
-			if err != nil {
-				return err
-			}
-		}
-
-		// discover plugins
-		ctx = c.Context()
-		ctx, cancel = context.WithCancel(ctx)
-		ps = []*plugin.Plugin{}
-
-		glob, err := c.Flags().GetString("glob")
-		if err == nil && glob != "" {
-			ps, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
-		} else {
-			ps, err = plugin.DiscoverPlugins(ctx, ".")
-		}
-		if err != nil {
-			return err
-		}
-
-		serviceManager, err = plugind.NewManager()
-		if err != nil {
-			return err
-		}
-
-		// reporter channel listen
-		go runnerReporter.Listen()
-
-		// event channel listen
-		go func() {
-			for {
-				select {
-				case evt := <-reportService.EventChannel:
-					// replace temp path
-					if realID, err := filepath.Rel(tempDir, evt.ID); err == nil {
-						evt.ID = realID
-					}
-					for _, detail := range evt.AlertDetails {
-						if detail.IaCDetail != nil {
-							if realPath, err := filepath.Rel(tempDir, detail.IaCDetail.FileInfo.FilePath); err == nil {
-								detail.IaCDetail.FileInfo.FilePath = realPath
-							}
-						}
-					}
-					runnerReporter.EventChannel <- evt
-				}
-			}
-		}()
-
-		return nil
-	}
-	scanIacPostRunE = func(c *cmd.Command, args []string) error {
-		if tempDir != "" {
-			os.RemoveAll(tempDir)
-		}
-		return scanPostRunE(c, args)
+	available_resource = []string{"pod", "pods", "configmap", "configmaps", "cm", "clusterrolebinding", "clusterrolebindings", "all"}
+	scanIaCCmd         = &cmd.Command{
+		Use:      "iac",
+		Short:    "perform iac file scan",
+		PreRunE:  scanReportPreRunE,
+		RunE:     scanIaC,
+		PostRunE: scanReportPostRunE,
 	}
 )
 
@@ -123,13 +37,6 @@ func scanIaCFile(c *cmd.Command, iac iacApi.IAC) error {
 		plugin.WithExecInterceptor(func(
 			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
 		) error {
-			// Init Service
-			log.Infof("Discovered plugin: %#v\n", plug.Name)
-			err := serviceManager.StartWithContext(ctx, plug.Name)
-			if err != nil {
-				log.Errorf("%#v can not work: %#v\n", plug.Name, err)
-				return err
-			}
 			// Register Service
 			reg := service.NewRegistry()
 			reg.AddServices(log.WithFields(log.Fields{
@@ -146,8 +53,66 @@ func scanIaCFile(c *cmd.Command, iac iacApi.IAC) error {
 	return nil
 }
 
-func scanGitRepoIaCFile(c *cmd.Command, args []string) error {
-	key, err := c.Flags().GetString("ssh-pubkey")
+func scanIaC(c *cmd.Command, args []string) error {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(args))
+	for _, value := range args {
+		handler, err := ScanIaCParser(value)
+		if err != nil {
+			return err
+		}
+		go func(handler Handler, value string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			err := handler(c, value)
+			if err != nil {
+				log.Errorf(err.Error())
+			}
+		}(handler, value, wg)
+	}
+	wg.Wait()
+	return nil
+}
+
+// host
+func scanHostIaCFile(c *cmd.Command, arg string) error {
+	filetype, err := c.Flags().GetString("iac-type")
+	var iacfile iacApi.IACType
+	if err != nil {
+		return err
+	}
+	compileRegex := regexp.MustCompile(HOSTREGEX)
+	matchArr := compileRegex.FindStringSubmatch(arg)
+	hostfilepath := matchArr[len(matchArr)-1]
+	if filetype == "" {
+		var opt []iacApi.DiscoverOption
+		iacfile, err = iacApi.DiscoverType(hostfilepath, opt...)
+		if err != nil {
+			return err
+		}
+	} else {
+		switch filetype {
+		case "kubernetes":
+			iacfile = "kubernetes"
+		case "dockerfile":
+			iacfile = "dockerfile"
+		case "docker-compose":
+			iacfile = "docker-compose"
+		default:
+			iacfile = "unknown"
+		}
+	}
+	iac := iacApi.IAC{
+		Path: hostfilepath,
+		Type: iacfile,
+	}
+	_ = scanIaCFile(c, iac)
+	return nil
+}
+
+// git
+func scanGitRepoIaCFile(c *cmd.Command, arg string) error {
+	key, err := c.Flags().GetString("sshkey")
+
 	if err != nil {
 		return err
 	}
@@ -166,93 +131,185 @@ func scanGitRepoIaCFile(c *cmd.Command, args []string) error {
 		os.Setenv("ALL_PROXY", proxy)
 	}
 
-	for _, arg := range args {
-		isGitUrl, err := regexp.MatchString("^(http(s)?://([^/]+?/){2}|git@[^:]+:[^/]+?/).*?.git$", arg)
-		if err != nil {
-			continue
-		}
-		if isGitUrl {
-			func() {
-				var opt []iacApi.DiscoverOption
-				err = git.Clone(tempDir, arg, key, insecure)
-				if err != nil {
-					log.Errorf("git download failed: %s", err)
-					// nil point fix
-					return
-				}
-				discovered, err := iacApi.DiscoverIACs(tempDir, opt...)
-				if err != nil {
-					log.Errorf("git discovered failed: %s", err)
-				}
-				for _, iac := range discovered {
-					_ = scanIaCFile(c, iac)
-				}
-			}()
-		}
+	compileRegex := regexp.MustCompile(GITREGEX)
+	matchArr := compileRegex.FindStringSubmatch(arg)
+	isGitUrl, err := regexp.MatchString("^(http(s)?://([^/]+?/){2}|git@[^:]+:[^/]+?/).*?.git$", matchArr[1])
+	if err != nil {
+		return err
+	}
+	if isGitUrl {
+		func() {
+			var opt []iacApi.DiscoverOption
+
+			err = git.Clone(tempDir, matchArr[1], key, insecure)
+
+			if err != nil {
+				log.Errorf("git download failed: %s", err)
+				// nil point fix
+				return
+			}
+			discovered, err := iacApi.DiscoverIACs(tempDir, opt...)
+			if err != nil {
+				log.Errorf("git discovered failed: %s", err)
+			}
+
+			for _, iac := range discovered {
+				_ = scanIaCFile(c, iac)
+			}
+		}()
 	}
 
 	return nil
 }
 
-func scanK8sConfig(c *cmd.Command, args []string) error {
-	kubeconfig, _ := c.Flags().GetString("kubeconfig")
+// kubernetes
+func parserK8sConfig(c *cmd.Command, input string) ([]string, error) {
+	var namespace, kubeconfig, resource, name string
+	kubeconfig, _ = c.Flags().GetString("kubeconfig")
+	if kubeconfig == "" {
+		if home := os.Getenv("HOME"); home != "" {
+			kubeconfig = home + "/.kube/config"
+		} else {
+			log.Errorf("please input kubeconfig file path using --kubeconfig / -k")
+		}
+	}
+	if input != "kubernetes" {
+		namespace, _ = c.Flags().GetString("namespace")
+		compileRegex := regexp.MustCompile(KUBERNETESREGEX)
+		matchArr := compileRegex.FindStringSubmatch(input)
+		resource = matchArr[2]
+		name = matchArr[3]
+	} else {
+		namespace = "all"
+		resource = "all"
+		name = "all"
+	}
+
+	return []string{namespace, resource, name, kubeconfig}, nil
+}
+func inResource(input string) bool {
+	for _, value := range available_resource {
+		if strings.ToLower(input) == value {
+			return true
+		}
+	}
+	return false
+}
+func inNamespace(input string, availabe []string) bool {
+	if input == "all" {
+		return true
+	} else {
+		for _, value := range availabe {
+			if input == value {
+				return true
+			}
+		}
+	}
+	return false
+}
+func scanK8sConfig(c *cmd.Command, arg string) error {
+	args, err := parserK8sConfig(c, arg)
+	if err != nil {
+		return err
+	}
+	namespace := args[0]
+	resource := args[1]
+	name := args[2]
+	kubeconfig := args[3]
+	if inResource(resource) == false {
+		if resource == "" {
+			log.Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :nil\nif you want to scan all resource please input\n    kubernetes or kubernetes:all/<yourname>")
+		} else {
+			log.Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :%s", resource)
+		}
+
+		return nil
+	}
 	log.Infof("start load remote k8s cluster config at %s", kubeconfig)
 	scanCtx := c.Context()
 	iacList := make([]iacApi.IAC, 0)
 	dataList := map[string][]byte{}
 
 	kubeRoot, err := kubernetes.New()
-
-	if err != nil {
-		return err
-	}
-	kubeNamespaces, err := kubeRoot.Resource("", "namespaces")
 	if err != nil {
 		return err
 	}
 
-	namespaces, err := kubeNamespaces.List(scanCtx)
+	//配置namespace
+	namespaces := make([]string, 0)
+	k8sNamespaces, err := kubeRoot.Resource("", "namespaces")
 	if err != nil {
 		return err
+	}
+	available_namespace, err := k8sNamespaces.List(scanCtx)
+	if err != nil {
+		return err
+	}
+	if inNamespace(namespace, available_namespace) {
+		if namespace == "all" {
+			namespaces = available_namespace
+		} else {
+			namespaces = append(namespaces, namespace)
+		}
+	} else {
+		log.Errorf("please input right namespace!\n    available namespaces:%s", available_namespace)
+	}
+	//配置name的正则表达式
+	if name == "all" {
+		Regix = ".*"
+	} else {
+		Regix = name
 	}
 
 	log.Infof("download remote k8s cluster config at %s", tempDir)
+	resource = strings.ToLower(resource)
 	for _, namespace := range namespaces {
 		if kubeC, errName := kubernetes.New(); errName == nil {
-			// pods
-			if resourcePod, errResource := kubeC.Resource(namespace, "pods"); errResource == nil {
-				if pods, errPod := resourcePod.List(scanCtx); errPod == nil {
-					for _, pod := range pods {
-						if podsConfig, errConfig := resourcePod.Get(scanCtx, pod); errConfig == nil {
-							dataList[strings.Join([]string{namespace, pod}, ":")] = podsConfig
+			if resource == "all" || resource == "pod" || resource == "pods" {
+				if resourcePod, errResource := kubeC.Resource(namespace, "pods"); errResource == nil {
+					if pods, errPod := resourcePod.List(scanCtx); errPod == nil {
+						for _, pod := range pods {
+							if match, _ := regexp.MatchString(Regix, pod); match {
+								if podsConfig, errConfig := resourcePod.Get(scanCtx, pod); errConfig == nil {
+									dataList[strings.Join([]string{namespace, pod}, ":")] = podsConfig
+								}
+							}
 						}
 					}
 				}
 			}
-			// configMaps
-			if resourceConfigMaps, errResource := kubeC.Resource(namespace, "configmaps"); errResource == nil {
-				if configmaps, errCM := resourceConfigMaps.List(scanCtx); errCM == nil {
-					for _, configmap := range configmaps {
-						if kubeletconfig, errConfig := resourceConfigMaps.Get(scanCtx, configmap); errConfig == nil {
-							dataList[strings.Join([]string{namespace, configmap}, ":")] = kubeletconfig
+			if resource == "all" || resource == "configmap" || resource == "configmaps" || resource == "cm" {
+				if resourceCM, errResource := kubeC.Resource(namespace, "configmaps"); errResource == nil {
+					if configmaps, errconfigmap := resourceCM.List(scanCtx); errconfigmap == nil {
+						for _, configmap := range configmaps {
+							if match, _ := regexp.MatchString(Regix, configmap); match {
+								if configmapconfig, errConfigmaps := resourceCM.Get(scanCtx, configmap); errConfigmaps == nil {
+									dataList[strings.Join([]string{namespace, configmap}, ":")] = configmapconfig
+								}
+							}
+
 						}
 					}
 				}
 			}
 		}
 	}
-
-	// some Others
-	if resourceClusterRole, errResource := kubeRoot.Resource("", "clusterrolebindings"); errResource == nil {
-		if clusterRoleBindings, errClusterRolebinding := resourceClusterRole.List(scanCtx); errClusterRolebinding == nil {
-			for _, clusterRoleBinding := range clusterRoleBindings {
-				if clusterRolebindingConfig, errConfig := resourceClusterRole.Get(scanCtx, clusterRoleBinding); errConfig == nil {
-					dataList[strings.Join([]string{"none", clusterRoleBinding}, ":")] = clusterRolebindingConfig
+	if resource == "all" || resource == "clusterrolebinding" || resource == "clusterrolebindings" {
+		if kubeC, errName := kubernetes.New(); errName == nil {
+			if resourceClusterRole, errResource := kubeC.Resource("", "clusterrolebindings"); errResource == nil {
+				if clusterRoleBindings, errclusterrolebinding := resourceClusterRole.List(scanCtx); errclusterrolebinding == nil {
+					for _, clusterRoleBinding := range clusterRoleBindings {
+						if match, _ := regexp.MatchString(name, clusterRoleBinding); match {
+							if clusterRolebindingConfig, errConfig := resourceClusterRole.Get(scanCtx, clusterRoleBinding); errConfig == nil {
+								dataList[strings.Join([]string{"none", clusterRoleBinding}, ":")] = clusterRolebindingConfig
+							}
+						}
+					}
 				}
+
 			}
 		}
 	}
-
 	// write TempFile
 	for key, data := range dataList {
 		tmpConfigFile := path.Join(tempDir, key)
@@ -273,19 +330,31 @@ func scanK8sConfig(c *cmd.Command, args []string) error {
 	return nil
 }
 
+func ScanIaCParser(arg string) (Handler, error) {
+	var flag string
+	compileRegex := regexp.MustCompile(IACREGEX)
+	matchArr := compileRegex.FindStringSubmatch(arg)
+	if matchArr[1] == "" { //没有协议头
+		flag = "host"
+	} else {
+		flag = matchArr[1]
+	}
+	switch flag {
+	case KUBERNETES:
+		return scanK8sConfig, nil
+	case GIT:
+		return scanGitRepoIaCFile, nil
+	case HOST:
+		return scanHostIaCFile, nil
+	}
+	return nil, nil
+}
+
 func init() {
-	scanIaCCmd.AddCommand(cmd.MapIACCommand(scanLocalCmd, scanIaCFile))
-	scanIaCCmd.AddCommand(scanGitRepoCmd)
-	scanIaCCmd.AddCommand(scanK8sConfigCmd)
-
-	scanIaCCmd.PersistentFlags().String("iac-type", "", "dedicate iac type for iac files")
-	scanIaCCmd.PersistentFlags().Int("threads", 5, "threads for scan action")
-	scanIaCCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")
-	scanIaCCmd.PersistentFlags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
-
-	scanGitRepoCmd.Flags().String("proxy", "", "proxy to git like: https://xxxxx or socks5://xxxx")
-	scanGitRepoCmd.Flags().String("sshkey", "", "auth to git if use by ssh proto")
-	scanGitRepoCmd.Flags().Bool("insecure-skip", false, "skip tls config")
-
-	scanK8sConfigCmd.Flags().String("kubeconfig", "", "k8s config file")
+	scanIaCCmd.Flags().String("iac-type", "", "dedicate iac type for iac files")
+	scanIaCCmd.Flags().StringP("kubeconfig", "k", "", "k8s config file")
+	scanIaCCmd.Flags().StringP("namespace", "n", "all", "k8s resource namespace")
+	scanIaCCmd.Flags().StringP("proxy", "", "", "proxy to git like: https://xxxxx or socks5://xxxx")
+	scanIaCCmd.Flags().StringP("sshkey", "", "", "auth to git if use by ssh proto")
+	scanIaCCmd.Flags().BoolP("insecure-skip", "", false, "skip tls config")
 }
