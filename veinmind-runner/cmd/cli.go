@@ -30,6 +30,31 @@ const (
 
 type Handler func(c *cmd.Command, arg string) error
 
+func splitArgs(cmd *cobra.Command, args []string) ([]string, []string) {
+	if cmd.ArgsLenAtDash() >= 0 {
+		return args[:cmd.ArgsLenAtDash()], args[cmd.ArgsLenAtDash():]
+	}
+	return args, []string{}
+}
+
+func ParseArgs(cmd *cmd.Command, args []string) [][]string {
+	_, targetArgs := splitArgs(cmd, args)
+	res := make([][]string, 0)
+	flagBegin := -1
+	flagEnd := -1
+	for i, value := range targetArgs {
+		if value == "--" {
+			flagEnd = i
+			if flagBegin < flagEnd {
+				res = append(res, targetArgs[flagBegin+1:flagEnd])
+				flagBegin = flagEnd
+			}
+		}
+	}
+	res = append(res, targetArgs[flagEnd+1:])
+	return res
+}
+
 var (
 	ps                    []*plugin.Plugin
 	ctx                   context.Context
@@ -39,8 +64,9 @@ var (
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
 	parallelContainerMode = container.InContainer()
-
-	scanPreRunE = func(c *cobra.Command, args []string) error {
+	pluginArgs            = make([][]string, 0)
+	pluginArgsMap         = make(map[string][]string, 0)
+	scanPreRunE           = func(c *cobra.Command, args []string) error {
 		// create resource directory if not exist
 		if _, err := os.Open(resourceDirectoryPath); os.IsNotExist(err) {
 			err = os.Mkdir(resourceDirectoryPath, 0600)
@@ -63,7 +89,15 @@ var (
 		if err != nil {
 			return err
 		}
-
+		pluginArgs = ParseArgs(c, args)
+		for _, args := range pluginArgs {
+			pluginName := args[0]
+			pluginArg := make([]string, 0)
+			for i := 1; i < len(args); i++ {
+				pluginArg = append(pluginArg, args[i])
+			}
+			pluginArgsMap[pluginName] = pluginArg
+		}
 		serviceManager, err = plugind.NewManager()
 		if err != nil {
 			return err

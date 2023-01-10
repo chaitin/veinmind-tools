@@ -17,7 +17,6 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	RegistryRemote "github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/rs/xid"
-	"github.com/spf13/cobra"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,13 +32,6 @@ var scanImageCmd = &cmd.Command{
 	PreRunE:  scanReportPreRunE,
 	RunE:     ScanImage,
 	PostRunE: scanReportPostRunE,
-}
-
-func splitArgs(cmd *cobra.Command, args []string) ([]string, []string) {
-	if cmd.ArgsLenAtDash() >= 0 {
-		return args[:cmd.ArgsLenAtDash()], args[cmd.ArgsLenAtDash():]
-	}
-	return args, []string{}
 }
 
 func ScanImage(c *cmd.Command, args []string) error {
@@ -278,6 +270,11 @@ func scan(c *cmd.Command, image api.Image) error {
 		) error {
 			// Register Service
 			reg := service.NewRegistry()
+			opts := make([]plugin.ExecOption, 0)
+			opts = append(opts, reg.Bind())
+			if value, ok := pluginArgsMap[plug.Name]; ok == true {
+				opts = append(opts, plugin.WithPrependArgs(value...))
+			}
 			reg.AddServices(log.WithFields(log.Fields{
 				"plugin":  plug.Name,
 				"command": path.Join(c.Path...),
@@ -285,7 +282,7 @@ func scan(c *cmd.Command, image api.Image) error {
 			reg.AddServices(reportService)
 
 			// Next Plugin
-			return next(ctx, reg.Bind())
+			return next(ctx, opts...)
 		}), plugin.WithExecParallelism(t)); err != nil {
 		return err
 	}
