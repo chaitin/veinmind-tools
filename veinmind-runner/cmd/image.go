@@ -55,19 +55,39 @@ func ScanImageDocker(c *cmd.Command, arg string) error {
 	regex := "docker?:?(.*)"
 	compileRegex := regexp.MustCompile(regex)
 	matchArr := compileRegex.FindStringSubmatch(arg)
+	ids := make([]string, 0)
 	r, err := docker.New()
 	if err != nil {
 		return err
 	}
-	ids, err := r.FindImageIDs(matchArr[1])
-
+	if matchArr[1] == "" {
+		refs, err := r.ListImageIDs()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		for _, ref := range refs {
+			tmp, err := r.FindImageIDs(ref)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			ids = append(ids, tmp...)
+		}
+	} else {
+		ids, err = r.FindImageIDs(matchArr[1])
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
 	for _, id := range ids {
 		image, err := r.OpenImageByID(id)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		scan(c, image)
+		imageScan(c, image)
 	}
 	return nil
 }
@@ -76,18 +96,39 @@ func ScanImageContainerd(c *cmd.Command, arg string) error {
 	regex := "containerd?:?(.*)"
 	compileRegex := regexp.MustCompile(regex)
 	matchArr := compileRegex.FindStringSubmatch(arg)
+	ids := make([]string, 0)
 	r, err := containerd.New()
 	if err != nil {
 		return err
 	}
-	ids, err := r.FindImageIDs(matchArr[1])
+	if matchArr[1] == "" {
+		refs, err := r.ListImageIDs()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		for _, ref := range refs {
+			tmp, err := r.FindImageIDs(ref)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			ids = append(ids, tmp...)
+		}
+	} else {
+		ids, err = r.FindImageIDs(matchArr[1])
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
 	for _, id := range ids {
 		image, err := r.OpenImageByID(id)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		scan(c, image)
+		imageScan(c, image)
 	}
 	return nil
 }
@@ -225,7 +266,7 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 			log.Error(err)
 			continue
 		}
-		scan(c, image)
+		imageScan(c, image)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -248,7 +289,7 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 	return nil
 }
 
-func scan(c *cmd.Command, image api.Image) error {
+func imageScan(c *cmd.Command, image api.Image) error {
 	refs, err := image.RepoRefs()
 	ref := ""
 	if err == nil && len(refs) > 0 {
@@ -300,9 +341,9 @@ func RegistryParser(arg string, auths RegistryRemote.Option) ([]string, []string
 		if err != nil {
 			log.Error(err)
 		}
-		repos, err = RegistryRemote.Catalog(context.Background(), registryAddr, auths)
+		_, err = RegistryRemote.Catalog(context.Background(), registryAddr, auths)
 		if err == nil {
-			res = append(res, splitRes[0], splitRes[1], "")
+			res = append(res, splitRes[0], "", splitRes[1])
 		} else {
 			res = append(res, "index.docker.io", splitRes[0], splitRes[1])
 		}
