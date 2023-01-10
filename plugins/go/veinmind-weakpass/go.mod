@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/Jeffail/tunny v0.1.4
 	github.com/beevik/etree v1.1.0
-	github.com/chaitin/libveinmind v1.5.2
+	github.com/chaitin/libveinmind v1.3.1
 	github.com/chaitin/veinmind-common-go v1.2.0-r0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.5.0
