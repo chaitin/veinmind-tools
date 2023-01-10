@@ -201,7 +201,7 @@ var scanRegistryImageCmd = &cmd.Command{
 							continue
 						}
 
-						err = scanImage(cmd, image)
+						err = scan(cmd, image)
 						if err != nil {
 							log.Error(err)
 							continue
@@ -234,7 +234,7 @@ var scanRegistryImageCmd = &cmd.Command{
 					repoRef = image.ID()
 				}
 
-				err = scanImage(cmd, image)
+				err = scan(cmd, image)
 				if err != nil {
 					log.Error(err)
 				}

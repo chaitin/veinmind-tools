@@ -8,6 +8,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -19,7 +20,15 @@ import (
 
 const (
 	resourceDirectoryPath = "./resource"
+	DOCKER                = "docker"
+	CONTAINERD            = "containerd"
+	REGISTRY              = "registry"
+	KUBERNETES            = "kubernetes"
+	GIT                   = "git"
+	HOST                  = "host"
 )
+
+type Handler func(c *cmd.Command, arg string) error
 
 var (
 	ps                    []*plugin.Plugin
@@ -30,7 +39,8 @@ var (
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
 	parallelContainerMode = container.InContainer()
-	scanPreRunE           = func(c *cobra.Command, args []string) error {
+
+	scanPreRunE = func(c *cobra.Command, args []string) error {
 		// create resource directory if not exist
 		if _, err := os.Open(resourceDirectoryPath); os.IsNotExist(err) {
 			err = os.Mkdir(resourceDirectoryPath, 0600)
@@ -135,22 +145,113 @@ var (
 
 		return nil
 	}
+
+	scanReportPreRunE = func(c *cmd.Command, args []string) error {
+		// init tempDir
+		dir, err := os.MkdirTemp("", uuid.NewString())
+		if err != nil {
+			return err
+		}
+		tempDir = dir
+		// create resource directory if not exist
+		if _, err := os.Open(resourceDirectoryPath); os.IsNotExist(err) {
+			err = os.Mkdir(resourceDirectoryPath, 0600)
+			if err != nil {
+				return err
+			}
+		}
+
+		// discover plugins
+		ctx = c.Context()
+		ctx, cancel = context.WithCancel(ctx)
+		ps = []*plugin.Plugin{}
+
+		glob, err := c.Flags().GetString("glob")
+		if err == nil && glob != "" {
+			allPlugins, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
+		} else {
+			allPlugins, err = plugin.DiscoverPlugins(ctx, ".")
+		}
+		if err != nil {
+			return err
+		}
+
+		serviceManager, err = plugind.NewManager()
+		if err != nil {
+			return err
+		}
+
+		for _, p := range allPlugins {
+			log.Infof("Discovered plugin: %#v\n", p.Name)
+			err = serviceManager.StartWithContext(ctx, p.Name)
+			if err != nil {
+				log.Errorf("%#v can not work: %#v\n", p.Name, err)
+				continue
+			}
+			ps = append(ps, p)
+		}
+
+		// reporter channel listen
+		go runnerReporter.Listen()
+
+		// event channel listen
+		go func() {
+			for {
+				select {
+				case evt := <-reportService.EventChannel:
+					// replace temp path
+					if realID, err := filepath.Rel(tempDir, evt.ID); err == nil {
+						evt.ID = realID
+					}
+					for _, detail := range evt.AlertDetails {
+						if detail.IaCDetail != nil {
+							if realPath, err := filepath.Rel(tempDir, detail.IaCDetail.FileInfo.FilePath); err == nil {
+								detail.IaCDetail.FileInfo.FilePath = realPath
+							}
+						}
+					}
+					runnerReporter.EventChannel <- evt
+				}
+			}
+		}()
+
+		return nil
+	}
+	scanReportPostRunE = func(c *cmd.Command, args []string) error {
+		if tempDir != "" {
+			os.Remove(tempDir)
+		}
+		return scanPostRunE(c, args)
+	}
 )
 
 // root command
 var rootCmd = &cmd.Command{}
 
+var ScanCmd = &cmd.Command{
+	Use:   "scan ",
+	Short: "run scan",
+}
+
 func init() {
+
 	// Cobra init
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(scanHostCmd)
 	rootCmd.AddCommand(scanIaCCmd)
-	rootCmd.AddCommand(scanRegistryCmd)
+	rootCmd.AddCommand(scanContainerCmd)
+	rootCmd.AddCommand(scanImageCmd)
 
+	rootCmd.PersistentFlags().Int("threads", 5, "threads for scan action")
+	rootCmd.PersistentFlags().StringP("output", "o", "report.json", "output filepath of report")
+	rootCmd.PersistentFlags().StringP("glob", "g", "", "specifies the pattern of plugin file to find")
 	// control exit
 	rootCmd.PersistentFlags().IntP("exit-code", "e", 0, "exit-code when veinmind-runner find security issues")
 
+	// Scan Flags
+	scanImageCmd.Flags().StringP("config", "c", "", "auth config path")
+	scanImageCmd.Flags().BoolP("cache", "C", false, "if query the result from oss or not")
 	// Service client init
 	reportService = report.NewReportService()
 

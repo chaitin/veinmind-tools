@@ -75,39 +75,39 @@ helm install veinmind .
 2.扫描所有本地镜像
 
 ```
-./veinmind-runner scan-host image
+./veinmind-runner scan image
 ```
 
 3.扫描所有本地容器
 
 ```
-./veinmind-runner scan-host container
+./veinmind-runner scan container
 ```
 
 4.扫描本地IaC文件
 
 ```
-./veinmind-runner scan-iac local ./
-./veinmind-runner scan-iac local /path/to/iac-file
+./veinmind-runner scan iac host:path/to/iac-file
+./veinmind-runner scan iac path/to/iac-file
 ```
 
 5.扫描远端 git 仓库的 IaC 文件
 
 ```
-./veinmind-runner scan-iac git http://xxxxxx.git 
+./veinmind-runner scan iac git:http://xxxxxx.git 
 # auth
-./veinmind-runner scan-iac git git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
+./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
+./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
 # add proxy
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
 # disable tls
-./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
+./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
 ```
 
 6.扫描远端 kubernetes IaC 配置(需要手动指定kubeconfig file)
 ```
-./veinmind-runner scan-iac k8s --kubeconfig=/your/k8sConfig/path
+./veinmind-runner scan iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
 ```
 
 7.扫描远程仓库中的`centos`镜像(不指定仓库默认为`index.docker.io`)
@@ -138,7 +138,7 @@ helm install veinmind .
 9.指定容器运行时类型
 
 ```
-./veinmind-runner scan-host image --containerd
+./veinmind-runner scan container --containerd
 ```
 
 容器运行时类型

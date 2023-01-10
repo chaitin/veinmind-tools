@@ -29,60 +29,13 @@ var scanHostContainerCmd = &cmd.Command{
 	PostRunE: scanPostRunE,
 }
 
-func scanImage(c *cmd.Command, image api.Image) error {
-	refs, err := image.RepoRefs()
-	ref := ""
-	if err == nil && len(refs) > 0 {
-		ref = refs[0]
-	} else {
-		ref = image.ID()
-	}
-
-	// Get threads value
-	t, err := c.Flags().GetInt("threads")
-	if err != nil {
-		t = 5
-	}
-
-	log.Infof("Scan image: %#v\n", ref)
-	if err := cmd.ScanImage(ctx, ps, image,
-		plugin.WithExecInterceptor(func(
-			ctx context.Context, plug *plugin.Plugin, c *plugin.Command, next func(context.Context, ...plugin.ExecOption) error,
-		) error {
-			// Init Service
-			log.Infof("Discovered plugin: %#v\n", plug.Name)
-			// IaC need not init any service
-			err = serviceManager.StartWithContext(ctx, plug.Name)
-			if err != nil {
-				log.Errorf("%#v can not work: %#v\n", plug.Name, err)
-				return err
-			}
-			// Register Service
-			reg := service.NewRegistry()
-			reg.AddServices(log.WithFields(log.Fields{
-				"plugin":  plug.Name,
-				"command": path.Join(c.Path...),
-			}))
-			reg.AddServices(reportService)
-
-			// Next Plugin
-			return next(ctx, reg.Bind())
-		}), plugin.WithExecParallelism(t)); err != nil {
-		return err
-	}
-	return nil
-}
-
 func scanContainer(c *cmd.Command, container api.Container) error {
-
 	ref := container.Name()
-
 	// Get threads value
 	t, err := c.Flags().GetInt("threads")
 	if err != nil {
 		t = 5
 	}
-
 	log.Infof("Scan container: %#v\n", ref)
 	if err := cmd.ScanContainer(ctx, ps, container,
 		plugin.WithExecInterceptor(func(
