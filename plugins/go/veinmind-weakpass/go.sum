@@ -201,8 +201,8 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/chaitin/libveinmind v1.1.1/go.mod h1:bUUjhkyZyZ9sTetpm5rOfj5TU3hr5moE3VQM+IgHrbw=
-github.com/chaitin/libveinmind v1.5.1 h1:p+qe2zOD58m+S5iZAR3kfWaNvz7MNizKtKDnfTidGTg=
-github.com/chaitin/libveinmind v1.5.1/go.mod h1:TXLYL6GeSAQ7pQ5IxPG4Tp0DuB1QvPPFhqdOjyiWxVU=
+github.com/chaitin/libveinmind v1.3.1 h1:zUgMAUUB90nTwYPxoEYfEhR2L7Bt/2E9NmyBrZEXbfU=
+github.com/chaitin/libveinmind v1.3.1/go.mod h1:vij/Pqbjd5peynZRDluc1ebx/DOO7jgaqxzJrhUPMBk=
 github.com/chaitin/veinmind-common-go v1.2.0-r0 h1:V647tSvHqBgRAdspsWsDq3qiNYUbEW3EPVkicdS63z8=
 github.com/chaitin/veinmind-common-go v1.2.0-r0/go.mod h1:Ap6KTM2qqKv+8tLeb38pX9DFWt/P8/1gmCO2b9tjNZo=
 github.com/charithe/durationcheck v0.0.9/go.mod h1:SSbRIBVfMjCi/kEB6K65XEA83D6prSM8ap1UCpNKtgg=
