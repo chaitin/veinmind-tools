@@ -11,6 +11,11 @@ import (
 
 var rootCmd = &cmd.Command{}
 
+var scanCmd = &cmd.Command{
+	Use:   "scan",
+	Short: "scan mode",
+}
+
 var scanImageCmd = &cmd.Command{
 	Use:   "image",
 	Short: "scan image escalate",
@@ -20,8 +25,6 @@ var scanContainerCmd = &cmd.Command{
 	Short: "scan container escalate",
 }
 
-// scanImage is func that used to do some action with Images
-// you can write your plugin scan code here
 func scanImage(c *cmd.Command, image api.Image) error {
 	defer func() {
 		err := image.Close()
@@ -29,28 +32,41 @@ func scanImage(c *cmd.Command, image api.Image) error {
 			log.Error(err)
 		}
 	}()
-	// do something here
 
-	utils.ImagesScanRun(image)
-
+	err := utils.ImagesScanRun(image)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
 	// if you want display at runner report, you should send your result to report event
 	return nil
 }
 
-// scanContainer is func that used to do some action with container
-// you can write your plugin scan code herex
 func scanContainer(c *cmd.Command, container api.Container) error {
-	utils.ContainersScanRun(container)
+	defer func() {
+		err := container.Close()
+		if err != nil {
+			log.Error(err)
+		}
+	}()
+
+	err := utils.ContainersScanRun(container)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
 	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(cmd.MapImageCommand(scanImageCmd, scanImage))
-	rootCmd.AddCommand(cmd.MapContainerCommand(scanContainerCmd, scanContainer))
+	rootCmd.AddCommand(scanCmd)
+	scanCmd.AddCommand(cmd.MapImageCommand(scanImageCmd, scanImage))
+	scanCmd.AddCommand(cmd.MapContainerCommand(scanContainerCmd, scanContainer))
+
 	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
 		Name:        "veinmind-escalate",
 		Author:      "veinmind-team",
-		Description: "veinmind-escalate Description",
+		Description: "detect escalation risk for image&container",
 	}))
 }
 

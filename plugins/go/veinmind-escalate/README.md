@@ -2,7 +2,7 @@
 <h1 align="center"> veinmind-escalate </h1>
 
 <p align="center">
-veinmind-malicious 是由长亭科技自研的一款镜像逃逸风险扫描工具 
+veinmind-malicious 是由长亭科技自研的一款逃逸风险扫描工具 
 </p>
 
 ## 功能特性
@@ -52,19 +52,24 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-
+./veinmind-escalate scan image [imageID/imageName]
 ```
 
 2.扫描所有本地镜像
 
 ```
-
+./veinmind-escalate scan image
 ```
 
+3.指定容器名称或容器ID并扫描
 
-## 演示
-1.扫描指定镜像名称 `xmrig/xmrig`
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220119111800.png)
+```
+./veinmind-escalate scan container [imageID/imageName]
+```
 
-## 报告
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220119142131.png)
+4.扫描所有本地容器
+
+```
+./veinmind-escalate scan container
+```
+

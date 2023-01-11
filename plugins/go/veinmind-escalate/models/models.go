@@ -1,6 +1,7 @@
 package models
 
 type EscalateResult struct {
-	ResultType    string `json:"result-type"`
-	ResultDetails string `json:"result-details"`
+	Path   string `json:"path"`
+	Reason string `json:"reason"`
+	Detail string `json:"detail"`
 }
