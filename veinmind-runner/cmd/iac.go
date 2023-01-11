@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	Regix              = ""
-	tempDir            = ""
+	Regix = ""
+
 	available_resource = []string{"pod", "pods", "configmap", "configmaps", "cm", "clusterrolebinding", "clusterrolebindings", "all"}
 	scanIaCCmd         = &cmd.Command{
 		Use:      "iac",
@@ -80,8 +80,7 @@ func scanHostIaCFile(c *cmd.Command, arg string) error {
 	if err != nil {
 		return err
 	}
-	regex := "(host:)?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(HOSTREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	hostfilepath := matchArr[len(matchArr)-1]
 	if filetype == "" {
@@ -132,8 +131,7 @@ func scanGitRepoIaCFile(c *cmd.Command, arg string) error {
 		os.Setenv("ALL_PROXY", proxy)
 	}
 
-	regex := "git:(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(GITREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	isGitUrl, err := regexp.MatchString("^(http(s)?://([^/]+?/){2}|git@[^:]+:[^/]+?/).*?.git$", matchArr[1])
 	if err != nil {
@@ -177,8 +175,7 @@ func parserK8sConfig(c *cmd.Command, input string) ([]string, error) {
 	}
 	if input != "kubernetes" {
 		namespace, _ = c.Flags().GetString("namespace")
-		regex := "(\\w*):(\\w*){1,}/?(.*)"
-		compileRegex := regexp.MustCompile(regex)
+		compileRegex := regexp.MustCompile(KUBERNETESREGEX)
 		matchArr := compileRegex.FindStringSubmatch(input)
 		resource = matchArr[2]
 		name = matchArr[3]
@@ -335,8 +332,7 @@ func scanK8sConfig(c *cmd.Command, arg string) error {
 
 func ScanIaCParser(arg string) (Handler, error) {
 	var flag string
-	regex := "(kubernetes|host|git)?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(IACREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	if matchArr[1] == "" { //没有协议头
 		flag = "host"

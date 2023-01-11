@@ -24,6 +24,9 @@ var scanContainerCmd = &cmd.Command{
 }
 
 func ScanContainer(c *cmd.Command, args []string) error {
+	if len(args) == 0 {
+		args = append(args, "")
+	}
 	wg := &sync.WaitGroup{}
 	wg.Add(len(args))
 	for _, value := range args {
@@ -44,22 +47,43 @@ func ScanContainer(c *cmd.Command, args []string) error {
 }
 
 func ScanContainerParser(arg string) (Handler, error) {
-	regex := "(docker|containerd)?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(CONTAINERREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
-	if matchArr[1] == "" || matchArr[1] == "docker" {
+	switch matchArr[1] {
+	case ALL: //如果没指定运行时则先以输入的id/name作为docker尝试打开容器，若无法打开则为containerd容器 否则为docker容器
+		r, err := docker.New()
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		ids := make([]string, 0)
+		ids, err = r.FindContainerIDs(arg)
+		if arg == "" {
+			ids, err = r.ListContainerIDs()
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		for _, id := range ids {
+			_, err := r.OpenContainerByID(id)
+			if err != nil {
+				return ScanContainerd, nil
+			}
+		}
 		return ScanDocker, nil
-	} else if matchArr[1] == "containerd" {
+	case DOCKER:
+		return ScanDocker, nil
+	case CONTAINERD:
 		return ScanContainerd, nil
-	} else {
+	default:
 		log.Errorf("please input right args! available: docker , containerd")
 	}
 	return nil, nil
 }
 
 func ScanDocker(c *cmd.Command, arg string) error {
-	regex := "docker?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(DOCKERREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	ids := make([]string, 0)
 	r, err := docker.New()
@@ -67,7 +91,7 @@ func ScanDocker(c *cmd.Command, arg string) error {
 		log.Error(err)
 		return err
 	}
-	if matchArr[1] == "" {
+	if matchArr[len(matchArr)-1] == "" {
 		refs, err := r.ListContainerIDs()
 		if err != nil {
 			log.Error(err)
@@ -82,7 +106,7 @@ func ScanDocker(c *cmd.Command, arg string) error {
 			ids = append(ids, tmp...)
 		}
 	} else {
-		ids, err = r.FindContainerIDs(matchArr[1])
+		ids, err = r.FindContainerIDs(matchArr[len(matchArr)-1])
 		if err != nil {
 			log.Error(err)
 			return err
@@ -101,15 +125,14 @@ func ScanDocker(c *cmd.Command, arg string) error {
 }
 
 func ScanContainerd(c *cmd.Command, arg string) error {
-	regex := "containerd:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(CONTAINERDREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	ids := make([]string, 0)
 	r, err := containerd.New()
 	if err != nil {
 		return err
 	}
-	if matchArr[1] == "" {
+	if matchArr[len(matchArr)-1] == "" {
 		refs, err := r.ListContainerIDs()
 		if err != nil {
 			log.Error(err)
@@ -124,7 +147,7 @@ func ScanContainerd(c *cmd.Command, arg string) error {
 			ids = append(ids, tmp...)
 		}
 	} else {
-		ids, err = r.FindContainerIDs(matchArr[1])
+		ids, err = r.FindContainerIDs(matchArr[len(matchArr)-1])
 		if err != nil {
 			log.Error(err)
 			return err
@@ -158,6 +181,11 @@ func containerScan(c *cmd.Command, container api.Container) error {
 		) error {
 			// Register Service
 			reg := service.NewRegistry()
+			opts := make([]plugin.ExecOption, 0)
+			opts = append(opts, reg.Bind())
+			if value, ok := pluginArgsMap[plug.Name]; ok == true {
+				opts = append(opts, plugin.WithPrependArgs(value...))
+			}
 			reg.AddServices(log.WithFields(log.Fields{
 				"plugin":  plug.Name,
 				"command": path.Join(c.Path...),
@@ -165,7 +193,7 @@ func containerScan(c *cmd.Command, container api.Container) error {
 			reg.AddServices(reportService)
 
 			// Next Plugin
-			return next(ctx, reg.Bind())
+			return next(ctx, opts...)
 		}), plugin.WithExecParallelism(t)); err != nil {
 		return err
 	}

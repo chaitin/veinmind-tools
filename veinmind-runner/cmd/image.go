@@ -35,10 +35,16 @@ var scanImageCmd = &cmd.Command{
 }
 
 func ScanImage(c *cmd.Command, args []string) error {
+	if len(args) == 0 {
+		args = append(args, "")
+	}
 	wg := &sync.WaitGroup{}
 	wg.Add(len(args))
 	for _, value := range args {
-		handler := ScanImageParser(value)
+		handler, err := ScanImageParser(value)
+		if err != nil {
+			return err
+		}
 		go func(handler Handler, value string, wg *sync.WaitGroup) {
 			defer wg.Done()
 			err := handler(c, value)
@@ -52,15 +58,14 @@ func ScanImage(c *cmd.Command, args []string) error {
 }
 
 func ScanImageDocker(c *cmd.Command, arg string) error {
-	regex := "docker?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(DOCKERREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	ids := make([]string, 0)
 	r, err := docker.New()
 	if err != nil {
 		return err
 	}
-	if matchArr[1] == "" {
+	if matchArr[len(matchArr)-1] == "" {
 		refs, err := r.ListImageIDs()
 		if err != nil {
 			log.Error(err)
@@ -75,7 +80,7 @@ func ScanImageDocker(c *cmd.Command, arg string) error {
 			ids = append(ids, tmp...)
 		}
 	} else {
-		ids, err = r.FindImageIDs(matchArr[1])
+		ids, err = r.FindImageIDs(matchArr[len(matchArr)-1])
 		if err != nil {
 			log.Error(err)
 			return err
@@ -93,15 +98,14 @@ func ScanImageDocker(c *cmd.Command, arg string) error {
 }
 
 func ScanImageContainerd(c *cmd.Command, arg string) error {
-	regex := "containerd?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(CONTAINERDREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	ids := make([]string, 0)
 	r, err := containerd.New()
 	if err != nil {
 		return err
 	}
-	if matchArr[1] == "" {
+	if matchArr[len(matchArr)-1] == "" {
 		refs, err := r.ListImageIDs()
 		if err != nil {
 			log.Error(err)
@@ -116,7 +120,7 @@ func ScanImageContainerd(c *cmd.Command, arg string) error {
 			ids = append(ids, tmp...)
 		}
 	} else {
-		ids, err = r.FindImageIDs(matchArr[1])
+		ids, err = r.FindImageIDs(matchArr[len(matchArr)-1])
 		if err != nil {
 			log.Error(err)
 			return err
@@ -145,8 +149,7 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 	authConfig := &auth.AuthConfig{
 		Auths: nil,
 	}
-	regex := "registry?:?(.*)"
-	compileRegex := regexp.MustCompile(regex)
+	compileRegex := regexp.MustCompile(REGISTRYREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
 	registryString := matchArr[1]
 	parserRegistry, repos := RegistryParser(registryString, RegistryRemote.WithAuth(&authn.Basic{
@@ -189,7 +192,7 @@ func ScanImageRegistry(c *cmd.Command, arg string) error {
 
 	//将registry中所有的image Load进来
 	for _, repo := range repos {
-		path := filepath.Join("/tmp/", xid.NewWithTime(time.Now()).String())
+		path := filepath.Join(tempDir, xid.NewWithTime(time.Now()).String())
 		paths[repo] = path
 		runtime, err := remote.New(path)
 		if err != nil {
@@ -370,19 +373,41 @@ func RegistryParser(arg string, auths RegistryRemote.Option) ([]string, []string
 	return res, repos
 }
 
-func ScanImageParser(arg string) Handler {
-	regex := "(docker|containerd|tarball|registry):(.*)"
-	compileRegex := regexp.MustCompile(regex)
+func ScanImageParser(arg string) (Handler, error) {
+	compileRegex := regexp.MustCompile(IMAGEREGEX)
 	matchArr := compileRegex.FindStringSubmatch(arg)
+
 	switch matchArr[1] {
+	case ALL: //如果没指定运行时则先以输入的id/name作为docker尝试打开镜像，若无法打开则为containerd镜像 否则为docker镜像
+		r, err := docker.New()
+		ids := make([]string, 0)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		ids, err = r.FindImageIDs(arg)
+		if arg == "" {
+			ids, err = r.ListImageIDs()
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		for _, id := range ids {
+			_, err := r.OpenImageByID(id)
+			if err != nil {
+				return ScanImageContainerd, nil
+			}
+		}
+		return ScanImageDocker, nil
 	case DOCKER:
-		return ScanImageDocker
+		return ScanImageDocker, nil
 	case CONTAINERD:
-		return ScanImageContainerd
+		return ScanImageContainerd, nil
 	case REGISTRY:
-		return ScanImageRegistry
+		return ScanImageRegistry, nil
 	default:
 		log.Errorf("please input right args, available: docker,containerd,registry")
 	}
-	return nil
+	return nil, nil
 }

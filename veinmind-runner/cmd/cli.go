@@ -19,7 +19,18 @@ import (
 )
 
 const (
+	CONTAINERREGEX  string = "(docker|containerd)?:?(.*)"
+	IMAGEREGEX      string = "(docker|containerd|registry)?:?(.*)"
+	IACREGEX        string = "(kubernetes|host|git)?:?(.*)"
+	DOCKERREGEX     string = "(docker)?:?(.*)"
+	CONTAINERDREGEX string = "(containerd)?:?(.*)"
+	REGISTRYREGEX   string = "(registry)?:?(.*)"
+	KUBERNETESREGEX string = "(\\w*):(\\w*){1,}/?(.*)"
+	GITREGEX        string = "(git)?:?(.*)"
+	HOSTREGEX       string = "(host)?:?(.*)"
+
 	resourceDirectoryPath = "./resource"
+	ALL                   = ""
 	DOCKER                = "docker"
 	CONTAINERD            = "containerd"
 	REGISTRY              = "registry"
@@ -28,34 +39,8 @@ const (
 	HOST                  = "host"
 )
 
-type Handler func(c *cmd.Command, arg string) error
-
-func splitArgs(cmd *cobra.Command, args []string) ([]string, []string) {
-	if cmd.ArgsLenAtDash() >= 0 {
-		return args[:cmd.ArgsLenAtDash()], args[cmd.ArgsLenAtDash():]
-	}
-	return args, []string{}
-}
-
-func ParseArgs(cmd *cmd.Command, args []string) [][]string {
-	_, targetArgs := splitArgs(cmd, args)
-	res := make([][]string, 0)
-	flagBegin := -1
-	flagEnd := -1
-	for i, value := range targetArgs {
-		if value == "--" {
-			flagEnd = i
-			if flagBegin < flagEnd {
-				res = append(res, targetArgs[flagBegin+1:flagEnd])
-				flagBegin = flagEnd
-			}
-		}
-	}
-	res = append(res, targetArgs[flagEnd+1:])
-	return res
-}
-
 var (
+	tempDir               = ""
 	ps                    []*plugin.Plugin
 	ctx                   context.Context
 	allPlugins            []*plugin.Plugin //All found plugins
@@ -64,7 +49,7 @@ var (
 	runnerReporter        *reporter.Reporter
 	reportService         *report.ReportService
 	parallelContainerMode = container.InContainer()
-	pluginArgs            = make([][]string, 0)
+	pluginArgs            = make(map[string][]string, 0)
 	pluginArgsMap         = make(map[string][]string, 0)
 	scanPreRunE           = func(c *cobra.Command, args []string) error {
 		// create resource directory if not exist
@@ -89,15 +74,7 @@ var (
 		if err != nil {
 			return err
 		}
-		pluginArgs = ParseArgs(c, args)
-		for _, args := range pluginArgs {
-			pluginName := args[0]
-			pluginArg := make([]string, 0)
-			for i := 1; i < len(args); i++ {
-				pluginArg = append(pluginArg, args[i])
-			}
-			pluginArgsMap[pluginName] = pluginArg
-		}
+		pluginArgsMap = parseArgs(c, args, ps)
 		serviceManager, err = plugind.NewManager()
 		if err != nil {
 			return err
@@ -259,13 +236,37 @@ var (
 	}
 )
 
+type Handler func(c *cmd.Command, arg string) error
+
+func splitArgs(cmd *cobra.Command, args []string) ([]string, []string) {
+	if cmd.ArgsLenAtDash() >= 0 {
+		return args[:cmd.ArgsLenAtDash()], args[cmd.ArgsLenAtDash():]
+	}
+	return args, []string{}
+}
+
+func parseArgs(cmd *cmd.Command, args []string, ps []*plugin.Plugin) map[string][]string {
+	_, targetArgs := splitArgs(cmd, args)
+	targetArgs = append(targetArgs, "--")
+	res := make(map[string][]string, 0)
+	for _, plugin := range ps {
+		res[plugin.Name] = []string{}
+	}
+	for i := 0; i < len(targetArgs); i++ {
+		if targetArgs[i] == "--" {
+			tmp := targetArgs[0:i]
+			if _, ok := res[tmp[0]]; ok == true {
+				res[tmp[0]] = append(res[tmp[0]], tmp...)
+			}
+			targetArgs = targetArgs[i+1:]
+			i = 0
+		}
+	}
+	return res
+}
+
 // root command
 var rootCmd = &cmd.Command{}
-
-var ScanCmd = &cmd.Command{
-	Use:   "scan ",
-	Short: "run scan",
-}
 
 func init() {
 

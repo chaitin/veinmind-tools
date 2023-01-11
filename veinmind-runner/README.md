@@ -66,31 +66,59 @@ helm install veinmind .
 
 ## 使用
 
-1.扫描本地镜像
+1.扫描本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner image [docker/containerd]:imageID/imageRef
+./veinmind-runner image [docker:/containerd:]imageID/imageRef
 ```
 
-2.扫描所有本地镜像
+2.扫描所有本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner image [docker/containerd]:
+./veinmind-runner image [docker/containerd]
 ```
 
 3.扫描远程镜像，若远程仓库需要认证需使用-c参数指定toml格式的认证信息文件（暂不支持docker.io的认证）
 
 ```
 ./veinmind-runner image registry:server/imageRef 如果不指定server，则默认为docker.io
-如：
-./veinmind-runner image registry:(docker.io/)nginx                                 扫描docker.io的nginx镜像
-./veinmind-runner image registry:(docker.io/)bitnami/nginx                         扫描docker.io的bitnami/nginx镜像
-./veinmind-runner image registry:(docker.io/)bitnami/                              扫描docker.io中bitnami/下的所有镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind-weakpass         扫描your-registry-address仓库下的veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmin-weakpass 扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmin-weakpass 扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/                 扫描your-registry-address仓库中veinmind/下的镜像
 ```
+例如：
+```shell
+#扫描docker.io的nginx镜像
+./veinmind-runner image registry:(docker.io/)nginx   
+```
+
+```shell
+#扫描docker.io的bitnami/nginx镜像
+./veinmind-runner image registry:(docker.io/)bitnami/nginx 
+```
+
+```shell
+# 扫描docker.io中bitnami/下的所有镜像
+./veinmind-runner image registry:(docker.io/)bitnami/
+```
+
+```shell
+#扫描your-registry-address仓库下的veinmind-weakpass镜像
+./veinmind-runner image registry:<your-registry-address>/veinmind-weakpass 
+```
+
+```shell
+#扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
+./veinmind-runner image registry:<your-registry-address>/veinmind/veinmind-weakpass 
+```
+
+```shell
+#扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
+./veinmind-runner image registry:<your-registry-address>/veinmind/veinmin-weakpass
+```
+
+```shell
+#扫描your-registry-address仓库中veinmind/下的镜像
+./veinmind-runner image registry:<your-registry-address>/veinmind/ 
+```
+
 `auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
 
 ```
@@ -115,12 +143,18 @@ helm install veinmind .
 
 ```
 ./veinmind-runner iac git:http://xxxxxx.git 
+```
+```shell
 # auth
 ./veinmind-runner iac git:git@xxxxxx --sshkey=/your/ssh/key/path
 ./veinmind-runner iac git:http://{username}:password@xxxxxx.git
+```
+```shell
 # add proxy
 ./veinmind-runner iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
 ./veinmind-runner iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+```
+```shell
 # disable tls
 ./veinmind-runner iac git:http://xxxxxx.git --insecure-skip=true
 ```
@@ -131,16 +165,16 @@ helm install veinmind .
 ./veinmind-runner iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
 ```
 
-7.扫描本地所有容器
+7.扫描本地所有容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner containerd [docker/containerd]:
+./veinmind-runner container [docker/containerd]
 ```
 
-8.扫描本地容器(容器运行时类型未指定的情况下默认为docker)
+8.扫描本地容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner container [docker/containerd]:containerID/containerRef
+./veinmind-runner container [docker:/containerd:]containerID/containerRef
 ```
 容器运行时类型
 
