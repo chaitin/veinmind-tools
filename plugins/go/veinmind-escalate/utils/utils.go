@@ -10,24 +10,27 @@ import (
 type checkFunc func(api.FileSystem) error
 
 var (
-	imageCheckList = []checkFunc{
+	ImageCheckList = []checkFunc{
 		pkg.UnsafeSuidCheck,
 		pkg.CheckEmptyPasswdRoot,
 		pkg.SudoFileCheck,
 		pkg.UnsafePrivCheck,
 	}
-	containerCheckList = []checkFunc{
+	ContainerCheckList = []checkFunc{
+		pkg.ContainerUnsafeMount,
+		pkg.ContainerUnsafeCapCheck,
+		pkg.ContainerCVECheck,
+		pkg.ContainerDockerAPiCheck,
+
 		pkg.UnsafeSuidCheck,
 		pkg.CheckEmptyPasswdRoot,
-		pkg.UnsafeCapCheck,
 		pkg.SudoFileCheck,
 		pkg.UnsafePrivCheck,
-		pkg.DetectContainerUnsafeMount,
 	}
 )
 
 func ImagesScanRun(fs api.Image) error {
-	for _, opt := range imageCheckList {
+	for _, opt := range ImageCheckList {
 		opt(fs)
 	}
 	return pkg.GenerateImageRoport(fs)
@@ -35,7 +38,7 @@ func ImagesScanRun(fs api.Image) error {
 }
 
 func ContainersScanRun(fs api.Container) error {
-	for _, opt := range containerCheckList {
+	for _, opt := range ContainerCheckList {
 		opt(fs)
 	}
 	return pkg.GenerateContainerRoport(fs)

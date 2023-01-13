@@ -9,8 +9,7 @@ require (
 
 require (
 	github.com/docker/docker v20.10.17+incompatible
-	github.com/prometheus/procfs v0.7.3
-	github.com/spf13/cobra v1.5.0 // indirect
+	github.com/spf13/cobra v1.5.0
 )
 
 replace google.golang.org/grpc/naming => github.com/xiegeo/grpc-naming v1.29.1-alpha

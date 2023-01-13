@@ -15,10 +15,14 @@ var res = []*models.EscalateResult{}
 const (
 	WRITE             checkMode = 2
 	READ              checkMode = 4
+	CAPPATTERN        string    = "CapEff:\\s*?[a-z0-9]+\\s"
+	KERNELPATTERN     string    = "([0-9]{1,})\\.([0-9]{1,})\\.([0-9]{1,})-[0-9]{1,}-[a-zA-Z]{1,}"
+	SUDOREGEX         string    = "(\\w{1,})\\s\\w{1,}=\\(.*\\)\\s(.*)"
+	CVEREASON         string    = "Your system has an insecure kernel version that is affected by a CVE vulnerability:"
+	DOCKERAPIREASON   string    = "Docker remote API is opened which is can be used for escalating"
+	SUDOREASON        string    = "This file is granted sudo privileges and can be used for escalating,you can check it in /etc/sudoers"
 	MOUNTREASON       string    = "There are some sensitive files or directory mounted"
-	CRONFLAG          string    = "INCRON:"
 	READREASON        string    = "This file is sensitive and is readable to all users"
-	CRONWRITEREASON   string    = "This file appears in the crontab file and is writable to all users"
 	WRITEREASON       string    = "This file is sensitive and is writable to all users"
 	SUIDREASON        string    = "This file is granted suid privileges and belongs to root. And this file can be interacted with, there is a risk of elevation"
 	EMPTYPASSWDREASON string    = "This user is privileged but does not have a password set"
@@ -27,7 +31,7 @@ const (
 
 func AddResult(path string, reason string, detail string) {
 	result := &models.EscalateResult{
-		Path:   path,
+		Target: path,
 		Reason: reason,
 		Detail: detail,
 	}
@@ -36,17 +40,17 @@ func AddResult(path string, reason string, detail string) {
 	escalateLock.Unlock()
 }
 
-func GenerateContainerRoport(image api.Container) error {
+func GenerateContainerRoport(container api.Container) error {
 	if len(res) > 0 {
 		detail, err := json.Marshal(res)
 		if err == nil {
 			Reportevent := report.ReportEvent{
-				ID:         image.ID(),
+				ID:         container.ID(),
 				Time:       time.Now(),
 				Level:      report.High,
-				DetectType: report.Image,
+				DetectType: report.Container,
 				EventType:  report.Risk,
-				AlertType:  report.Weakpass,
+				AlertType:  report.Escalate,
 				GeneralDetails: []report.GeneralDetail{
 					detail,
 				},
@@ -83,4 +87,9 @@ func GenerateImageRoport(image api.Image) error {
 
 	}
 	return nil
+}
+func FileClose(file api.File, err error) {
+	if err == nil {
+		file.Close()
+	}
 }

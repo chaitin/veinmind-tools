@@ -38,7 +38,6 @@ func scanImage(c *cmd.Command, image api.Image) error {
 		log.Error(err)
 		return err
 	}
-	// if you want display at runner report, you should send your result to report event
 	return nil
 }
 

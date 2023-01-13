@@ -57,56 +57,25 @@ var CAPStringsList = []string{
 	"CAP_BPF",
 	"CAP_CHECKPOINT_RESTORE",
 }
-var UnSafeCapList = []string{"DAC_OVERRIDE", "DAC_READ_SEARCH", "SYS_MODULE", "SYS_PTRACE", "PRIVILEGED", "SYS_ADMIN"}
+var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "PRIVILEGED", "CAP_SYS_ADMIN", "CAP_SYS_CHROOT", "CAP_BPF", "CAP_DAC_OVERRIDE"}
 
 func UnsafePrivCheck(fs api.FileSystem) error {
 	taskMap := make(map[checkMode][]string, 0)
 	taskMap[WRITE] = []string{"/etc/passwd", "/etc/crontab"}
 	taskMap[READ] = []string{"/etc/shadow"}
-
-	content, err := fs.Open("/etc/crontab")
-	defer content.Close()
-	if err == nil {
-		scanner := bufio.NewScanner(content)
-		res := make([]string, 0)
-		for scanner.Scan() {
-			if !strings.HasPrefix(scanner.Text(), "#") {
-				res = append(res, strings.Split(scanner.Text(), " ")...)
-			}
-		}
-		regexPattern := "^\\/(\\w+\\/?)+.*"
-		for _, value := range res {
-			if ok, err := regexp.Match(regexPattern, []byte(value)); err == nil {
-				if ok == true {
-					taskMap[WRITE] = append(taskMap[WRITE], CRONFLAG+value)
-				}
-			}
-		}
-	}
 	for _, task := range taskMap[WRITE] {
 		reason := WRITEREASON
-		if strings.HasPrefix(task, CRONFLAG) {
-			reason = CRONWRITEREASON
-			task = strings.TrimPrefix(task, CRONFLAG)
-		}
-		if priv, ok, err := PrivCheck(fs, task, WRITE); err == nil {
+		if priv, ok, err := privCheck(fs, task, WRITE); err == nil {
 			if ok == true {
 				AddResult(task, reason, "UnSafePriv "+priv)
 			}
-		} else {
-			log.Error(err)
-			return err
 		}
 	}
-
 	for _, task := range taskMap[READ] {
-		if priv, ok, err := PrivCheck(fs, task, READ); err == nil {
+		if priv, ok, err := privCheck(fs, task, READ); err == nil {
 			if ok == true {
 				AddResult(task, READREASON, "UnSafePriv "+priv)
 			}
-		} else {
-			log.Error(err)
-			return err
 		}
 	}
 	return nil
@@ -120,11 +89,10 @@ func UnsafeSuidCheck(fs api.FileSystem) error {
 			files := filepath[i] + binaryName[j]
 			content, err := fs.Stat(files)
 			if err == nil {
-				if IsBelongToRoot(content) && IsContainSUID(content) {
+				if isBelongToRoot(content) && isContainSUID(content) {
 					AddResult(files, SUIDREASON, "UnSafePriv "+content.Mode().String())
 				}
 			} else {
-				log.Error(err)
 				continue
 			}
 		}
@@ -132,61 +100,76 @@ func UnsafeSuidCheck(fs api.FileSystem) error {
 	return nil
 }
 
-func UnsafeCapCheck(fs api.FileSystem) error {
-	res, err := ReadProc(fs, "/proc/1/status")
-	if err != nil {
-		log.Error(err)
-		return err
+func ContainerUnsafeCapCheck(fs api.FileSystem) error {
+	res, err2 := fs.Open("/proc/1/status")
+	if err2 != nil {
+		log.Error(err2)
+		return err2
 	}
-	Cap, err := ParseCapEff(res)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	UnSafeCaps := intersect(Cap, UnSafeCapList)
-	for _, UnSafeCap := range UnSafeCaps {
-		AddResult("/proc/1/status", CAPREASON, "UnSafeCapability "+UnSafeCap)
+	defer FileClose(res, err2)
+	scanner := bufio.NewScanner(res)
+	for scanner.Scan() {
+		compile := regexp.MustCompile(CAPPATTERN)
+		res := compile.FindStringSubmatch(scanner.Text())
+		if len(res) > 0 {
+
+		}
+		if strings.HasPrefix(scanner.Text(), "CapEff:") {
+			if strings.HasSuffix(scanner.Text(), "fffffffff") {
+				AddResult("/proc/1/status", CAPREASON, "UnSafeCapability PRIVILEGED")
+			} else {
+				Cap, err := parseCapEff(scanner.Text())
+				fmt.Println(Cap)
+				if err != nil {
+					log.Error(err)
+					return err
+				}
+				UnSafeCaps := intersect(Cap, UnSafeCapList)
+				for _, UnSafeCap := range UnSafeCaps {
+					AddResult("/proc/1/status", CAPREASON, "UnSafeCapability "+UnSafeCap)
+				}
+			}
+		}
 	}
 	return nil
 }
 
 func CheckEmptyPasswdRoot(fs api.FileSystem) error {
 	privilegedUser := make([]string, 0)
-	filePasswd, err := fs.Open("/etc/passwd")
-	if err != nil {
-		log.Error(err)
-		return err
+	filePasswd, errPASSWD := fs.Open("/etc/passwd")
+	if errPASSWD != nil {
+		log.Error(errPASSWD)
+		return errPASSWD
 	}
-	defer filePasswd.Close()
-	if err == nil {
-		scanner := bufio.NewScanner(filePasswd)
-		for scanner.Scan() {
-			attr := strings.Split(scanner.Text(), ":")
-			if attr[1] == "" && attr[2] == "0" {
+	defer FileClose(filePasswd, errPASSWD)
+	scanner := bufio.NewScanner(filePasswd)
+	for scanner.Scan() {
+		attr := strings.Split(scanner.Text(), ":")
+		if len(attr) >= 3 {
+			if attr[2] == "0" {
 				privilegedUser = append(privilegedUser, attr[0])
 			}
 		}
 	}
 
-	fileShadow, err := fs.Open("/etc/shadow")
-	if err != nil {
-		log.Error(err)
-		return err
+	fileShadow, errSHADOW := fs.Open("/etc/shadow")
+	if errSHADOW != nil {
+		log.Error(errSHADOW)
+		return errSHADOW
 	}
-	defer fileShadow.Close()
-	if err == nil {
-		scanner := bufio.NewScanner(fileShadow)
-		for scanner.Scan() {
-			attr := strings.Split(scanner.Text(), ":")
-			if attr[1] == "0" {
-				for _, root := range privilegedUser {
-					if root == attr[0] {
-						AddResult("/etc/shadow", EMPTYPASSWDREASON, "UnsafeUser "+attr[0])
-					}
+	defer FileClose(fileShadow, errSHADOW)
+	scanner = bufio.NewScanner(fileShadow)
+	for scanner.Scan() {
+		attr := strings.Split(scanner.Text(), ":")
+		if attr[1] == "0" {
+			for _, root := range privilegedUser {
+				if root == attr[0] {
+					AddResult("/etc/shadow", EMPTYPASSWDREASON, "UnsafeUser "+attr[0])
 				}
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -206,7 +189,7 @@ func intersect(a []string, b []string) []string {
 	return iter
 }
 
-func PrivCheck(fs api.FileSystem, path string, checkMode checkMode) (string, bool, error) {
+func privCheck(fs api.FileSystem, path string, checkMode checkMode) (string, bool, error) {
 	content, err := fs.Stat(path)
 	if err != nil {
 		return "", false, err
@@ -217,13 +200,19 @@ func PrivCheck(fs api.FileSystem, path string, checkMode checkMode) (string, boo
 		log.Error(err)
 		return "", false, err
 	}
-	if privPasswdAllUsers >= int(checkMode) {
-		return content.Mode().String(), true, nil
+	if checkMode == WRITE {
+		if privPasswdAllUsers >= int(checkMode) && privPasswdAllUsers != 4 {
+			return content.Mode().String(), true, nil
+		}
+	} else {
+		if privPasswdAllUsers >= int(checkMode) {
+			return content.Mode().String(), true, nil
+		}
 	}
 	return "", false, nil
 }
 
-func IsBelongToRoot(content os.FileInfo) bool {
+func isBelongToRoot(content os.FileInfo) bool {
 	uid := content.Sys().(*syscall.Stat_t).Uid
 	if uid == uint32(0) {
 		return true
@@ -231,7 +220,7 @@ func IsBelongToRoot(content os.FileInfo) bool {
 	return false
 }
 
-func IsContainSUID(content os.FileInfo) bool {
+func isContainSUID(content os.FileInfo) bool {
 	res := fmt.Sprintf("%o", uint32(content.Mode()))
 	if strings.HasPrefix(res, "40000") {
 		return true
@@ -239,7 +228,8 @@ func IsContainSUID(content os.FileInfo) bool {
 	return false
 }
 
-func ParseCapEff(capHex string) ([]string, error) {
+func parseCapEff(capHex string) ([]string, error) {
+	capHex = strings.TrimSpace(strings.TrimPrefix(capHex, "CapEff:"))
 	var capTextList []string
 	numb, err := strconv.ParseUint(capHex, 16, 64)
 	if err != nil {
@@ -254,9 +244,4 @@ func ParseCapEff(capHex string) ([]string, error) {
 	}
 
 	return capTextList, nil
-}
-
-func ReadProc(fs api.FileSystem, path string) (string, error) {
-	//读取 /proc/1/status中的Cap相关数据判断权限
-	return "", nil
 }
