@@ -119,7 +119,6 @@ func ContainerUnsafeCapCheck(fs api.FileSystem) error {
 				AddResult("/proc/1/status", CAPREASON, "UnSafeCapability PRIVILEGED")
 			} else {
 				Cap, err := parseCapEff(scanner.Text())
-				fmt.Println(Cap)
 				if err != nil {
 					log.Error(err)
 					return err
