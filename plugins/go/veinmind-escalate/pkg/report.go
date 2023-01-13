@@ -15,7 +15,6 @@ var res = []*models.EscalateResult{}
 const (
 	WRITE             checkMode = 2
 	READ              checkMode = 4
-	CAPPATTERN        string    = "CapEff:\\s*?[a-z0-9]+\\s"
 	KERNELPATTERN     string    = "([0-9]{1,})\\.([0-9]{1,})\\.([0-9]{1,})-[0-9]{1,}-[a-zA-Z]{1,}"
 	SUDOREGEX         string    = "(\\w{1,})\\s\\w{1,}=\\(.*\\)\\s(.*)"
 	CVEREASON         string    = "Your system has an insecure kernel version that is affected by a CVE vulnerability:"

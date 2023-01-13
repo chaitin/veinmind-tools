@@ -6,7 +6,6 @@ import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -109,11 +108,6 @@ func ContainerUnsafeCapCheck(fs api.FileSystem) error {
 	defer FileClose(res, err2)
 	scanner := bufio.NewScanner(res)
 	for scanner.Scan() {
-		compile := regexp.MustCompile(CAPPATTERN)
-		res := compile.FindStringSubmatch(scanner.Text())
-		if len(res) > 0 {
-
-		}
 		if strings.HasPrefix(scanner.Text(), "CapEff:") {
 			if strings.HasSuffix(scanner.Text(), "fffffffff") {
 				AddResult("/proc/1/status", CAPREASON, "UnSafeCapability PRIVILEGED")
