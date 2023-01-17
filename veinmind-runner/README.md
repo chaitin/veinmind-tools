@@ -69,54 +69,54 @@ helm install veinmind .
 1.扫描本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner image [docker:/containerd:]imageID/imageRef
+./veinmind-runner scan image [docker:/containerd:]imageID/imageRef
 ```
 
 2.扫描所有本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner image [docker/containerd]
+./veinmind-runner scan image [docker:/containerd:]
 ```
 
 3.扫描远程镜像，若远程仓库需要认证需使用-c参数指定toml格式的认证信息文件（暂不支持docker.io的认证）
 
 ```
-./veinmind-runner image registry:server/imageRef 如果不指定server，则默认为docker.io
+./veinmind-runner scan image registry:server/imageRef 如果不指定server，则默认为docker.io
 ```
 例如：
 ```shell
 #扫描docker.io的nginx镜像
-./veinmind-runner image registry:(docker.io/)nginx   
+./veinmind-runner scan image registry:nginx   
 ```
 
 ```shell
 #扫描docker.io的bitnami/nginx镜像
-./veinmind-runner image registry:(docker.io/)bitnami/nginx 
+./veinmind-runner scan image registry:nginx 
 ```
 
 ```shell
 # 扫描docker.io中bitnami/下的所有镜像
-./veinmind-runner image registry:(docker.io/)bitnami/
+./veinmind-runner scan image registry:bitnami/
 ```
 
 ```shell
 #扫描your-registry-address仓库下的veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind-weakpass 
+./veinmind-runner scan image registry:<your-registry-address>/veinmind-weakpass 
 ```
 
 ```shell
 #扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmind-weakpass 
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmind-weakpass 
 ```
 
 ```shell
 #扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmin-weakpass
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmin-weakpass
 ```
 
 ```shell
 #扫描your-registry-address仓库中veinmind/下的镜像
-./veinmind-runner image registry:<your-registry-address>/veinmind/ 
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/ 
 ```
 
 `auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
@@ -135,46 +135,46 @@ helm install veinmind .
 4.扫描本地IaC文件
 
 ```
-./veinmind-runner iac host:path/to/iac-file
-./veinmind-runner iac path/to/iac-file
+./veinmind-runner scan iac host:path/to/iac-file
+./veinmind-runner scan iac path/to/iac-file
 ```
 
 5.扫描远端 git 仓库的 IaC 文件
 
 ```
-./veinmind-runner iac git:http://xxxxxx.git 
+./veinmind-runner scan iac git:http://xxxxxx.git 
 ```
 ```shell
 # auth
-./veinmind-runner iac git:git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner iac git:http://{username}:password@xxxxxx.git
+./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
+./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
 ```
 ```shell
 # add proxy
-./veinmind-runner iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
 ```
 ```shell
 # disable tls
-./veinmind-runner iac git:http://xxxxxx.git --insecure-skip=true
+./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
 ```
 
 6.扫描远端 kubernetes IaC 配置(需要手动指定kubeconfig file)
 
 ```
-./veinmind-runner iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
+./veinmind-runner scan iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
 ```
 
 7.扫描本地所有容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner container [docker/containerd]
+./veinmind-runner scan container [dockerd:/containerd:]
 ```
 
 8.扫描本地容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner container [docker:/containerd:]containerID/containerRef
+./veinmind-runner scan container [dockerd:/containerd:]containerID/containerRef
 ```
 容器运行时类型
 
@@ -184,7 +184,7 @@ helm install veinmind .
 9.使用`glob`筛选需要运行插件
 
 ```
-./veinmind-runner  image -g "**/veinmind-malicious"
+./veinmind-runner scan image -g "**/veinmind-malicious"
 ```
 
 10.列出当前插件列表
@@ -196,11 +196,11 @@ helm install veinmind .
 11.指定容器运行时路径
 
 ```
-./veinmind-runner image --docker-data-root [your_path]
+./veinmind-runner scan image --docker-data-root [your_path]
 ```
 
 ```
-./veinmind-runner image --containerd-root [your_path]
+./veinmind-runner scan image --containerd-root [your_path]
 ```
 
 12.支持 docker 镜像阻断功能

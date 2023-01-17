@@ -7,13 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/distribution/distribution/reference"
-
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/route"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
-	scankit "github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
+	"github.com/distribution/distribution/reference"
 	"github.com/docker/docker/pkg/authorization"
 )
 
@@ -25,7 +24,7 @@ func handleContainerCreate(policy Policy, req *authorization.Request) (<-chan []
 		return eventListCh, true, err
 	}
 
-	events, err := scankit.ScanLocalImage(context.Background(), imageName,
+	events, err := scan.ScanLocalImage(context.Background(), imageName,
 		policy.EnabledPlugins, policy.PluginParams)
 	if err != nil {
 		log.Error(err)
@@ -88,7 +87,7 @@ func handleImageCreate(policy Policy, req *authorization.Request) (<-chan []repo
 					break
 				}
 
-				events, err := scankit.ScanLocalImage(context.Background(), imageName,
+				events, err := scan.ScanLocalImage(context.Background(), imageName,
 					policy.EnabledPlugins, policy.PluginParams)
 				if err != nil {
 					log.Error(err)
@@ -113,7 +112,7 @@ func handleImagePush(policy Policy, req *authorization.Request) (<-chan []report
 		return eventListCh, true, err
 	}
 
-	events, err = scankit.ScanLocalImage(context.Background(), imageName,
+	events, err = scan.ScanLocalImage(context.Background(), imageName,
 		policy.EnabledPlugins, policy.PluginParams)
 	if err != nil {
 		log.Error(err)

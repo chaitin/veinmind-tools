@@ -13,7 +13,11 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
+
+// DispatchTask declare func that how to scan a target object
+type DispatchTask func(ctx context.Context, targets []*target.Target) error
 
 func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
 	ps, err := plugin.DiscoverPlugins(ctx, ".")

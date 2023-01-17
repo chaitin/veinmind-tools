@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/spf13/cobra"
 )
 
 // listCmd used to display relevant information
@@ -18,7 +18,7 @@ var listCmd = &cmd.Command{
 var listPluginCmd = &cmd.Command{
 	Use:   "plugin",
 	Short: "list plugin information",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cmd.Command, args []string) error {
 		ps, err := plugin.DiscoverPlugins(context.Background(), ".")
 		if err != nil {
 			return err

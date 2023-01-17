@@ -8,7 +8,7 @@ require (
 	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.1.9
 	github.com/joho/godotenv v1.4.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/testwill/go-clamd v1.0.0
 	gorm.io/driver/sqlite v1.4.4
 	gorm.io/gorm v1.24.3

@@ -1,4 +1,4 @@
-FROM veinmind/go1.18:1.5.1-stretch as builder
+FROM veinmind/go1.18:1.5.3-stretch as builder
 WORKDIR /build
 COPY . .
 RUN chmod +x script/build.sh && /bin/bash script/build.sh
@@ -12,8 +12,9 @@ FROM veinmind/veinmind-backdoor:latest as backdoor
 FROM veinmind/veinmind-log4j2:latest as log4j2
 FROM veinmind/veinmind-unsafe-mount:latest as unsafe-mount
 FROM veinmind/veinmind-iac:latest as iac
+FROM veinmind/veinmind-vuln:latest as vuln
 
-FROM veinmind/python3.6:1.5.1-stretch as release
+FROM veinmind/python3.6:1.5.3-stretch as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
@@ -29,6 +30,7 @@ COPY --from=backdoor /tool /tool/veinmind-backdoor
 COPY --from=log4j2 /tool/veinmind-log4j2  .
 COPY --from=unsafe-mount /tool/veinmind-unsafe-mount .
 COPY --from=iac /tool/veinmind-iac .
+COPY --from=vuln /tool/veinmind-vuln .
 
 RUN pip install -r veinmind-sensitive/requirements.txt && pip install -r veinmind-history/requirements.txt && pip install -r veinmind-backdoor/requirements.txt && chmod +x */scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner

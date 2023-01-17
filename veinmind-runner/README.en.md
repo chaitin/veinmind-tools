@@ -66,62 +66,57 @@ helm install veinmind .
 
 ## use
 
-1. Scan the local image (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
+1. Scan the local image
 
-```
-./veinmind-runner image [docker:/containerd:] imageID/imageRef
+```shell
+./veinmind-runner scan image 
 ```
 
-2. Scan all local images (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
+2. Scan all local images with specific runtime
 
+```shell
+./veinmind-runner scan image [dockerd:/containerd:]
 ```
-./veinmind-runner image [docker/containerd]
+
+For example: 
+```shell
+./veinmind-runner scan image dockerd:nginx
 ```
 
 3. Scan the remote mirror. If the remote warehouse needs authentication, you need to use the -c parameter to specify the authentication information file in toml format (docker.io authentication is not supported yet)
 
-```
-./veinmind-runner image registry:server/imageRef If no server is specified, it defaults to docker.io
+```shell
+./veinmind-runner scan image registry:server/image
 ```
 For example:
 ```shell
-#Scan the nginx image of docker.io
-./veinmind-runner image registry:(docker.io/)nginx
+#Scan the nginx:latest image of index.docker.io
+./veinmind-runner scan image registry:nginx
 ```
 
 ```shell
-#Scan the bitnami/nginx image of docker.io
-./veinmind-runner image registry:(docker.io/)bitnami/nginx
+#Scan the nginx:x.x image of index.docker.io
+./veinmind-runner scan image registry:nginx:x.x
 ```
 
 ```shell
-# Scan all images under bitnami/ in docker.io
-./veinmind-runner image registry:(docker.io/)bitnami/
-```
-
-```shell
-#Scan the veinmind-weakpass image under your-registry-address warehouse
-./veinmind-runner image registry:<your-registry-address>/veinmind-weakpass
+#Scan the veinmind image under your-registry-address warehouse
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/
 ```
 
 ```shell
 #Scan the veinmind/veinmind-weakpass image under your-registry-address warehouse
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmind-weakpass
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmind-weakpass
 ```
 
 ```shell
 #Scan the veinmind/veinmind-weakpass image under your-registry-address warehouse
-./veinmind-runner image registry:<your-registry-address>/veinmind/veinmin-weakpass
-```
-
-```shell
-#Scan the images under veinmind/ in your-registry-address warehouse
-./veinmind-runner image registry:<your-registry-address>/veinmind/
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmin-weakpass -c auth.toml
 ```
 
 The format of `auth.toml` is as follows, `registry` represents the warehouse address, `username` represents the user name, and `password` represents the password or token
 
-```
+```toml
 [[auths]]
 registry = "index.docker.io"
 username = "admin"
@@ -134,29 +129,29 @@ password = "password"
 
 4. Scan local IaC files
 
-```
-./veinmind-runner iac host:path/to/iac-file
-./veinmind-runner iac path/to/iac-file
+```shell
+./veinmind-runner scan iac host:path/to/iac-file
+./veinmind-runner scan iac path/to/iac-file
 ```
 
 5. Scan the IaC file of the remote git repository
 
-```
-./veinmind-runner iac git: http://xxxxxx.git
+```shell
+./veinmind-runner scan iac git: http://xxxxxx.git
 ```
 ```shell
 #auth
-./veinmind-runner iac git:git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner iac git:http://{username}:password@xxxxxx.git
+./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
+./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
 ```
 ```shell
 # add proxy
-./veinmind-runner iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
 ```
 ```shell
 # disable tls
-./veinmind-runner iac git:http://xxxxxx.git --insecure-skip=true
+./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
 ```
 
 6. Scan the remote kubernetes IaC configuration (you need to manually specify the kubeconfig file)
@@ -168,23 +163,23 @@ password = "password"
 7. Scan all local containers (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
 
 ```
-./veinmind-runner container [docker/containerd]
+./veinmind-runner scan container [dockerd:/containerd:]
 ```
 
 8. Scan the local container (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
 
 ```
-./veinmind-runner container [docker:/containerd:]containerID/containerRef
+./veinmind-runner scan container [dockerd:/containerd:]containerID/containerRef
 ```
 container runtime type
 
 - dockerd
-  -containerd
+- containerd
 
 9. Use `glob` to filter the plugins required to run
 
 ```
-./veinmind-runner image -g "**/veinmind-malicious"
+./veinmind-runner scan image -g "**/veinmind-malicious"
 ```
 
 10. List the current plugin list
@@ -196,11 +191,11 @@ container runtime type
 11. Specify the container runtime path
 
 ```
-./veinmind-runner image --docker-data-root [your_path]
+./veinmind-runner scan image --docker-data-root [your_path]
 ```
 
 ```
-./veinmind-runner image --containerd-root [your_path]
+./veinmind-runner scan image --containerd-root [your_path]
 ```
 
 12. Support docker image blocking function

@@ -57,7 +57,7 @@ jobs:
   ### OPTIONAL ###
     command: ["/tool/entrypoint.sh"] ### 程序入口点
     args:
-      - "scan-host"     ### 运行参数
+      - "scan image"     ### 运行参数
     nodeSelector:       ### 节点选择，可以依据标签将该任务推送到节点  类似的还有 nodeName,依据名称选择节点
       beta.kubernetes.io/arch: amd64
     resources:          ### 资源配置,1000m == 1 个 CPU 单元，相当于1 个物理 CPU 核，或1 个虚拟核

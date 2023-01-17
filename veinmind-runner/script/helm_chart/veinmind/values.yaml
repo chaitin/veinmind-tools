@@ -13,7 +13,7 @@ jobs:
   ### OPTIONAL ###
     command: ["/tool/entrypoint.sh"]
     args:
-      - "scan-host"
+      - "scan image"
     resources:
       limits:
         cpu: 1000m

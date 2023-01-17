@@ -8,7 +8,6 @@ require (
 	github.com/chaitin/libveinmind v1.5.1
 	github.com/chaitin/veinmind-common-go v1.2.0-r0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.2
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 )
@@ -48,6 +47,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
