@@ -11,11 +11,11 @@ jobs:
       CI_GOOS: linux
       CI_GOARCH: amd64
 
-  build-amd64-veinmind-asset:
+  build-amd64-veinmind-vuln:
     uses: ./.github/workflows/build.yml
     with:
-      path: ./plugins/go/veinmind-asset
-      file: veinmind-asset
+      path: ./plugins/go/veinmind-vuln
+      file: veinmind-vuln
       CI_GOOS: linux
       CI_GOARCH: amd64
 
@@ -118,7 +118,7 @@ jobs:
       CI_GOARCH: amd64
     needs: [
       build-amd64-veinmind-malicious,
-      build-amd64-veinmind-asset,
+      build-amd64-veinmind-vuln,
       build-amd64-veinmind-webshell,
       build-amd64-veinmind-unsafe-mount,
       build-amd64-veinmind-log4j2,
@@ -137,7 +137,7 @@ jobs:
           name: veinmind-malicious-amd64
       - uses: actions/download-artifact@v3
         with:
-          name: veinmind-asset-amd64
+          name: veinmind-vuln-amd64
       - uses: actions/download-artifact@v3
         with:
           name: veinmind-webshell-amd64
@@ -155,7 +155,7 @@ jobs:
           name: veinmind-iac-amd64
       - run: |
           mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-malicious  
-          mv veinmind-asset_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-asset 
+          mv veinmind-vuln_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-vuln 
           mv veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-webshell 
           mv veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-unsafe-mount 
           mv veinmind-log4j2_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-log4j2 
@@ -166,8 +166,8 @@ jobs:
           mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
           mv ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner-entrypoint
           rm -rf ./veinmind-runner && mv veinmind-runner-entrypoint veinmind-runner
-          chmod +x veinmind-runner veinmind-malicious veinmind-asset veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac 
-          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-asset veinmind-webshell \
+          chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac 
+          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell \
           veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac \
           ./veinmind-sensitive \
           ./veinmind-history \
