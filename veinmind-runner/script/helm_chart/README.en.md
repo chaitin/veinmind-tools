@@ -55,7 +55,7 @@ jobs:
   ### OPTIONAL ###
     command: ["/tool/entrypoint.sh"] ### entry point
     args:
-      - "scan-host"     ### parameters
+      - "scan image"     ### parameters
     nodeSelector:       ### Select the node that needs to execute veinmind according to the label, Select nodes by name via nodeName
       beta.kubernetes.io/arch: amd64
     resources:          ### Resource configuration 1000m == 1 CPU,1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core

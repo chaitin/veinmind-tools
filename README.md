@@ -50,7 +50,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息      |
 | [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门        |
 | [veinmind-history](plugins/python/veinmind-history)       | 扫描镜像中的异常历史命令    |
-| [veinmind-vuln](plugins/go/veinmind-vlun)                 | 扫描镜像中的资产信息和漏洞   |
+| [veinmind-vuln](plugins/go/veinmind-vuln)                 | 扫描镜像中的资产信息和漏洞   |
 | [veinmind-webshell](plugins/go/veinmind-webshell)         | 扫描镜像中的 Webshell |
 | [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | 扫描容器中的不安全挂载目录   |
 | [veinmind-iac](plugins/go/veinmind-iac)                   | 扫描IaC文件         |

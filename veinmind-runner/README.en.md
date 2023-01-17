@@ -1,20 +1,21 @@
 <h1 align="center"> veinmind-runner </h1>
 
 <p align="center">
-veinmind-runner it's a container security host developed by Chaitin Technology.
+veinmind-runner is a veinmind container security tool platform developed by Chaitin Technology
 </p>
 
-## Introduce
-With the background of rich R&D experience, the chaitin team designed a plug-in system in veinmind-sdk.
-With the support of this plugin system, you only need to call the API provided by veinmind-sdk to automatically generate plugins that conform to standard specifications. (For specific code examples, see [example](./example))
-As a plugin platform, `veinmind-runner` will automatically scan the plugins that conform to the specification, and pass the image information that needs to be scanned to the corresponding plugins.
+## basic introduction
+
+Chaitin team designed a plug-in system in [veinmind-sdk]() based on rich R&D experience. With the support of this plug-in system, you only need to call the API provided by [veinmind-sdk]() to automatically generate plug-ins that meet the standard specifications. (
+Specific code examples can be found in [example](./example))
+As a plug-in platform, `veinmind-runner` will automatically scan the plug-ins that meet the specifications, and pass the image information that needs to be scanned to the corresponding plug-in.
 ![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220321150601.png)
 
-## Feature
+## Features
 
 - Automatically scan and register plugins in the current directory (including subdirectories)
-- Unified operation of plug-ins implemented in different languages
-- Plugins can communicate with `runner`, such as reporting events for alarming, etc.
+- Uniformly run Wenmai plug-ins based on different languages
+- Plug-ins can communicate with `runner`, such as reporting events for alarms, etc.
 
 ## Compatibility
 
@@ -23,165 +24,205 @@ As a plugin platform, `veinmind-runner` will automatically scan the plugins that
 - linux/arm64
 - linux/arm
 
-## Install
+## before the start
 
-### Install by package manager
+### Installation method one
 
-please install `libveinmind`，here is [official document](https://github.com/chaitin/libveinmind)
+Please install `libveinmind` first, the installation method can refer to [official document](https://github.com/chaitin/libveinmind)
 
-you can compile manually `veinmind-runner`，
-or download from [Release](https://github.com/chaitin/veinmind-tools/releases)
+Optionally compile `veinmind-runner` manually,
+Or find the compiled `veinmind-runner` on the [Release](https://github.com/chaitin/veinmind-tools/releases) page to download
 
-### Install by parallel container
+### Installation Method 2
 
-based on the parallel container mode, get the image of `veinmind-runner` and start it
+Based on the parallel container mode, get the image of `veinmind-runner` and start it
+
 ```
 docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' \
 -v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
 ```
 
-or use the script provided by the project to start
+Or use the script provided by the project to start
+
 ```
 chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 ```
 
-### Install by Helm
+### Installation method three
 
-based on `Kubernetes` environment, use `Helm` to install `veinmind-runner`，run scan tasks regularly
+Based on the `Kubernetes` environment, use `Helm` to install `veinmind-runner`, and execute scanning tasks regularly
 
-Please install `Helm` first, the installation method can refer to the [official document](https://helm.sh/zh/docs/intro/install/)
+Please install `Helm` first, the installation method can refer to [official document](https://helm.sh/zh/docs/intro/install/)
 
-Before installing `veinmind-runner`, please configure the running parameters, please refer to the [document](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.en.md)
+Install `veinmind-runner`
+Before, the execution parameters can be configured, please refer to [documentation](https://github.com/chaitin/veinmind-tools/blob/master/veinmind-runner/script/helm_chart/README.md)
 
-Install `veinmind-runner` with `Helm`
+Install `veinmind-runner` using `Helm`
 
 ```
 cd ./veinmind-runner/script/helm_chart/veinmind
 helm install veinmind .
 ```
 
-## Usage
+## use
 
-1.specify the image name or image ID and scan (need to have a corresponding image locally)
+1. Scan the local image
 
-```
-./veinmind-runner scan-host image [imagename/imageid]
-```
-
-2.scan all local images
-
-```
-./veinmind-runner scan-host image
+```shell
+./veinmind-runner scan image 
 ```
 
+2. Scan all local images with specific runtime
 
-3.scan all local containers
-
-```
-./veinmind-runner scan-host container
-```
-
-4.scan local iac file
-
-```
-./veinmind-runner scan-iac local ./
-./veinmind-runner scan-iac local /path/to/iac-file
+```shell
+./veinmind-runner scan image [dockerd:/containerd:]
 ```
 
-5.scan IaC file in remote git repository
-
+For example: 
+```shell
+./veinmind-runner scan image dockerd:nginx
 ```
-./veinmind-runner scan-iac git http://xxxxxx.git 
-# auth
-./veinmind-runner scan-iac git git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
+
+3. Scan the remote mirror. If the remote warehouse needs authentication, you need to use the -c parameter to specify the authentication information file in toml format (docker.io authentication is not supported yet)
+
+```shell
+./veinmind-runner scan image registry:server/image
+```
+For example:
+```shell
+#Scan the nginx:latest image of index.docker.io
+./veinmind-runner scan image registry:nginx
+```
+
+```shell
+#Scan the nginx:x.x image of index.docker.io
+./veinmind-runner scan image registry:nginx:x.x
+```
+
+```shell
+#Scan the veinmind image under your-registry-address warehouse
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/
+```
+
+```shell
+#Scan the veinmind/veinmind-weakpass image under your-registry-address warehouse
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmind-weakpass
+```
+
+```shell
+#Scan the veinmind/veinmind-weakpass image under your-registry-address warehouse
+./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmin-weakpass -c auth.toml
+```
+
+The format of `auth.toml` is as follows, `registry` represents the warehouse address, `username` represents the user name, and `password` represents the password or token
+
+```toml
+[[auths]]
+registry = "index.docker.io"
+username = "admin"
+password = "password"
+[[auths]]
+registry = "registry.private.net"
+username = "admin"
+password = "password"
+```
+
+4. Scan local IaC files
+
+```shell
+./veinmind-runner scan iac host:path/to/iac-file
+./veinmind-runner scan iac path/to/iac-file
+```
+
+5. Scan the IaC file of the remote git repository
+
+```shell
+./veinmind-runner scan iac git: http://xxxxxx.git
+```
+```shell
+#auth
+./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
+./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
+```
+```shell
 # add proxy
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+```
+```shell
 # disable tls
-./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
+./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
 ```
 
-6.scan remote kubernetes IaC config(needs kubeconfig file)
-```
-./veinmind-runner scan-iac k8s --kubeconfig=/your/k8sConfig/path
-```
-
-7.scan the `centos` image in the remote repository (the default is `index.docker.io` if the repository is not specified)
+6. Scan the remote kubernetes IaC configuration (you need to manually specify the kubeconfig file)
 
 ```
-./veinmind-runner scan-registry image centos
+./veinmind-runner iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
 ```
 
-8.scan `registry.private.net/library/nginx` image in the remote private registry, where `auth.toml` is the authentication information configuration file, which contains the corresponding authentication information
+7. Scan all local containers (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
 
 ```
-./veinmind-runner scan-registry image -c auth.toml registry.private.net/library/nginx
+./veinmind-runner scan container [dockerd:/containerd:]
 ```
 
-the format of `auth.toml` is as follows, `registry` represents the repository address, `username` represents the username, `password` represents the password or token
-```
-[[auths]]
-	registry = "index.docker.io"
-	username = "admin"
-	password = "password"
-[[auths]]
-	registry = "registry.private.net"
-	username = "admin"
-	password = "password"
-```
-
-9.specify the container runtime type
+8. Scan the local container (if the container runtime type is not specified, it will try docker and containerd in sequence by default)
 
 ```
-./veinmind-runner scan-host image --containerd
+./veinmind-runner scan container [dockerd:/containerd:]containerID/containerRef
 ```
-
 container runtime type
+
 - dockerd
 - containerd
 
-10.filtering with `glob` requires running the plugin
+9. Use `glob` to filter the plugins required to run
+
 ```
-./veinmind-runner scan-host image -g "**/veinmind-malicious"
+./veinmind-runner scan image -g "**/veinmind-malicious"
 ```
 
-11.list plugin
+10. List the current plugin list
+
 ```
 ./veinmind-runner list plugin
 ```
 
-12.specify the container runtime path
+11. Specify the container runtime path
+
 ```
-./veinmind-runner scan-host image --docker-data-root [your_path]
-```
-```
-./veinmind-runner scan-host image --containerd-root [your_path]
+./veinmind-runner scan image --docker-data-root [your_path]
 ```
 
-13.support docker plugin for authorization
+```
+./veinmind-runner scan image --containerd-root [your_path]
+```
+
+12. Support docker image blocking function
+
 ```bash
-# first
+#first
 ./veinmind-runner authz -c config.toml
 # second
 dockerd --authorization-plugin=veinmind-broker
 ```
-Field in `config.toml`
 
-|  | **name**           | **attribute** | **meaning**  |
-|----------|-------------------|----------|---------|
-| policy   | action            | string   | action should be monitored |
-|          | enabled_plugins   | []string | which plugins to use
-|
-|          | plugin_params     | []string | parameters for each plugin |
-|          | risk_level_filter | []string | risk level    |
-|          | block             | bool     | whether to block    |
-|          | alert             | bool     | whether to alert    |
-| log      | report_log_path   | string   | log for veinmind plugins  |
-|          | authz_log_path    | string   | log for docker plugin  |
+Where `config.toml` contains the following fields
 
-- action supports [DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/) provided operation interface
-- The following configuration means: when `create a container`or`push a image`, use the `veinmind-weakpass` plugin to scan the `ssh` service, if a weak password is found, and the risk level is `High`, block this operation, and issue a warning. Finally, the scan results are stored in `plugin.log`, and the risk results are stored in `auth.log`.
+| | **field name** | **field attribute** | **meaning** |
+|----------|-------------------|----------|------- --|
+| policy | action | string | Behavior to be monitored |
+| | enabled_plugins | []string | Which plugins to use |
+| | plugin_params | []string | Parameters for each plugin |
+| | risk_level_filter | []string | risk level |
+| | block | bool | whether to block |
+| | alert | bool | whether to alarm |
+| log | report_log_path | string | plugin scan log |
+| | authz_log_path | string | Denial of service log |
+
+- action in principle supports [DockerAPI](https://docs.docker.com/engine/api/v1.41/#operation/) provides the operation interface
+- The following configuration means: when `creating a container` or `push image`, use the `veinmind-weakpass` plug-in to scan the `ssh` service, if a weak password is found, and the risk level is `High`
+  prevents this operation and issues a warning. Finally, the scan results are stored in `plugin.log`, and the risk results are stored in `auth.log`.
 
 ```toml
 [log]

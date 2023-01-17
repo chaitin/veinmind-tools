@@ -4,12 +4,8 @@ import (
 	"encoding/json"
 	"io"
 
-	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/libveinmind/go/containerd"
-	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
-	"github.com/pkg/errors"
 )
 
 type ReportEvent struct {
@@ -100,40 +96,8 @@ func (r *Reporter) convert(event report.ReportEvent) (ReportEvent, error) {
 			ReportEvent: event,
 		}, nil
 	}
-	dr, _ := docker.New()
-	cr, _ := containerd.New()
-	runtimes := []api.Runtime{dr, cr}
-	var image api.Image
-	find := false
-	for _, runtime := range runtimes {
-		if runtime != nil {
-			i, err := runtime.OpenImageByID(event.ID)
-			if err != nil {
-				continue
-			}
-			image = i
-			find = true
-			break
-		}
-	}
-	if !find || image == nil {
-		return ReportEvent{}, errors.New("Can't get image object")
-	}
-
-	refs, err := image.RepoRefs()
-	if err != nil {
-		refs = []string{}
-		log.Error(err)
-	}
-
-	//oci, err := image.OCISpecV1()
-	//if err != nil {
-	//	oci = nil
-	//	log.Error(err)
-	//}
-
+	// todo: rollback reference or redesigned ReportEvent structure
 	return ReportEvent{
-		ImageRefs:   refs,
 		ReportEvent: event,
 	}, nil
 }

@@ -1,6 +1,14 @@
 package main
 
 import (
+	_ "net/http/pprof"
+	"os"
+	"path"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
@@ -13,14 +21,6 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/scanner/malicious"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"
-	"github.com/spf13/cobra"
-	_ "net/http/pprof"
-	"os"
-	"path"
-	"strings"
-	"sync"
-	"syscall"
-	"time"
 )
 
 var reportData = model.ReportData{}
@@ -31,7 +31,7 @@ var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
 	Use:   "extract",
 	Short: "Extract config file",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cmd.Command, args []string) error {
 		embed.ExtractAll()
 		return nil
 	},
@@ -39,7 +39,7 @@ var extractCmd = &cmd.Command{
 var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
-	PostRun: func(cmd *cobra.Command, args []string) {
+	PostRun: func(cmd *cmd.Command, args []string) {
 		// 计算扫描数据
 		spend := time.Since(scanStart)
 		reportData.ScanSpendTime = spend.String()

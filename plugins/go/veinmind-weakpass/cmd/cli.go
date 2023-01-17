@@ -15,8 +15,6 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/hash"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/utils"
-
-	"github.com/spf13/cobra"
 )
 
 var serviceName = []string{}
@@ -25,10 +23,10 @@ var username string
 var dictpath string
 
 var rootCmd = &cmd.Command{}
-var extractCmd = &cobra.Command{
+var extractCmd = &cmd.Command{
 	Use:   "extract",
 	Short: "extract dict file to disk",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cmd.Command, args []string) {
 		embed.ExtractAll()
 	},
 }
