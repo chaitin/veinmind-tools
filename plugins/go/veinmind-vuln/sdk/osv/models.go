@@ -93,3 +93,10 @@ type Vulnerability struct {
 	} `json:"references,omitempty"`
 	DatabaseSpecific map[string]interface{} `json:"database_specific,omitempty"`
 }
+
+func (v *Vulnerability) GetAliases() []string {
+	if len(v.Aliases) > 0 {
+		return v.Aliases
+	}
+	return []string{v.ID}
+}

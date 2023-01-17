@@ -73,9 +73,9 @@ func OutputStdout(verbose bool, asset bool, pkgType string, results []model.Scan
 							if len(pkg.Vulnerabilities) > 0 {
 								for vi, vul := range pkg.Vulnerabilities {
 									if vi == 0 {
-										fmt.Fprintln(tabwBody, "|", "os-pkg", "\t", Limit(pkg.Name, tab), "\t", Limit(pkg.Version, tab), "\t", Limit(pkg.FilePath, tab), "\t", vul.Aliases, "\t")
+										fmt.Fprintln(tabwBody, "|", "os-pkg", "\t", Limit(pkg.Name, tab), "\t", Limit(pkg.Version, tab), "\t", Limit(pkg.FilePath, tab), "\t", vul.GetAliases(), "\t")
 									} else {
-										fmt.Fprintln(tabwBody, "|", " ", "\t", " ", "\t", " ", "\t", " ", "\t", vul.Aliases, "\t")
+										fmt.Fprintln(tabwBody, "|", " ", "\t", " ", "\t", " ", "\t", " ", "\t", vul.GetAliases(), "\t")
 									}
 								}
 							} else {
@@ -216,11 +216,15 @@ func OutputCSV(res []model.ScanResult) error {
 			for _, pkg := range pkgInfo.Packages {
 				err := w.Write([]string{r.ID, r.Name, r.OSInfo.Family, r.OSInfo.Name, "os-pkg", pkg.Name, pkg.Version, pkg.FilePath, func() string {
 					vulns := ""
-					for _, v := range pkg.Vulnerabilities {
-						if len(v.Aliases) > 0 {
-							vulns += strings.Join(v.Aliases, "|")
-						} else {
-							vulns = strings.Join([]string{vulns, v.ID}, "|")
+					for vi, v := range pkg.Vulnerabilities {
+						for di, d := range v.GetAliases() {
+							vulns += d
+							if di != len(v.GetAliases())-1 {
+								vulns += "|"
+							}
+						}
+						if vi != len(pkg.Vulnerabilities)-1 {
+							vulns += "|"
 						}
 					}
 					return vulns
