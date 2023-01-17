@@ -35,7 +35,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ```
 ### 4. 快速扫描本地镜像
 ```
-./run.sh scan-host image
+./run.sh scan image
 ```
 
 
