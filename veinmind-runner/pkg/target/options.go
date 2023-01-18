@@ -8,6 +8,7 @@ type Options struct {
 	ParallelContainerMode bool
 	Insecure              bool
 	SpecFlags             []string
+
 	// For Iac Scan
 	IacFileType      string
 	IacLimitSize     int64
@@ -15,6 +16,9 @@ type Options struct {
 	IacProxy         string
 	IacKubeConfig    string
 	IacKubeNameSpace string
+
+	// For Registry Scan
+	CatalogFilterRegex string
 }
 
 type Option func(*Options)
@@ -40,6 +44,12 @@ func WithTempPath(path string) Option {
 func WithConfigPath(path string) Option {
 	return func(o *Options) {
 		o.ConfigPath = path
+	}
+}
+
+func WithFilterRegex(regex string) Option {
+	return func(o *Options) {
+		o.CatalogFilterRegex = regex
 	}
 }
 

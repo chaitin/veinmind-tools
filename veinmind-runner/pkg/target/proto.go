@@ -11,10 +11,11 @@ const (
 	UNKNOWN Protol = "unknown"
 	// DOCKERD CONTAINERD: container protol
 	// DOCKERD CONTAINERD REGISTRY TARBALL: image protol
-	DOCKERD    Protol = "dockerd"
-	CONTAINERD Protol = "containerd"
-	REGISTRY   Protol = "registry"
-	TARBALL    Protol = "tarball"
+	DOCKERD        Protol = "dockerd"
+	CONTAINERD     Protol = "containerd"
+	REGISTRY       Protol = "registry"
+	REGISTRY_IMAGE Protol = "registry-image"
+	TARBALL        Protol = "tarball"
 
 	// LOCAL GIT KUBERNETES: iac protol
 	LOCAL      Protol = "host"
@@ -28,7 +29,7 @@ func (p Protol) String() string {
 
 func IsProto(t string) bool {
 	switch t {
-	case DOCKERD.String(), CONTAINERD.String(), REGISTRY.String(), LOCAL.String(), GIT.String(), KUBERNETES.String():
+	case DOCKERD.String(), CONTAINERD.String(), REGISTRY.String(), REGISTRY_IMAGE.String(), LOCAL.String(), GIT.String(), KUBERNETES.String():
 		return true
 	default:
 		return false
@@ -38,7 +39,7 @@ func IsProto(t string) bool {
 func ParseProto(cmd string, arg string) (Protol, string) {
 	switch cmd {
 	case "image":
-		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD, REGISTRY))
+		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD, REGISTRY, REGISTRY_IMAGE))
 	case "container":
 		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD))
 	case "iac":
