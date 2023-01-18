@@ -32,7 +32,7 @@ COPY --from=unsafe-mount /tool/veinmind-unsafe-mount .
 COPY --from=iac /tool/veinmind-iac .
 COPY --from=vuln /tool/veinmind-vuln .
 
-RUN pip install -r veinmind-sensitive/requirements.txt && pip install -r veinmind-history/requirements.txt && pip install -r veinmind-backdoor/requirements.txt && chmod +x */scan.py
+RUN pip install -r veinmind-history/requirements.txt && pip install -r veinmind-backdoor/requirements.txt && chmod +x */scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner
 ENTRYPOINT ["/tool/entrypoint.sh"]
 
