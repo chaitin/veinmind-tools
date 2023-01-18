@@ -3,7 +3,6 @@ package scan
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -202,10 +201,6 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 		images = append(images, instance)
 	}
 
-	// remove root directory
-	defer func() {
-		_ = os.RemoveAll(remoteRuntime.Root())
-	}()
 	return doImages(ctx, t.Plugins, images, t.WithDefaultOptions()...)
 }
 

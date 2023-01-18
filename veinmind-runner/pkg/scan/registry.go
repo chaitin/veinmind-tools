@@ -3,7 +3,6 @@ package scan
 import (
 	"context"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 
@@ -143,9 +142,5 @@ func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error 
 		images = append(images, instance)
 	}
 
-	// remove root directory
-	defer func() {
-		_ = os.RemoveAll(remoteRuntime.Root())
-	}()
 	return doImages(ctx, t.Plugins, images, t.WithDefaultOptions()...)
 }
