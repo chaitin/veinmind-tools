@@ -16,18 +16,8 @@ type v2client struct {
 }
 
 func NewV2Client(registry string, opts ...Option) (Client, error) {
-	option := &Options{}
-
-	// trans: http://xxxx || https://xxxx => xxxx
-	// && change options insecure
-	if gstr.HasPrefix("http://", registry) {
-		registry = gstr.Replace(registry, "http://", "", -1)
-		option.Insecure = false
-	}
-
-	if gstr.HasPrefix("https://", registry) {
-		registry = gstr.Replace(registry, "https://", "", -1)
-		option.Insecure = true
+	option := &Options{
+		Insecure: true,
 	}
 
 	// user's options > scheme
@@ -74,9 +64,7 @@ func (c *v2client) GetRepoTags(ctx context.Context, repo string, opts ...Option)
 		o(c.option)
 	}
 	repositoryOpt := make([]name.Option, 0)
-	if c.option.Insecure {
-		repositoryOpt = append(repositoryOpt, name.Insecure)
-	}
+	repositoryOpt = append(repositoryOpt, name.Insecure)
 	reference, err := name.ParseReference(repo, repositoryOpt...)
 	if err != nil {
 		return []string{}, err
