@@ -2,11 +2,11 @@ package scan
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
-	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -16,11 +16,13 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/remote"
 	"github.com/chaitin/veinmind-common-go/pkg/auth"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
+	"github.com/distribution/distribution/reference"
 	"github.com/gogf/gf/text/gstr"
 	"github.com/rs/xid"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
 
 func DispatchImages(ctx context.Context, targets []*target.Target) error {
@@ -40,15 +42,22 @@ func DispatchImages(ctx context.Context, targets []*target.Target) error {
 					return err
 				}
 				return HostImage(ctx, obj, r)
-			case target.REGISTRY:
+			case target.REGISTRY_IMAGE:
 				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
 				r, err := remote.New(path)
 				if err != nil {
 					return err
 				}
 				return RegistryImage(ctx, obj, r)
+			case target.REGISTRY:
+				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
+				r, err := remote.New(path)
+				if err != nil {
+					return err
+				}
+				return Registry(ctx, obj, r)
 			default:
-				return errors.New(fmt.Sprintf("individual image protol: %s", obj.Protol))
+				return errors.New(fmt.Sprintf("[scan] individual image protol: %s", obj.Protol))
 			}
 		})
 	}
@@ -80,15 +89,26 @@ func HostImage(ctx context.Context, t *target.Target, runtime api.Runtime) error
 }
 
 func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) error {
-
 	remoteRuntime, ok := runtime.(*remote.Runtime)
 	if !ok {
-		return errors.New("unexpect remote runtime")
+		return errors.New("[scan] unexpect remote runtime")
 	}
 
-	var username = ""
-	var password = ""
+	var (
+		domain   string
+		username string
+		password string
+		find     bool
+	)
 
+	// parse image reference domain
+	ref, err := reference.ParseDockerRef(t.Value)
+	if err != nil {
+		return errors.Wrapf(err, "[scan] can't parse domain from reference %s", t.Value)
+	}
+	domain = reference.Domain(ref)
+
+	// parse domain mapping username and password
 	registryOpt := make([]registry.Option, 0)
 	registryOpt = append(registryOpt, registry.WithInsecure(t.Opts.Insecure))
 
@@ -99,48 +119,89 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 		}
 		authConfig, err := auth.ParseAuthConfig(config)
 		if err != nil {
-			log.Error("load remote auth config error")
-		}
-		for _, auth := range authConfig.Auths {
-			if gstr.HasPrefix(t.Value, auth.Registry) {
-				username = auth.Username
-				password = auth.Password
-				break
+			log.Errorf("[scan] load remote auth config error, %+v", err)
+		} else {
+			for _, authEntry := range authConfig.Auths {
+				if gstr.Equal(domain, authEntry.Registry) {
+					username = authEntry.Username
+					password = authEntry.Password
+					find = true
+					break
+				}
 			}
 		}
 	}
-
-	registryOpt = append(registryOpt, registry.WithLoginByPassword(username, password))
-	client, err := registry.NewV2Client(t.Value, registryOpt...)
-
-	if err != nil {
-		return err
-	}
-	repos, err := client.GetRepos(ctx)
-
-	if err != nil {
-		return err
+	if find {
+		registryOpt = append(registryOpt, registry.WithLoginByPassword(username, password))
 	}
 
-	//将registry中所有的image Load进来
-	for _, repo := range repos {
-		tags, err := client.GetRepoTags(ctx, repo)
-		if err != nil {
-			log.Error(err)
-			continue
-		}
-		for _, tag := range tags {
-			name := strings.Join([]string{repo, tag}, ":")
-			_, err = remoteRuntime.Load(name, remote.WithAuth(username, password))
+	// init registry v2 client
+	client, err := registry.NewV2Client(domain, registryOpt...)
+	if err != nil {
+		return errors.Wrapf(err, "[scan] can't init registry v2 client for %s", domain)
+	}
+
+	// append reference
+	normalized, err := reference.ParseNormalizedNamed(t.Value)
+	if err != nil {
+		return errors.Wrapf(err, "[scan] can't parse reference %s", t.Value)
+	}
+	refs := make([]reference.Named, 0)
+	refs = append(refs, normalized)
+
+	// load remote image
+	var loaded []string
+	for _, ref := range refs {
+		// check reference tag
+		if _, ok := ref.(reference.NamedTagged); !ok {
+			tags, err := client.GetRepoTags(ctx, ref.String())
 			if err != nil {
-				log.Error(err)
+				log.Errorf("[scan] can't get reference tags for %s, err: %+v", ref.String(), err)
 				continue
 			}
-			log.Infof("Load image success: %#v\n", name)
+
+			for _, tag := range tags {
+				complete, err := reference.WithTag(ref, tag)
+				images, err := remoteRuntime.Load(complete.String(), remote.WithAuth(username, password))
+				if err != nil {
+					log.Errorf("[scan] can't load remote image for %s, err: %+v", complete.String(), err)
+					continue
+				}
+				loaded = append(loaded, images...)
+				log.Infof("[scan] load image success: %#v\n", complete.String())
+			}
+		} else {
+			images, err := remoteRuntime.Load(ref.String(), remote.WithAuth(username, password))
+			if err != nil {
+				log.Errorf("[scan] can't load remote image for %s, err: %+v", ref.String(), err)
+			} else {
+				loaded = append(loaded, images...)
+				log.Infof("[scan] load image success: %#v\n", ref.String())
+			}
 		}
 	}
 
-	return HostImage(ctx, t, remoteRuntime)
+	// open and scan image instance
+	var (
+		images []api.Image
+		uniq   map[string]struct{}
+	)
+	uniq = make(map[string]struct{})
+	for _, id := range loaded {
+		if _, ok := uniq[id]; ok {
+			continue
+		} else {
+			uniq[id] = struct{}{}
+		}
+
+		instance, err := runtime.OpenImageByID(id)
+		if err != nil {
+			continue
+		}
+		images = append(images, instance)
+	}
+
+	return doImages(ctx, t.Plugins, images, t.WithDefaultOptions()...)
 }
 
 func doImage(ctx context.Context, rang plugin.ExecRange, image api.Image, pluginOpts ...plugin.ExecOption) error {
@@ -151,6 +212,20 @@ func doImage(ctx context.Context, rang plugin.ExecRange, image api.Image, plugin
 	} else {
 		ref = image.ID()
 	}
-	log.Infof("Scan image: %#v\n", ref)
+	log.Infof("[scan] start scan image: %#v\n", ref)
 	return cmd.ScanImage(ctx, rang, image, pluginOpts...)
+}
+
+func doImages(ctx context.Context, rang plugin.ExecRange, images []api.Image, pluginOpts ...plugin.ExecOption) error {
+	for _, image := range images {
+		refs, err := image.RepoRefs()
+		ref := ""
+		if err == nil && len(refs) > 0 {
+			ref = refs[0]
+		} else {
+			ref = image.ID()
+		}
+		log.Infof("[scan] start scan image: %#v\n", ref)
+	}
+	return cmd.ScanImages(ctx, rang, images, pluginOpts...)
 }

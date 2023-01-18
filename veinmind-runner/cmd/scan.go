@@ -10,12 +10,13 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/google/uuid"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
-	"github.com/google/uuid"
 )
 
 // scan cmd
@@ -76,6 +77,9 @@ func generateOptions(c *cmd.Command, args []string) []target.Option {
 	// config
 	config, _ := c.Flags().GetString("config")
 	opts = append(opts, target.WithConfigPath(config))
+	// filter regex
+	regex, _ := c.Flags().GetString("filter")
+	opts = append(opts, target.WithFilterRegex(regex))
 	// parallelMode
 	opts = append(opts, target.WithParallelContainerMode(parallelContainerMode))
 	// tempDir
@@ -243,6 +247,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("insecure-skip", "", false, "skip tls config")
 	// Scan Flags
 	scanImageCmd.Flags().StringP("config", "c", "", "auth config path")
+	scanImageCmd.Flags().StringP("filter", "f", "", "catalog repo filter regex")
 
 	scanIaCCmd.Flags().String("iac-type", "", "dedicate iac type for iac files")
 	scanIaCCmd.Flags().StringP("proxy", "", "", "proxy to git like: https://xxxxx or socks5://xxxx")

@@ -69,57 +69,47 @@ helm install veinmind .
 1.扫描本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner scan image [docker:/containerd:]imageID/imageRef
+./veinmind-runner scan image [docker/containerd]:reference
 ```
 
 2.扫描所有本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner scan image [docker:/containerd:]
+./veinmind-runner scan image [docker/containerd]:reference
 ```
 
-3.扫描远程镜像，若远程仓库需要认证需使用-c参数指定toml格式的认证信息文件（暂不支持docker.io的认证）
+3.扫描远程镜像，若远程仓库需要认证需使用 -c 参数指定 toml 格式的认证信息文件（暂不支持 dockerhub 的私有镜像扫描）
 
 ```
-./veinmind-runner scan image registry:server/imageRef 如果不指定server，则默认为docker.io
+./veinmind-runner scan image registry-image:reference
 ```
 例如：
 ```shell
-#扫描docker.io的nginx镜像
-./veinmind-runner scan image registry:nginx   
+#扫描 docker.io 的 nginx 镜像 (所有 tag)
+./veinmind-runner scan image registry-image:nginx   
 ```
 
 ```shell
-#扫描docker.io的bitnami/nginx镜像
-./veinmind-runner scan image registry:nginx 
+#扫描 docker.io 的 bitnami/nginx 镜像 (所有 tag)
+./veinmind-runner scan image registry-image:bitnami/nginx 
 ```
 
 ```shell
-# 扫描docker.io中bitnami/下的所有镜像
-./veinmind-runner scan image registry:bitnami/
+#扫描 registry.example.com 私有仓库下的 registry.example.com/library/ubuntu:latest 镜像
+./veinmind-runner scan image -c auth.toml registry-image:registry.example.com/library/ubuntu:latest
 ```
 
 ```shell
-#扫描your-registry-address仓库下的veinmind-weakpass镜像
-./veinmind-runner scan image registry:<your-registry-address>/veinmind-weakpass 
+#扫描 registry.example.com 私有仓库下的所有镜像
+./veinmind-runner scan image -c auth.toml registry:registry.example.com 
 ```
 
 ```shell
-#扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmind-weakpass 
+#基于给定正则扫描 registry.example.com 私有仓库下的所有镜像
+./veinmind-runner scan image -c auth.toml --filter "nginx$" registry:registry.example.com 
 ```
 
-```shell
-#扫描your-registry-address仓库下的veinmind/veinmind-weakpass镜像
-./veinmind-runner scan image registry:<your-registry-address>/veinmind/veinmin-weakpass
-```
-
-```shell
-#扫描your-registry-address仓库中veinmind/下的镜像
-./veinmind-runner scan image registry:<your-registry-address>/veinmind/ 
-```
-
-`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
+`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码
 
 ```
 [[auths]]
