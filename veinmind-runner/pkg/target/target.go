@@ -10,11 +10,12 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 )
 
 type Target struct {
-	Protol         Protol
+	Proto          Proto
 	Value          string
 	Opts           *Options
 	Plugins        []*plugin.Plugin
@@ -40,11 +41,10 @@ func (t *Target) WithDefaultOptions(opts ...Option) []plugin.ExecOption {
 		next func(context.Context, ...plugin.ExecOption) error,
 	) error {
 		// Init Service
-		log.Infof("Discovered plugin: %#v\n", plug.Name)
+		log.Infof("[target] discovered plugin: %#v\n", plug.Name)
 		// IaC need not init any service
 		err := t.ServiceManager.StartWithContext(ctx, plug.Name)
 		if err != nil {
-			log.Errorf("%#v can not work: %#v\n", plug.Name, err)
 			return err
 		}
 		// Register Service
@@ -88,17 +88,17 @@ func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, servi
 	}
 
 	if len(objArgs) == 0 {
-		args = append(objArgs, "")
+		objArgs = append(objArgs, "")
 	}
 
 	for _, arg := range objArgs {
-		protol, value := ParseProto(cmd.Use, arg)
-		if protol == UNKNOWN {
-			log.Warnf("Identified proto with arg: %s", arg)
+		proto, value := ParseProto(cmd.Use, arg)
+		if proto == UNKNOWN {
+			log.Warnf("[target] can't identified proto with arg: %s", arg)
 			continue
 		}
 		targets = append(targets, &Target{
-			Protol:         protol,
+			Proto:          proto,
 			Value:          value,
 			Opts:           options,
 			Plugins:        plugins,

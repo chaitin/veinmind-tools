@@ -29,7 +29,7 @@ func DispatchImages(ctx context.Context, targets []*target.Target) error {
 	errG := errgroup.Group{}
 	for _, obj := range targets {
 		errG.Go(func() error {
-			switch obj.Protol {
+			switch obj.Proto {
 			case target.DOCKERD:
 				r, err := docker.New()
 				if err != nil {
@@ -57,7 +57,7 @@ func DispatchImages(ctx context.Context, targets []*target.Target) error {
 				}
 				return Registry(ctx, obj, r)
 			default:
-				return errors.New(fmt.Sprintf("[scan] individual image protol: %s", obj.Protol))
+				return errors.New(fmt.Sprintf("[scan] individual image protol: %s", obj.Proto))
 			}
 		})
 	}

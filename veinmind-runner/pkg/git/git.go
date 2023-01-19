@@ -8,7 +8,7 @@ import (
 )
 
 func Clone(path string, url string, key string, insecure bool) error {
-	log.Infof("start download %s at %s", url, path)
+	log.Infof("[git] start download %s at %s", url, path)
 	opt := &api.CloneOptions{
 		URL:             url,
 		InsecureSkipTLS: insecure,

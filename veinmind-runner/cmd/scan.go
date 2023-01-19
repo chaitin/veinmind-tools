@@ -33,7 +33,7 @@ var (
 
 	scanCmd = &cmd.Command{
 		Use:   "scan",
-		Short: "perform a scan",
+		Short: "scan related command",
 	}
 	scanImageCmd = &cmd.Command{
 		Use:      "image",
