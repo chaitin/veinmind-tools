@@ -68,7 +68,7 @@ func HostImage(ctx context.Context, t *target.Target, runtime api.Runtime) error
 	var ids []string
 	var err error
 	// scanAll
-	if t.Value == "" {
+	if t.Value == "" || t.Value == "*" {
 		ids, err = runtime.ListImageIDs()
 	} else {
 		ids, err = runtime.FindImageIDs(t.Value)

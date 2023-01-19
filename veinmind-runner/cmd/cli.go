@@ -7,6 +7,7 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
@@ -15,13 +16,17 @@ const (
 )
 
 // root command
-var rootCmd = &cmd.Command{}
+var rootCmd = &cmd.Command{
+	Use:  "veinmind-runner",
+	Long: `veinmind-runner is a veinmind container security tool platform developed by Chaitin Technology`,
+}
 
 func init() {
 
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(scanCmd)
+	rootCmd.AddCommand(generateCmd)
 
 	// global params
 	rootCmd.PersistentFlags().Int("threads", 5, "threads for scan action")

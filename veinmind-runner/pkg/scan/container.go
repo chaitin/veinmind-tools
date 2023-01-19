@@ -45,7 +45,7 @@ func LocalContainer(ctx context.Context, t *target.Target, runtime api.Runtime) 
 	var ids []string
 	var err error
 	// scanAll
-	if t.Value == "" {
+	if t.Value == "" || t.Value == "*" {
 		ids, err = runtime.ListContainerIDs()
 	} else {
 		ids, err = runtime.FindContainerIDs(t.Value)
@@ -59,7 +59,7 @@ func LocalContainer(ctx context.Context, t *target.Target, runtime api.Runtime) 
 			return err
 		}
 		if err := doContainer(ctx, t.Plugins, container, t.WithDefaultOptions()...); err != nil {
-			log.Errorf("scan container %s error : %s", container.Name(), err)
+			log.Errorf("[scan] scan container %s error : %s", container.Name(), err)
 		}
 	}
 	return nil

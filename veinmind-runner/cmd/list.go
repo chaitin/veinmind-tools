@@ -12,12 +12,12 @@ import (
 // listCmd used to display relevant information
 var listCmd = &cmd.Command{
 	Use:   "list",
-	Short: "list relevant information",
+	Short: "List relevant information",
 }
 
 var listPluginCmd = &cmd.Command{
 	Use:   "plugin",
-	Short: "list plugin information",
+	Short: "List plugin information",
 	RunE: func(cmd *cmd.Command, args []string) error {
 		ps, err := plugin.DiscoverPlugins(context.Background(), ".")
 		if err != nil {

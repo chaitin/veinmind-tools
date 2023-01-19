@@ -2,12 +2,13 @@ package main
 
 import (
 	"github.com/chaitin/libveinmind/go/cmd"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
 )
 
 var authCmd = &cmd.Command{
 	Use:   "authz",
-	Short: "authz as docker plugin",
+	Short: "Authz as docker plugin",
 	RunE: func(cmd *cmd.Command, args []string) error {
 		path, err := cmd.Flags().GetString("config")
 		if err != nil {
