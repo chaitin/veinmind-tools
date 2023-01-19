@@ -33,23 +33,74 @@ var (
 
 	scanCmd = &cmd.Command{
 		Use:   "scan",
-		Short: "scan related command",
+		Short: "Scan cloud native objects security, include image/container/iac",
 	}
 	scanImageCmd = &cmd.Command{
-		Use:      "image",
-		Short:    "perform image scan",
+		Use:   "image [flags] target",
+		Short: `Scan image`,
+		Long:  `Scan image from multi source, include dockerd/containerd/registry`,
+		Example: `
+1. scan dockerd image nginx:latest
+veinmind-runner scan image dockerd:nginx:latest
+
+2. scan containerd image bitnami/nginx:latest
+veinmind-runner scan image containerd:bitnami/nginx:latest
+
+3. scan public registry image library/ubuntu (all tag)
+veinmind-runner scan image registry-image:library/ubuntu
+
+4. scan private registry image example.com/app/market:v1.11.2
+veinmind-runner scan image -c auth.toml registry-image:example.com/app/market:v1.11.2
+
+auth.toml format (yaml):
+[[auths]]
+	registry = "example.com"
+	username = "<your-username>"
+	password = "<your-password>"
+
+5. scan private registry example.com （need admin privilege)
+veinmind-runner scan image -c auth.toml registry:example.com
+
+auth.toml format (yaml):
+[[auths]]
+	registry = "example.com"
+	username = "<your-username>"
+	password = "<your-password>"
+`,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,
 	}
 	scanContainerCmd = &cmd.Command{
-		Use:      "container",
-		Short:    "perform container scan",
+		Use:   "container [flags] target",
+		Short: "Scan container",
+		Long:  `Scan container from multi source, include dockerd/containerd`,
+		Example: `
+1. scan dockerd container (all)
+veinmind-runner scan container dockerd:*
+
+2. scan dockerd container d29e2ca5b3a8 (container id)
+veinmind-runner scan container dockerd:d29e2ca5b3a8
+
+3. scan containerd container webapp (container name)
+veinmind-runner scan container containerd:webapp
+`,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,
 	}
 	scanIaCCmd = &cmd.Command{
-		Use:      "iac",
-		Short:    "perform iac file scan",
+		Use:   "iac [flags] target",
+		Short: "Scan iac",
+		Long:  `Scan iac from multi source, include host/git/kubernetes`,
+		Example: `
+1. scan host iac (current directory)
+veinmind-runner scan iac host:./
+
+2. scan github kubernetes-sigs/kustomize repo iac
+veinmind-runner scan iac git:https://github.com/kubernetes-sigs/kustomize.git
+
+3. scan kubernetes pod iac
+veinmind-runner scan iac --kubeconfig admin.yaml kubernetes:pod
+`,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,
 	}
@@ -87,7 +138,7 @@ func generateOptions(c *cmd.Command, args []string) []target.Option {
 	// resourceDir
 	opts = append(opts, target.WithResourcePath(resourceDirectoryPath))
 	// Iac param
-	if c.Use == "iac" {
+	if c.Name() == "iac" {
 		// Iac Type
 		iacType, _ := c.Flags().GetString("iac-type")
 		opts = append(opts, target.WithIacFileType(iacType))
@@ -151,7 +202,7 @@ func scanPreRun(c *cmd.Command, args []string) error {
 			select {
 			case evt := <-reportService.EventChannel:
 				// iac need replace real path
-				if c.Use == "iac" {
+				if c.Name() == "iac" {
 					// replace temp path
 					if realID, err := filepath.Rel(tempDir, evt.ID); err == nil {
 						evt.ID = realID

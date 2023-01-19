@@ -92,7 +92,7 @@ func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, servi
 	}
 
 	for _, arg := range objArgs {
-		proto, value := ParseProto(cmd.Use, arg)
+		proto, value := ParseProto(cmd.Name(), arg)
 		if proto == UNKNOWN {
 			log.Warnf("[target] can't identified proto with arg: %s", arg)
 			continue
