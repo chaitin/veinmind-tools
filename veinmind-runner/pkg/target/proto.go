@@ -56,15 +56,17 @@ func regexParse(arg string, defaultProtol Protol, patternString string) (Protol,
 	// complete matches
 	if len(matches) == 3 {
 		if IsProto(strings.Trim(matches[1], ":")) {
-			return Protol(strings.Trim(matches[1], ":")), matches[2]
+			return Proto(strings.Trim(matches[1], ":")), matches[2]
 		} else {
 			// means user input is value
-			// use default protol
-			return defaultProtol, matches[2]
+			// use default proto
+			return defaultProto, matches[2]
 		}
 	}
-	// bad matches
-	return UNKNOWN, ""
+
+	// no match
+	// use default proto and empty value
+	return defaultProto, ""
 }
 
 func generatePattern(ps ...Protol) string {

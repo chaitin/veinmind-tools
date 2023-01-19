@@ -88,7 +88,7 @@ func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, servi
 	}
 
 	if len(objArgs) == 0 {
-		args = append(objArgs, "")
+		objArgs = append(objArgs, "")
 	}
 
 	for _, arg := range objArgs {
