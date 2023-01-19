@@ -16,10 +16,11 @@ import (
 	"github.com/chaitin/libveinmind/go/kubernetes"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/git"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 	"github.com/gogf/gf/errors/gerror"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/git"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
 
 var AvailableResource = []string{"pod", "pods", "configmap", "configmaps", "cm", "clusterrolebinding", "clusterrolebindings", "all"}
@@ -28,7 +29,7 @@ func DispatchIacs(ctx context.Context, targets []*target.Target) error {
 	errG := errgroup.Group{}
 	for _, obj := range targets {
 		errG.Go(func() error {
-			switch obj.Protol {
+			switch obj.Proto {
 			case target.LOCAL:
 				return HostIac(ctx, obj)
 			case target.GIT:
@@ -36,7 +37,7 @@ func DispatchIacs(ctx context.Context, targets []*target.Target) error {
 			case target.KUBERNETES:
 				return KubeIac(ctx, obj)
 			default:
-				return errors.New(fmt.Sprintf("individual IAC protol: %s", obj.Protol))
+				return errors.New(fmt.Sprintf("[scan] individual iac proto: %s", obj.Proto))
 			}
 		})
 	}
@@ -106,7 +107,7 @@ func GitIac(ctx context.Context, t *target.Target) error {
 			return err
 		}
 		return HostIac(ctx, &target.Target{
-			Protol:         t.Protol,
+			Proto:          t.Proto,
 			Value:          t.Opts.TempPath,
 			Opts:           t.Opts,
 			Plugins:        t.Plugins,
@@ -223,7 +224,7 @@ func KubeIac(ctx context.Context, t *target.Target) error {
 	}
 
 	return HostIac(ctx, &target.Target{
-		Protol:         t.Protol,
+		Proto:          t.Proto,
 		Value:          t.Opts.TempPath,
 		Opts:           t.Opts,
 		Plugins:        t.Plugins,
@@ -286,6 +287,6 @@ func inNamespace(input string, availabe []string) bool {
 }
 
 func doIAC(ctx context.Context, rang plugin.ExecRange, iac iacApi.IAC, pluginOpts ...plugin.ExecOption) error {
-	log.Infof("scan Iac: %s, filetype: %s", iac.Path, iac.Type)
+	log.Infof("[scan] start scan iac: %s, filetype: %s", iac.Path, iac.Type)
 	return cmd.ScanIAC(ctx, rang, iac, pluginOpts...)
 }

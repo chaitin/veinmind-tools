@@ -5,25 +5,25 @@ import (
 	"strings"
 )
 
-type Protol string
+type Proto string
 
 const (
-	UNKNOWN Protol = "unknown"
+	UNKNOWN Proto = "unknown"
 	// DOCKERD CONTAINERD: container protol
 	// DOCKERD CONTAINERD REGISTRY TARBALL: image protol
-	DOCKERD        Protol = "dockerd"
-	CONTAINERD     Protol = "containerd"
-	REGISTRY       Protol = "registry"
-	REGISTRY_IMAGE Protol = "registry-image"
-	TARBALL        Protol = "tarball"
+	DOCKERD        Proto = "dockerd"
+	CONTAINERD     Proto = "containerd"
+	REGISTRY       Proto = "registry"
+	REGISTRY_IMAGE Proto = "registry-image"
+	TARBALL        Proto = "tarball"
 
 	// LOCAL GIT KUBERNETES: iac protol
-	LOCAL      Protol = "host"
-	GIT        Protol = "git"
-	KUBERNETES Protol = "kubernetes"
+	LOCAL      Proto = "host"
+	GIT        Proto = "git"
+	KUBERNETES Proto = "kubernetes"
 )
 
-func (p Protol) String() string {
+func (p Proto) String() string {
 	return string(p)
 }
 
@@ -36,7 +36,7 @@ func IsProto(t string) bool {
 	}
 }
 
-func ParseProto(cmd string, arg string) (Protol, string) {
+func ParseProto(cmd string, arg string) (Proto, string) {
 	switch cmd {
 	case "image":
 		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD, REGISTRY, REGISTRY_IMAGE))
@@ -49,7 +49,7 @@ func ParseProto(cmd string, arg string) (Protol, string) {
 	}
 }
 
-func regexParse(arg string, defaultProtol Protol, patternString string) (Protol, string) {
+func regexParse(arg string, defaultProto Proto, patternString string) (Proto, string) {
 	pattern := regexp.MustCompile(patternString)
 	matches := pattern.FindStringSubmatch(arg)
 
@@ -69,7 +69,7 @@ func regexParse(arg string, defaultProtol Protol, patternString string) (Protol,
 	return defaultProto, ""
 }
 
-func generatePattern(ps ...Protol) string {
+func generatePattern(ps ...Proto) string {
 	pattern := ""
 	for i, p := range ps {
 		if i == 0 {
