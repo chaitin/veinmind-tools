@@ -3,10 +3,11 @@ package plugind
 import (
 	"context"
 	_ "embed"
-	"github.com/BurntSushi/toml"
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	"golang.org/x/sync/errgroup"
 	"sync"
+
+	"github.com/BurntSushi/toml"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed conf/service.toml
@@ -29,12 +30,12 @@ func (c *Manager) StartWithContext(ctx context.Context, name string) error {
 		}
 		for _, s := range plugin.Service {
 			if !s.Running {
-				log.Infof("Plugin: %s Service: %s Will Start", plugin.Name, s.Name)
+				log.GetModule(log.PlugindModuleKey).Infof("%s related service %s try start", plugin.Name, s.Name)
 				err := svcManager.Start(ctx, s)
 				if err != nil {
 					return err
 				}
-				log.Infof("Plugin: %s Service: %s Success Started", plugin.Name, s.Name)
+				log.GetModule(log.PlugindModuleKey).Infof("%s related service %s success start", plugin.Name, s.Name)
 			}
 		}
 	}

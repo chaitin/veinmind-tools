@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 )
 
 type ReportEvent struct {
@@ -33,7 +33,7 @@ func (r *Reporter) Listen() {
 		case evt := <-r.EventChannel:
 			evtN, err := r.convert(evt)
 			if err != nil {
-				log.Error(err)
+				log.GetModule(log.ReporterModuleKey).Error(err)
 			}
 			r.events = append(r.events, evtN)
 		case <-r.closeCh:
@@ -41,7 +41,7 @@ func (r *Reporter) Listen() {
 		}
 	}
 END:
-	log.Info("Stop reporter listen")
+	log.GetModule(log.ReporterModuleKey).Info("stop reporter listen")
 }
 
 func (r *Reporter) StopListen() {

@@ -3,12 +3,13 @@ package git
 import (
 	api "github.com/go-git/go-git/v5"
 
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 )
 
 func Clone(path string, url string, key string, insecure bool) error {
-	log.Infof("[git] start download %s at %s", url, path)
+	log.GetModule(log.GitModuleKey).Infof("start download %s at %s", url, path)
 	opt := &api.CloneOptions{
 		URL:             url,
 		InsecureSkipTLS: insecure,

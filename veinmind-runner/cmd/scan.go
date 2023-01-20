@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
-	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/container"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/scan"
@@ -223,11 +223,11 @@ func scanPreRun(c *cmd.Command, args []string) error {
 	return nil
 }
 
-func scanPostRun(c *cmd.Command, args []string) error {
+func scanPostRun(c *cmd.Command, _ []string) error {
 	if tempDir != "" {
 		err := os.RemoveAll(tempDir)
 		if err != nil {
-			log.Errorf("remove temp dir err: %s", err)
+			log.GetModule(log.CmdModuleKey).Errorf(errors.Wrap(err, "can't remove temp directory").Error())
 		}
 	}
 	// Stop reporter listen
@@ -236,7 +236,7 @@ func scanPostRun(c *cmd.Command, args []string) error {
 	// Output
 	err := runnerReporter.Write(os.Stdout)
 	if err != nil {
-		log.Error(err)
+		log.GetModule(log.CmdModuleKey).Error(errors.Wrap(err, "can't write runner report to stdout"))
 	}
 	output, _ := c.Flags().GetString("output")
 	if parallelContainerMode {
@@ -245,7 +245,7 @@ func scanPostRun(c *cmd.Command, args []string) error {
 	if _, err := os.Stat(output); errors.Is(err, os.ErrNotExist) {
 		f, err := os.Create(output)
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.CmdModuleKey).Error(err)
 		} else {
 			err = runnerReporter.Write(f)
 			if err != nil {
@@ -255,7 +255,7 @@ func scanPostRun(c *cmd.Command, args []string) error {
 	} else {
 		f, err := os.OpenFile(output, os.O_WRONLY, 0666)
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.CmdModuleKey).Error(err)
 		} else {
 			err = runnerReporter.Write(f)
 			if err != nil {

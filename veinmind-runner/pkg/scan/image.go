@@ -13,13 +13,14 @@ import (
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/remote"
 	"github.com/chaitin/veinmind-common-go/pkg/auth"
 	"github.com/distribution/distribution/reference"
 	"github.com/gogf/gf/text/gstr"
 	"github.com/rs/xid"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/registry"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
@@ -57,7 +58,7 @@ func DispatchImages(ctx context.Context, targets []*target.Target) error {
 				}
 				return Registry(ctx, obj, r)
 			default:
-				return errors.New(fmt.Sprintf("[scan] individual image protol: %s", obj.Proto))
+				return errors.New(fmt.Sprintf("individual image protol: %s", obj.Proto))
 			}
 		})
 	}
@@ -82,7 +83,7 @@ func HostImage(ctx context.Context, t *target.Target, runtime api.Runtime) error
 			return err
 		}
 		if err := doImage(ctx, t.Plugins, image, t.WithDefaultOptions()...); err != nil {
-			log.Errorf("scan Image %s error : %s", image.ID(), err)
+			log.GetModule(log.ScanModuleKey).Errorf("scan Image %s error : %s", image.ID(), err)
 		}
 	}
 	return nil
@@ -91,7 +92,7 @@ func HostImage(ctx context.Context, t *target.Target, runtime api.Runtime) error
 func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) error {
 	remoteRuntime, ok := runtime.(*remote.Runtime)
 	if !ok {
-		return errors.New("[scan] unexpect remote runtime")
+		return errors.New("unexpect remote runtime")
 	}
 
 	var (
@@ -104,7 +105,7 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 	// parse image reference domain
 	ref, err := reference.ParseDockerRef(t.Value)
 	if err != nil {
-		return errors.Wrapf(err, "[scan] can't parse domain from reference %s", t.Value)
+		return errors.Wrapf(err, "can't parse domain from reference %s", t.Value)
 	}
 	domain = reference.Domain(ref)
 
@@ -119,7 +120,7 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 		}
 		authConfig, err := auth.ParseAuthConfig(config)
 		if err != nil {
-			log.Errorf("[scan] load remote auth config error, %+v", err)
+			log.GetModule(log.ScanModuleKey).Errorf("load remote auth config error, %+v", err)
 		} else {
 			for _, authEntry := range authConfig.Auths {
 				if gstr.Equal(domain, authEntry.Registry) {
@@ -138,13 +139,13 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 	// init registry v2 client
 	client, err := registry.NewV2Client(domain, registryOpt...)
 	if err != nil {
-		return errors.Wrapf(err, "[scan] can't init registry v2 client for %s", domain)
+		return errors.Wrapf(err, "can't init registry v2 client for %s", domain)
 	}
 
 	// append reference
 	normalized, err := reference.ParseNormalizedNamed(t.Value)
 	if err != nil {
-		return errors.Wrapf(err, "[scan] can't parse reference %s", t.Value)
+		return errors.Wrapf(err, "can't parse reference %s", t.Value)
 	}
 	refs := make([]reference.Named, 0)
 	refs = append(refs, normalized)
@@ -156,7 +157,7 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 		if _, ok := ref.(reference.NamedTagged); !ok {
 			tags, err := client.GetRepoTags(ctx, ref.String())
 			if err != nil {
-				log.Errorf("[scan] can't get reference tags for %s, err: %+v", ref.String(), err)
+				log.GetModule(log.ScanModuleKey).Errorf("can't get reference tags for %s, err: %+v", ref.String(), err)
 				continue
 			}
 
@@ -164,19 +165,19 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 				complete, err := reference.WithTag(ref, tag)
 				images, err := remoteRuntime.Load(complete.String(), remote.WithAuth(username, password))
 				if err != nil {
-					log.Errorf("[scan] can't load remote image for %s, err: %+v", complete.String(), err)
+					log.GetModule(log.ScanModuleKey).Errorf("can't load remote image for %s, err: %+v", complete.String(), err)
 					continue
 				}
 				loaded = append(loaded, images...)
-				log.Infof("[scan] load image success: %#v\n", complete.String())
+				log.GetModule(log.ScanModuleKey).Infof("load image success: %#v\n", complete.String())
 			}
 		} else {
 			images, err := remoteRuntime.Load(ref.String(), remote.WithAuth(username, password))
 			if err != nil {
-				log.Errorf("[scan] can't load remote image for %s, err: %+v", ref.String(), err)
+				log.GetModule(log.ScanModuleKey).Errorf("can't load remote image for %s, err: %+v", ref.String(), err)
 			} else {
 				loaded = append(loaded, images...)
-				log.Infof("[scan] load image success: %#v\n", ref.String())
+				log.GetModule(log.ScanModuleKey).Infof("load image success: %#v\n", ref.String())
 			}
 		}
 	}
@@ -212,7 +213,7 @@ func doImage(ctx context.Context, rang plugin.ExecRange, image api.Image, plugin
 	} else {
 		ref = image.ID()
 	}
-	log.Infof("[scan] start scan image: %#v\n", ref)
+	log.GetModule(log.ScanModuleKey).Infof("start scan image: %#v\n", ref)
 	return cmd.ScanImage(ctx, rang, image, pluginOpts...)
 }
 
@@ -225,7 +226,7 @@ func doImages(ctx context.Context, rang plugin.ExecRange, images []api.Image, pl
 		} else {
 			ref = image.ID()
 		}
-		log.Infof("[scan] start scan image: %#v\n", ref)
+		log.GetModule(log.ScanModuleKey).Infof("start scan image: %#v\n", ref)
 	}
 	return cmd.ScanImages(ctx, rang, images, pluginOpts...)
 }

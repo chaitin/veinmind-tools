@@ -6,7 +6,8 @@ import (
 
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 )
 
 // listCmd used to display relevant information
@@ -33,20 +34,17 @@ var listPluginCmd = &cmd.Command{
 			if verbose {
 				pJsonByte, err := json.MarshalIndent(p.Manifest, "", "	")
 				if err != nil {
-					log.Error(err)
+					log.GetModule(log.CmdModuleKey).Error(err)
 					continue
 				}
-				log.Info("\n" + string(pJsonByte))
+				log.GetModule(log.CmdModuleKey).Info("\n" + string(pJsonByte))
 			} else {
-				log.Info("Plugin Name: " + p.Name)
+				log.GetModule(log.CmdModuleKey).Infof("plugin name: %s", p.Name)
 			}
 		}
 		return nil
 	},
 }
-
-// perhaps let user display load IaC rules
-var listIaCRuleCmd = &cmd.Command{}
 
 func init() {
 	listCmd.AddCommand(listPluginCmd)

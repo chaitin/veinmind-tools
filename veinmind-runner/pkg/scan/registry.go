@@ -7,9 +7,9 @@ import (
 	"regexp"
 
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/remote"
 	"github.com/chaitin/veinmind-common-go/pkg/auth"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/distribution/distribution/reference"
 	"github.com/gogf/gf/text/gstr"
 	"github.com/pkg/errors"
@@ -21,7 +21,7 @@ import (
 func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error {
 	remoteRuntime, ok := runtime.(*remote.Runtime)
 	if !ok {
-		return errors.New("[scan] unexpect remote runtime")
+		return errors.New("unexpect remote runtime")
 	}
 
 	// check target registry domain
@@ -56,7 +56,7 @@ func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error 
 		}
 		authConfig, err := auth.ParseAuthConfig(config)
 		if err != nil {
-			log.Errorf("[scan] load remote auth config error, %+v", err)
+			log.GetModule(log.ScanModuleKey).Errorf("load remote auth config error, %+v", err)
 		} else {
 			for _, authEntry := range authConfig.Auths {
 				if gstr.Equal(domain, authEntry.Registry) {
@@ -75,13 +75,13 @@ func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error 
 	// init registry v2 client
 	client, err := registry.NewV2Client(domain, registryOpt...)
 	if err != nil {
-		return errors.Wrapf(err, "[scan] can't init registry v2 client for %s", domain)
+		return errors.Wrapf(err, "can't init registry v2 client for %s", domain)
 	}
 
 	// fetch catalog
 	repos, err := client.GetRepos(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "[scan] can't get repos for registry %s", domain)
+		return errors.Wrapf(err, "can't get repos for registry %s", domain)
 	}
 
 	// filter repos
@@ -106,7 +106,7 @@ func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error 
 
 		tags, err := client.GetRepoTags(ctx, ref.String())
 		if err != nil {
-			log.Errorf("[scan] can't get reference tags for %s, err: %+v", ref.String(), err)
+			log.GetModule(log.ScanModuleKey).Errorf("can't get reference tags for %s, err: %+v", ref.String(), err)
 			continue
 		}
 
@@ -114,11 +114,11 @@ func Registry(ctx context.Context, t *target.Target, runtime api.Runtime) error 
 			complete, err := reference.WithTag(ref, tag)
 			images, err := remoteRuntime.Load(complete.String(), remote.WithAuth(username, password))
 			if err != nil {
-				log.Errorf("[scan] can't load remote image for %s, err: %+v", complete.String(), err)
+				log.GetModule(log.ScanModuleKey).Errorf("can't load remote image for %s, err: %+v", complete.String(), err)
 				continue
 			}
 			loaded = append(loaded, images...)
-			log.Infof("[scan] load image success: %#v\n", complete.String())
+			log.GetModule(log.ScanModuleKey).Infof("load image success: %#v\n", complete.String())
 		}
 	}
 
