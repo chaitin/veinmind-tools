@@ -10,8 +10,9 @@ import (
 	"github.com/chaitin/libveinmind/go/containerd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
@@ -59,13 +60,13 @@ func LocalContainer(ctx context.Context, t *target.Target, runtime api.Runtime) 
 			return err
 		}
 		if err := doContainer(ctx, t.Plugins, container, t.WithDefaultOptions()...); err != nil {
-			log.Errorf("[scan] scan container %s error : %s", container.Name(), err)
+			log.GetModule(log.ScanModuleKey).Errorf("[scan] scan container %s error : %s", container.Name(), err)
 		}
 	}
 	return nil
 }
 
 func doContainer(ctx context.Context, rang plugin.ExecRange, container api.Container, pluginOpts ...plugin.ExecOption) error {
-	log.Infof("[scan] start scan container: %#v\n", container.Name())
+	log.GetModule(log.ScanModuleKey).Infof("[scan] start scan container: %#v\n", container.Name())
 	return cmd.ScanContainer(ctx, rang, container, pluginOpts...)
 }

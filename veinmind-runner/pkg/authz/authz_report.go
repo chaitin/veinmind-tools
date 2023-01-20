@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
@@ -47,10 +49,10 @@ func handleDockerPluginReportEvents(eventListCh <-chan []reporter.ReportEvent, b
 	filter, events := processReportEvents(eventListCh, bpolicy, pluginLog)
 	if filter {
 		if bpolicy.Alert {
-			log.Warn(fmt.Sprintf("Action %s has risks!", bpolicy.Action))
+			log.GetModule(log.AuthzModuleKey).Warn(fmt.Sprintf("action %s has risks!", bpolicy.Action))
 		}
 	}
 	if err := reporter.WriteEvents2Log(events, pluginLog); err != nil {
-		log.Warn(err)
+		log.GetModule(log.AuthzModuleKey).Warn(err)
 	}
 }

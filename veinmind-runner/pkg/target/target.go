@@ -6,10 +6,11 @@ import (
 
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
+	logService "github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 )
@@ -41,7 +42,7 @@ func (t *Target) WithDefaultOptions(opts ...Option) []plugin.ExecOption {
 		next func(context.Context, ...plugin.ExecOption) error,
 	) error {
 		// Init Service
-		log.Infof("[target] discovered plugin: %#v\n", plug.Name)
+		log.GetModule(log.TargetModuleKey).Infof("discovered plugin: %#v\n", plug.Name)
 		// IaC need not init any service
 		err := t.ServiceManager.StartWithContext(ctx, plug.Name)
 		if err != nil {
@@ -49,7 +50,7 @@ func (t *Target) WithDefaultOptions(opts ...Option) []plugin.ExecOption {
 		}
 		// Register Service
 		reg := service.NewRegistry()
-		reg.AddServices(log.WithFields(log.Fields{
+		reg.AddServices(logService.WithFields(logService.Fields{
 			"plugin":  plug.Name,
 			"command": path.Join(c.Path...),
 		}))
@@ -94,7 +95,7 @@ func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, servi
 	for _, arg := range objArgs {
 		proto, value := ParseProto(cmd.Name(), arg)
 		if proto == UNKNOWN {
-			log.Warnf("[target] can't identified proto with arg: %s", arg)
+			log.GetModule(log.TargetModuleKey).Warnf("can't identified proto with arg: %s", arg)
 			continue
 		}
 		targets = append(targets, &Target{

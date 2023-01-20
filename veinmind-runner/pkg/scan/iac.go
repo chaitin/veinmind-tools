@@ -15,9 +15,10 @@ import (
 	iacApi "github.com/chaitin/libveinmind/go/iac"
 	"github.com/chaitin/libveinmind/go/kubernetes"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/gogf/gf/errors/gerror"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/git"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
@@ -37,7 +38,7 @@ func DispatchIacs(ctx context.Context, targets []*target.Target) error {
 			case target.KUBERNETES:
 				return KubeIac(ctx, obj)
 			default:
-				return errors.New(fmt.Sprintf("[scan] individual iac proto: %s", obj.Proto))
+				return errors.New(fmt.Sprintf("individual iac proto: %s", obj.Proto))
 			}
 		})
 	}
@@ -66,11 +67,11 @@ func HostIac(ctx context.Context, t *target.Target) error {
 		}
 		iacFiles, err := iacApi.DiscoverIACs(t.Value, iacOpt...)
 		if err != nil {
-			return gerror.Wrap(err, "auto discover error")
+			return gerror.Wrap(err, "auto discover iac error")
 		}
 		for _, file := range iacFiles {
 			if err := doIAC(ctx, t.Plugins, file, t.WithDefaultOptions()...); err != nil {
-				log.Errorf("scan iac %s error : %s", file.Path, err)
+				log.GetModule(log.ScanModuleKey).Errorf("scan iac %s error: %+v", file.Path, err)
 			}
 		}
 		return nil
@@ -102,7 +103,7 @@ func GitIac(ctx context.Context, t *target.Target) error {
 		err = git.Clone(t.Opts.TempPath, t.Value, t.Opts.IacSshPath, t.Opts.Insecure)
 
 		if err != nil {
-			log.Errorf("git download failed: %s", err)
+			log.GetModule(log.ScanModuleKey).Errorf("git download failed: %+v", err)
 			// nil point fix
 			return err
 		}
@@ -129,14 +130,14 @@ func KubeIac(ctx context.Context, t *target.Target) error {
 	kubeconfig := args[3]
 	if inResource(resource) == false {
 		if resource == "" {
-			log.Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :nil\nif you want to scan all resource please input\n    kubernetes or kubernetes:all/<yourname>")
+			log.GetModule(log.ScanModuleKey).Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :nil\nif you want to scan all resource please input\n    kubernetes or kubernetes:all/<yourname>")
 		} else {
-			log.Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :%s", resource)
+			log.GetModule(log.ScanModuleKey).Errorf("please input available resource!\n     available :pod,configmap,clusterrolebinding\n     get       :%s", resource)
 		}
 
 		return nil
 	}
-	log.Infof("start load remote k8s cluster config at %s", kubeconfig)
+	log.GetModule(log.ScanModuleKey).Infof("start load remote k8s cluster config at %s", kubeconfig)
 	dataList := map[string][]byte{}
 	kubeRoot, err := kubernetes.New(kubernetes.WithKubeConfigPath(kubeconfig))
 	if err != nil {
@@ -161,7 +162,7 @@ func KubeIac(ctx context.Context, t *target.Target) error {
 			namespaces = append(namespaces, namespace)
 		}
 	} else {
-		log.Errorf("please input right namespace!\n    available namespaces:%s", available_namespace)
+		log.GetModule(log.ScanModuleKey).Errorf("please input right namespace!\n    available namespaces:%s", available_namespace)
 	}
 	reg := name
 	//配置name的正则表达式
@@ -169,7 +170,7 @@ func KubeIac(ctx context.Context, t *target.Target) error {
 		reg = ".*"
 	}
 
-	log.Infof("download remote k8s cluster config at %s", t.Opts.TempPath)
+	log.GetModule(log.ScanModuleKey).Infof("download remote k8s cluster config at %s", t.Opts.TempPath)
 	resource = strings.ToLower(resource)
 	for _, namespace := range namespaces {
 		if resource == "all" || resource == "pod" || resource == "pods" {
@@ -217,9 +218,9 @@ func KubeIac(ctx context.Context, t *target.Target) error {
 	for key, data := range dataList {
 		tmpConfigFile := path.Join(t.Opts.TempPath, key)
 		if errWrite := ioutil.WriteFile(tmpConfigFile+".yaml", data, fs.ModePerm); errWrite == nil {
-			log.Infof("write temp config file at %s", tmpConfigFile)
+			log.GetModule(log.ScanModuleKey).Infof("write temp config file at %s", tmpConfigFile)
 		} else {
-			log.Warnf("write temp file failed: %s", tmpConfigFile)
+			log.GetModule(log.ScanModuleKey).Warnf("write temp file failed: %s", tmpConfigFile)
 		}
 	}
 
@@ -240,7 +241,7 @@ func parserK8sConfig(t *target.Target) ([]string, error) {
 		if home := os.Getenv("HOME"); home != "" {
 			kubeconfig = home + "/.kube/config"
 		} else {
-			log.Errorf("please input kubeconfig file path using --kubeconfig / -k")
+			log.GetModule(log.ScanModuleKey).Errorf("please input kubeconfig file path using --kubeconfig / -k")
 		}
 	}
 	if t.Value == "" {
@@ -287,6 +288,6 @@ func inNamespace(input string, availabe []string) bool {
 }
 
 func doIAC(ctx context.Context, rang plugin.ExecRange, iac iacApi.IAC, pluginOpts ...plugin.ExecOption) error {
-	log.Infof("[scan] start scan iac: %s, filetype: %s", iac.Path, iac.Type)
+	log.GetModule(log.ScanModuleKey).Infof("start scan iac: %s, filetype: %s", iac.Path, iac.Type)
 	return cmd.ScanIAC(ctx, rang, iac, pluginOpts...)
 }

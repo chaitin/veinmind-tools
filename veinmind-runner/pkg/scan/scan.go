@@ -8,10 +8,11 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
+	logService "github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
@@ -64,13 +65,13 @@ func ScanLocalImage(ctx context.Context, imageName string,
 	for _, id := range imageIDs {
 		image, err := veinmindRuntime.OpenImageByID(id)
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.ScanModuleKey).Error(err)
 			continue
 		}
 		err = ScanImage(ctx, finalPs, image, reportService,
 			specflags.WithSpecFlags(pluginParams))
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.ScanModuleKey).Error(err)
 		}
 	}
 	return runnerReporter.GetEvents()
@@ -84,7 +85,7 @@ func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
 	) error {
 		// Register Service
 		reg := service.NewRegistry()
-		reg.AddServices(log.WithFields(log.Fields{
+		reg.AddServices(logService.WithFields(logService.Fields{
 			"plugin":  plug.Name,
 			"command": path.Join(c.Path...),
 		}))

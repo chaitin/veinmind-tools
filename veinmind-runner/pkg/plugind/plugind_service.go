@@ -3,7 +3,7 @@ package plugind
 import (
 	"context"
 	"errors"
-	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"net"
 	"os"
 	"os/exec"
@@ -71,7 +71,7 @@ func (s *service) start() error {
 	go func() {
 		err := command.Run()
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.PlugindModuleKey).Error(err)
 		}
 		s.sig <- struct{}{}
 	}()
@@ -113,7 +113,7 @@ func (s *service) daemon() {
 		case <-s.sig:
 			err := s.start()
 			if err != nil {
-				log.Error(err)
+				log.GetModule(log.PlugindModuleKey).Error(err)
 				return
 			}
 		}
