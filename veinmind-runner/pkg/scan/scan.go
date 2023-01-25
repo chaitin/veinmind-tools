@@ -12,6 +12,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
@@ -43,12 +44,12 @@ func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.P
 func ScanLocalImage(ctx context.Context, imageName string,
 	enabledPlugins []string, pluginParams []string) (events []reporter.ReportEvent, err error) {
 	reportService := report.NewReportService()
-	runnerReporter, _ := reporter.NewReporter()
+	runnerReporter, _ := reporter.NewReporter(ctx)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	go startReportService(ctx, runnerReporter, reportService)
 	go runnerReporter.Listen()
-	defer runnerReporter.StopListen()
+	defer runnerReporter.Close()
 
 	veinmindRuntime, err := docker.New()
 	if err != nil {
@@ -74,7 +75,7 @@ func ScanLocalImage(ctx context.Context, imageName string,
 			log.GetModule(log.ScanModuleKey).Error(err)
 		}
 	}
-	return runnerReporter.GetEvents()
+	return runnerReporter.Events()
 }
 
 func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
