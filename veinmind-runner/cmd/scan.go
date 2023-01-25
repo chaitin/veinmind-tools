@@ -216,6 +216,8 @@ func scanPreRun(c *cmd.Command, args []string) error {
 					}
 				}
 				runnerReporter.EventChannel <- evt
+			case <-ctx.Done():
+				return
 			}
 		}
 	}()
