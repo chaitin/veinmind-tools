@@ -37,7 +37,7 @@ func init() {
 	reportService = report.NewReportService()
 
 	// Reporter init
-	r, err := reporter.NewReporter()
+	r, err := reporter.NewReporter(rootCmd.Context())
 	if err != nil {
 		log.Fatal(err)
 	}
