@@ -162,6 +162,7 @@ func GenerateImageReport(weakpassResults []model.WeakpassResult, image api.Image
 	if len(details) > 0 {
 		Reportevent := report.ReportEvent{
 			ID:           image.ID(),
+			Object:       report.Object{Raw: image},
 			Time:         time.Now(),
 			Level:        report.High,
 			DetectType:   report.Image,
@@ -192,6 +193,7 @@ func GenerateContainerReport(weakpassResults []model.WeakpassResult, container a
 	if len(details) > 0 {
 		Reportevent := report.ReportEvent{
 			ID:           container.ID(),
+			Object:       report.Object{Raw: container},
 			Time:         time.Now(),
 			Level:        report.High,
 			DetectType:   report.Container,

@@ -9,11 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/chaitin/libveinmind/go"
+	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	reportService "github.com/chaitin/veinmind-common-go/service/report"
+
 	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
 	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
@@ -115,6 +116,7 @@ func scan(_ *cmd.Command, image api.Image) error {
 		}
 		reportEvent := reportService.ReportEvent{
 			ID:           image.ID(),
+			Object:       reportService.Object{Raw: image},
 			Level:        reportService.High,
 			DetectType:   reportService.Image,
 			EventType:    reportService.Risk,

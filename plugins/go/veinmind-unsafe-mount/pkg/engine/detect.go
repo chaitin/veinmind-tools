@@ -36,6 +36,7 @@ func DetectContainerUnsafeMount(container api.Container) (events []report.Report
 
 				events = append(events, report.ReportEvent{
 					ID:             container.ID(),
+					Object:         report.Object{Raw: container},
 					Time:           time.Now(),
 					Level:          report.High,
 					DetectType:     report.Container,

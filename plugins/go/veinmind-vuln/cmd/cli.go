@@ -9,6 +9,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	scanner "github.com/chaitin/veinmind-tools/plugins/go/veinmind-vuln/analyzer"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-vuln/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-vuln/utils"
@@ -98,6 +99,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 	if onlyAsset {
 		reportEvent := report.ReportEvent{
 			ID:         image.ID(),
+			Object:     report.Object{Raw: image},
 			Time:       time.Now(),
 			Level:      report.None,
 			DetectType: report.Image,
@@ -117,6 +119,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 	if res.CveTotal > 0 {
 		reportEvent := report.ReportEvent{
 			ID:         image.ID(),
+			Object:     report.Object{Raw: image},
 			Time:       time.Now(),
 			Level:      report.High,
 			DetectType: report.Image,
@@ -161,6 +164,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	if onlyAsset {
 		reportEvent := report.ReportEvent{
 			ID:         container.ID(),
+			Object:     report.Object{Raw: container},
 			Time:       time.Now(),
 			Level:      report.None,
 			DetectType: report.Container,
@@ -181,6 +185,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	if res.CveTotal > 0 {
 		reportEvent := report.ReportEvent{
 			ID:         container.ID(),
+			Object:     report.Object{Raw: container},
 			Time:       time.Now(),
 			Level:      report.High,
 			DetectType: report.Container,

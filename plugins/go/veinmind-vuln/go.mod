@@ -6,7 +6,7 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20220904090510-d2cb7a409fe8
 	github.com/aquasecurity/trivy v0.29.2
 	github.com/chaitin/libveinmind v1.5.1
-	github.com/chaitin/veinmind-common-go v1.2.3
+	github.com/chaitin/veinmind-common-go v1.3.0
 	golang.org/x/sync v0.1.0
 )
 

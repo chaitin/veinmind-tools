@@ -216,6 +216,8 @@ func scanPreRun(c *cmd.Command, args []string) error {
 					}
 				}
 				runnerReporter.EventChannel <- evt
+			case <-ctx.Done():
+				return
 			}
 		}
 	}()
@@ -231,10 +233,10 @@ func scanPostRun(c *cmd.Command, _ []string) error {
 		}
 	}
 	// Stop reporter listen
-	runnerReporter.StopListen()
+	runnerReporter.Close()
 
-	// Output
-	err := runnerReporter.Write(os.Stdout)
+	// Render with stdout
+	err := runnerReporter.Render(os.Stdout)
 	if err != nil {
 		log.GetModule(log.CmdModuleKey).Error(errors.Wrap(err, "can't write runner report to stdout"))
 	}
@@ -276,7 +278,7 @@ func scanPostRun(c *cmd.Command, _ []string) error {
 	if exitcode == 0 {
 		return nil
 	} else {
-		events, err := runnerReporter.GetEvents()
+		events, err := runnerReporter.Events()
 		if err != nil {
 			return err
 		}

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/chaitin/libveinmind v1.5.1
-	github.com/chaitin/veinmind-common-go v1.2.1
+	github.com/chaitin/veinmind-common-go v1.3.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/moby/buildkit v0.10.5
 	github.com/open-policy-agent/opa v0.46.1

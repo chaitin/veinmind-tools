@@ -38,7 +38,7 @@ def scan_images(image):
                                        detect_type=DetectType.Image.value,
                                        event_type=EventType.Risk.value,
                                        alert_type=AlertType.Backdoor.value,
-                                       alert_details=[detail])
+                                       alert_details=[detail], native_object=image)
             report(report_event)
 
 @cli.resultcallback()
