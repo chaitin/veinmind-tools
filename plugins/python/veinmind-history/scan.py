@@ -76,7 +76,7 @@ def scan_images(image):
                                                           level=Level.High.value, detect_type=DetectType.Image.value,
                                                           event_type=EventType.Risk.value,
                                                           alert_type=AlertType.AbnormalHistory.value,
-                                                          alert_details=[detail])
+                                                          alert_details=[detail], native_object=image)
                                     report(image_report)
                                     break
                     else:
@@ -94,7 +94,7 @@ def scan_images(image):
                                                           level=Level.High.value, detect_type=DetectType.Image.value,
                                                           event_type=EventType.Risk.value,
                                                           alert_type=AlertType.AbnormalHistory.value,
-                                                          alert_details=[detail])
+                                                          alert_details=[detail], native_object=image)
                                     report(image_report)
                                     break
                 else:
@@ -113,7 +113,7 @@ def scan_images(image):
                                                           level=Level.High.value, detect_type=DetectType.Image.value,
                                                           event_type=EventType.Risk.value,
                                                           alert_type=AlertType.AbnormalHistory.value,
-                                                          alert_details=[detail])
+                                                          alert_details=[detail], native_object=image)
                                     report(image_report)
                                     break
                     else:
@@ -129,7 +129,7 @@ def scan_images(image):
                                                           level=Level.High.value, detect_type=DetectType.Image.value,
                                                           event_type=EventType.Risk.value,
                                                           alert_type=AlertType.AbnormalHistory.value,
-                                                          alert_details=[detail])
+                                                          alert_details=[detail], native_object=image)
                                     report(image_report)
                                     break
 

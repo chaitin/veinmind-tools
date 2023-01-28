@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
@@ -115,6 +114,7 @@ func scan(_ *cmd.Command, image api.Image) error {
 		}
 		reportEvent := reportService.ReportEvent{
 			ID:           image.ID(),
+			Object:       reportService.Object{Raw: image},
 			Level:        reportService.High,
 			DetectType:   reportService.Image,
 			EventType:    reportService.Risk,

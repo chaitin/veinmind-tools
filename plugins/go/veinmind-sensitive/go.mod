@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v1.1.0
 	github.com/chaitin/libveinmind v1.5.1
-	github.com/chaitin/veinmind-common-go v1.1.9-r0
+	github.com/chaitin/veinmind-common-go v1.3.0
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gogf/gf v1.16.9
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
