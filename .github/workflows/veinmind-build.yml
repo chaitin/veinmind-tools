@@ -54,9 +54,7 @@ jobs:
         with:
           go-version: '1.18'
       - run: |
-          sudo echo 'deb [trusted=yes] https://download.veinmind.tech/libveinmind/apt/ ./' | sudo tee /etc/apt/sources.list.d/libveinmind.list
-          sudo apt-get update
-          sudo apt-get install -y libveinmind-dev
+          sudo make install
           cd ./plugins/go/veinmind-weakpass && go mod tidy 
           cd hash && go test -tags dynamic
           cd ../service && go test -tags dynamic 
@@ -75,7 +73,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.3'
-      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: make install
       - run: cd ./plugins/go/veinmind-weakpass && /bin/bash -x script/build_amd64.sh
       - uses: actions/upload-artifact@v3
         with:
@@ -133,7 +131,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.3'
-      - run: /bin/bash scripts/libveinmind/install_libveinmind_debian.sh
+      - run: make install
       - run: cd veinmind-runner && /bin/bash -x script/build_veinmind_runner_amd64.sh
       - uses: actions/download-artifact@v3
         with:
