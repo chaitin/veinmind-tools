@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"os"
 
@@ -22,6 +23,8 @@ var rootCmd = &cmd.Command{
 }
 
 func init() {
+	// with context
+	rootCmd.SetContext(context.Background())
 
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)

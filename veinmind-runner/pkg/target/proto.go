@@ -29,7 +29,7 @@ func (p Proto) String() string {
 
 func IsProto(t string) bool {
 	switch t {
-	case DOCKERD.String(), CONTAINERD.String(), REGISTRY.String(), REGISTRY_IMAGE.String(), LOCAL.String(), GIT.String(), KUBERNETES.String():
+	case DOCKERD.String(), CONTAINERD.String(), REGISTRY.String(), REGISTRY_IMAGE.String(), LOCAL.String(), GIT.String(), KUBERNETES.String(), TARBALL.String():
 		return true
 	default:
 		return false
@@ -39,7 +39,7 @@ func IsProto(t string) bool {
 func ParseProto(cmd string, arg string) (Proto, string) {
 	switch cmd {
 	case "image":
-		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD, REGISTRY, REGISTRY_IMAGE))
+		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD, REGISTRY, REGISTRY_IMAGE, TARBALL))
 	case "container":
 		return regexParse(arg, DOCKERD, generatePattern(DOCKERD, CONTAINERD))
 	case "iac":
