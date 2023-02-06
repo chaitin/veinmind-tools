@@ -1,4 +1,4 @@
-//go:generate go run ./ generate doc --path ../docs/cmd/
+//go:generate go run ./ generate doc --path ../docs/
 package main
 
 import (

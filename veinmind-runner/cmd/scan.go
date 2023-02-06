@@ -66,6 +66,9 @@ auth.toml format (yaml):
 	registry = "example.com"
 	username = "<your-username>"
 	password = "<your-password>"
+
+6. scan tarball format image
+veinmind-runner scan image tarball:/tmp/alpine.tar
 `,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,

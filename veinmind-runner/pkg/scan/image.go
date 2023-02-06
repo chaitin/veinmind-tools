@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/chaitin/libveinmind/go/tarball"
 	"github.com/pkg/errors"
 
 	api "github.com/chaitin/libveinmind/go"
@@ -57,6 +58,13 @@ func DispatchImages(ctx context.Context, targets []*target.Target) error {
 					return err
 				}
 				return Registry(ctx, obj, r)
+			case target.TARBALL:
+				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
+				t, err := tarball.New(tarball.WithRoot(path))
+				if err != nil {
+					return err
+				}
+				return TarballImage(ctx, obj, t)
 			default:
 				return errors.New(fmt.Sprintf("individual image protol: %s", obj.Proto))
 			}
@@ -200,6 +208,32 @@ func RegistryImage(ctx context.Context, t *target.Target, runtime api.Runtime) e
 			continue
 		}
 		images = append(images, instance)
+	}
+
+	return doImages(ctx, t.Plugins, images, t.WithDefaultOptions()...)
+}
+
+func TarballImage(ctx context.Context, t *target.Target, runtime api.Runtime) error {
+	tarballRuntime, ok := runtime.(*tarball.Tarball)
+	if !ok {
+		return errors.New("scan: runtime type not match for tarball")
+	}
+
+	_, err := tarballRuntime.Load(t.Value)
+	if err != nil {
+		return err
+	}
+
+	var images []api.Image
+	ids, _ := tarballRuntime.ListImageIDs()
+	for _, id := range ids {
+		image, err := tarballRuntime.OpenImageByID(id)
+		if err != nil {
+			log.GetModule(log.ScanModuleKey).Error(err)
+			continue
+		}
+
+		images = append(images, image)
 	}
 
 	return doImages(ctx, t.Plugins, images, t.WithDefaultOptions()...)
