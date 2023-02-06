@@ -15,13 +15,16 @@ import (
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
+	"github.com/chaitin/veinmind-common-go/service/report/service"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-basic/pkg/capability"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 var (
-	rootCommand = &cmd.Command{}
-	scanCommand = &cmd.Command{
+	reportService = &report.Service{}
+	rootCommand   = &cmd.Command{}
+	scanCommand   = &cmd.Command{
 		Use:   "scan",
 		Short: "scan mode",
 	}
@@ -47,29 +50,30 @@ func scanImage(c *cmd.Command, image api.Image) error {
 		return err
 	}
 
-	evt := report.ReportEvent{
-		ID:         image.ID(),
-		Time:       time.Now(),
-		Level:      report.None,
-		DetectType: report.Image,
-		AlertType:  report.Basic,
-		EventType:  report.Info,
-		AlertDetails: []report.AlertDetail{
-			{
-				ImageBasicDetail: &report.ImageBasicDetail{
-					References:  refs,
-					CreatedTime: oci.Created.Unix(),
-					Env:         oci.Config.Env,
-					Entrypoint:  oci.Config.Entrypoint,
-					Cmd:         oci.Config.Cmd,
-					WorkingDir:  oci.Config.WorkingDir,
-					Author:      oci.Author,
-				},
+	evt := &event.Event{
+		BasicInfo: &event.BasicInfo{
+			ID:         image.ID(),
+			Object:     event.NewObject(image),
+			Time:       time.Now(),
+			Level:      event.None,
+			DetectType: event.Image,
+			AlertType:  event.BasicImage,
+			EventType:  event.Info,
+		},
+		DetailInfo: &event.DetailInfo{
+			AlertDetail: &event.ImageBasicDetail{
+				References:  refs,
+				CreatedTime: oci.Created.Unix(),
+				Env:         oci.Config.Env,
+				Entrypoint:  oci.Config.Entrypoint,
+				Cmd:         oci.Config.Cmd,
+				WorkingDir:  oci.Config.WorkingDir,
+				Author:      oci.Author,
 			},
 		},
 	}
 
-	err = report.DefaultReportClient().Report(evt)
+	err = reportService.Client.Report(evt)
 	if err != nil {
 		return err
 	}
@@ -79,10 +83,10 @@ func scanImage(c *cmd.Command, image api.Image) error {
 
 func scanContainer(c *cmd.Command, container api.Container) error {
 	var (
-		containerRuntime  report.ContainerRuntimeType
-		rootProcessDetail report.RootProcessDetail
-		mountDetails      []report.MountDetail
-		processDetails    []report.ProcessDetail
+		containerRuntime  event.RuntimeType
+		rootProcessDetail event.RootProcessDetail
+		mountDetails      []event.MountDetail
+		processDetails    []event.ProcessDetail
 		createdTime       int64
 		runtimeUniqDesc   string
 	)
@@ -101,7 +105,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	switch c := container.(type) {
 	case *docker.Container:
 		// runtime type
-		containerRuntime = report.Docker
+		containerRuntime = event.Docker
 
 		// runtime desc
 		runtimeUniqDesc = c.Runtime().UniqueDesc()
@@ -116,7 +120,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 
 			// container mount info
 			for _, mount := range config.MountPoints {
-				mountDetails = append(mountDetails, report.MountDetail{
+				mountDetails = append(mountDetails, event.MountDetail{
 					Destination: mount.Destination,
 					Type:        mount.Type,
 					Source:      mount.Source,
@@ -142,7 +146,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 		}
 
 		// runtime type
-		containerRuntime = report.Containerd
+		containerRuntime = event.Containerd
 
 		// runtime desc
 		runtimeUniqDesc = c.Runtime().UniqueDesc()
@@ -158,7 +162,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 				}
 			}
 
-			mountDetails = append(mountDetails, report.MountDetail{
+			mountDetails = append(mountDetails, event.MountDetail{
 				Destination: mount.Destination,
 				Type:        mount.Type,
 				Source:      mount.Source,
@@ -179,7 +183,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 		rootProcessDetail.Cwd = ocispec.Process.Cwd
 
 		if ocispec.Process.Capabilities != nil {
-			rootProcessDetail.Capabilities = report.CapabilitiesDetail{
+			rootProcessDetail.Capabilities = event.CapabilitiesDetail{
 				Bounding:    ocispec.Process.Capabilities.Bounding,
 				Effective:   ocispec.Process.Capabilities.Effective,
 				Inheritable: ocispec.Process.Capabilities.Inheritable,
@@ -301,7 +305,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 				}
 			}
 
-			processDetails = append(processDetails, report.ProcessDetail{
+			processDetails = append(processDetails, event.ProcessDetail{
 				Cmdline:    cmdline,
 				Cwd:        cwd,
 				Environ:    env,
@@ -320,33 +324,34 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 		}
 	}
 
-	evt := report.ReportEvent{
-		ID:         container.ID(),
-		Time:       time.Now(),
-		Level:      report.None,
-		DetectType: report.Container,
-		AlertType:  report.Basic,
-		EventType:  report.Info,
-		AlertDetails: []report.AlertDetail{
-			{
-				ContainerBasicDetail: &report.ContainerBasicDetail{
-					Name:            container.Name(),
-					CreatedTime:     createdTime,
-					State:           string(ocistate.Status),
-					Runtime:         containerRuntime,
-					RuntimeUniqDesc: runtimeUniqDesc,
-					Hostname:        ocispec.Hostname,
-					ImageID:         container.ImageID(),
-					Privileged:      capability.IsPrivileged(container),
-					RootProcess:     rootProcessDetail,
-					Mounts:          mountDetails,
-					Processes:       processDetails,
-				},
+	evt := &event.Event{
+		BasicInfo: &event.BasicInfo{
+			ID:         container.ID(),
+			Object:     event.NewObject(container),
+			Time:       time.Now(),
+			Level:      event.Low,
+			DetectType: event.Container,
+			AlertType:  event.BasicContainer,
+			EventType:  event.Info,
+		},
+		DetailInfo: &event.DetailInfo{
+			AlertDetail: &event.ContainerBasicDetail{
+				Name:            container.Name(),
+				CreatedTime:     createdTime,
+				State:           string(ocistate.Status),
+				Runtime:         containerRuntime,
+				RuntimeUniqDesc: runtimeUniqDesc,
+				Hostname:        ocispec.Hostname,
+				ImageID:         container.ImageID(),
+				Privileged:      capability.IsPrivileged(container),
+				RootProcess:     rootProcessDetail,
+				Mounts:          mountDetails,
+				Processes:       processDetails,
 			},
 		},
 	}
 
-	err = report.DefaultReportClient().Report(evt)
+	err = reportService.Client.Report(evt)
 	if err != nil {
 		return err
 	}
@@ -360,8 +365,8 @@ func init() {
 		Author:      "veinmind-team",
 		Description: "veinmind-basic scan image basic info",
 	}))
-	scanCommand.AddCommand(cmd.MapImageCommand(scanImageCommand, scanImage))
-	scanCommand.AddCommand(cmd.MapContainerCommand(scanContainerCommand, scanContainer))
+	scanCommand.AddCommand(report.MapReportCmd(cmd.MapImageCommand(scanImageCommand, scanImage), reportService, service.WithVerbose()))
+	scanCommand.AddCommand(report.MapReportCmd(cmd.MapContainerCommand(scanContainerCommand, scanContainer), reportService, service.WithVerbose()))
 }
 
 func main() {

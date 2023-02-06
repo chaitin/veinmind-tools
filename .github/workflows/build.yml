@@ -22,6 +22,7 @@ on:
 
 jobs:
   base-build:
+    name: ${{inputs.file}}
     runs-on: ubuntu-20.04
     container:
       image: veinmind/go1.18:1.5.3-stretch
