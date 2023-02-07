@@ -3,6 +3,29 @@ on:
   workflow_call:
 
 jobs:
+  test-veinmind-weakpass:
+    runs-on: ubuntu-20.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: |
+          sudo make install
+          cd ./plugins/go/veinmind-weakpass && go mod tidy 
+          cd hash && go test -tags dynamic
+          cd ../service && go test -tags dynamic
+#  build-amd64-veinmind-basic:
+#    uses: ./.github/workflows/build.yml
+#    with:
+#      path: ./plugins/go/veinmind-malicious
+#      file: veinmind-basic
+#      CI_GOOS: linux
+#      CI_GOARCH: amd64
+
   build-amd64-veinmind-malicious:
     uses: ./.github/workflows/build.yml
     with:
@@ -43,31 +66,15 @@ jobs:
       CI_GOOS: linux
       CI_GOARCH: amd64
 
-  test-veinmind-weakpass:
-    runs-on: ubuntu-20.04
-    env:
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.18'
-      - run: |
-          sudo make install
-          cd ./plugins/go/veinmind-weakpass && go mod tidy 
-          cd hash && go test -tags dynamic
-          cd ../service && go test -tags dynamic 
-
-
   # statics build need ubuntu
   build-amd64-static-veinmind-weakpass:
+    name: veinmind-weakpass-static
     runs-on: ubuntu-20.04
+    needs: test-veinmind-weakpass
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
       TAGS: "static"
-    needs: test-veinmind-weakpass
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -86,8 +93,8 @@ jobs:
 
   build-amd64-dynamic-veinmind-weakpass:
     if: startsWith(github.ref, 'refs/tags/')
-    uses: ./.github/workflows/build.yml
     needs: test-veinmind-weakpass
+    uses: ./.github/workflows/build.yml
     with:
       path: ./plugins/go/veinmind-weakpass
       file: veinmind-weakpass
