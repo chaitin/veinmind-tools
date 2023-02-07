@@ -12,23 +12,11 @@ import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/service"
 )
-
-func GetImageName(image api.Image) (imageName string, err error) {
-	repoRefs, err := image.RepoRefs()
-	if err != nil {
-		return "unknown", err
-	}
-	if len(repoRefs) >= 1 {
-		imageName = repoRefs[0]
-	} else {
-		imageName = image.ID()
-	}
-	return imageName, nil
-}
 
 func StartModule(config model.Config, fs api.FileSystem, modname string, marco map[string]string) (results []model.WeakpassResult, err error) {
 	// 获取对应的服务模块
@@ -147,64 +135,70 @@ func StartModule(config model.Config, fs api.FileSystem, modname string, marco m
 
 }
 
-func GenerateImageReport(weakpassResults []model.WeakpassResult, image api.Image) (err error) {
-	details := []report.AlertDetail{}
+func GenerateImageReport(weakpassResults []model.WeakpassResult, image api.Image, reportService *report.Service) (err error) {
+	var details []event.AlertDetail
 	for _, wr := range weakpassResults {
-		details = append(details, report.AlertDetail{
-			WeakpassDetail: &report.WeakpassDetail{
-				Username: wr.Username,
-				Password: wr.Password,
-				Service:  wr.ServiceType,
-				Path:     wr.Filepath,
-			},
+		details = append(details, &event.WeakpassDetail{
+			Username: wr.Username,
+			Password: wr.Password,
+			Service:  wr.ServiceType,
+			Path:     wr.Filepath,
 		})
 	}
-	if len(details) > 0 {
-		Reportevent := report.ReportEvent{
-			ID:           image.ID(),
-			Object:       report.Object{Raw: image},
-			Time:         time.Now(),
-			Level:        report.High,
-			DetectType:   report.Image,
-			EventType:    report.Risk,
-			AlertType:    report.Weakpass,
-			AlertDetails: details,
+	for _, d := range details {
+		event := &event.Event{
+			BasicInfo: &event.BasicInfo{
+				ID:         image.ID(),
+				Object:     event.NewObject(image),
+				Source:     "veinmind-weakpass",
+				Time:       time.Now(),
+				Level:      event.High,
+				DetectType: event.Image,
+				EventType:  event.Risk,
+				AlertType:  event.Weakpass,
+			},
+			DetailInfo: &event.DetailInfo{
+				AlertDetail: d,
+			},
 		}
-		err = report.DefaultReportClient().Report(Reportevent)
-		if err != nil {
-			return err
-		}
+		err = reportService.Client.Report(event)
+	}
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func GenerateContainerReport(weakpassResults []model.WeakpassResult, container api.Container) (err error) {
-	details := []report.AlertDetail{}
+func GenerateContainerReport(weakpassResults []model.WeakpassResult, container api.Container, reportService *report.Service) (err error) {
+	var details []event.AlertDetail
 	for _, wr := range weakpassResults {
-		details = append(details, report.AlertDetail{
-			WeakpassDetail: &report.WeakpassDetail{
-				Username: wr.Username,
-				Password: wr.Password,
-				Service:  wr.ServiceType,
-				Path:     wr.Filepath,
-			},
+		details = append(details, &event.WeakpassDetail{
+			Username: wr.Username,
+			Password: wr.Password,
+			Service:  wr.ServiceType,
+			Path:     wr.Filepath,
 		})
 	}
-	if len(details) > 0 {
-		Reportevent := report.ReportEvent{
-			ID:           container.ID(),
-			Object:       report.Object{Raw: container},
-			Time:         time.Now(),
-			Level:        report.High,
-			DetectType:   report.Container,
-			EventType:    report.Risk,
-			AlertType:    report.Weakpass,
-			AlertDetails: details,
+	for _, d := range details {
+		event := &event.Event{
+			BasicInfo: &event.BasicInfo{
+				ID:         container.ID(),
+				Object:     event.NewObject(container),
+				Source:     "veinmind-weakpass",
+				Time:       time.Now(),
+				Level:      event.High,
+				DetectType: event.Container,
+				EventType:  event.Risk,
+				AlertType:  event.Weakpass,
+			},
+			DetailInfo: &event.DetailInfo{
+				AlertDetail: d,
+			},
 		}
-		err = report.DefaultReportClient().Report(Reportevent)
-		if err != nil {
-			return err
-		}
+		err = reportService.Client.Report(event)
+	}
+	if err != nil {
+		return err
 	}
 	return nil
 }

@@ -1,14 +1,14 @@
 <h1 align="center"> veinmind-sensitive </h1>
 
 <p align="center">
-veinmind-sensitive is an image sensitive information scanning tool developed by Chaitin Technology 
+veinmind-sensitive is a mirror sensitive information scanning tool developed by Changting Technology
 </p>
 
 ## Features
 
-- Quickly scan images for sensitive information
-- Support custom sensitive information scanning rules
-- Support container runtime `containerd` and `dockerd`
+- Quickly scan the image for sensitive information
+- Support sensitive information scanning rule customization
+- Supports weak password scanning of 'containerd'/' dockerd 'image file systems
 
 ## Compatibility
 
@@ -17,64 +17,74 @@ veinmind-sensitive is an image sensitive information scanning tool developed by 
 - linux/arm64
 - linux/arm
 
-## Prepare
+## Usage
 
-### install by package manager
+### Based on executable files
 
-1. install `libveinmind` first ，you can click here [offical document](https://github.com/chaitin/libveinmind) for more
-   info
+Please install ` libveinmind `, installation method can refer to [official documentation] (https://github.com/chaitin/libveinmind)
+#### Makefile one-click command
 
-### install by parallel container
+```
+make run ARG="scan xxx"
+```
+#### Compile your own executable file for scanning
 
-1. Install by Parallel Container，pull `veinmind-sensitive` image and start
-    ```
-    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive-go
-    ```
-2. or start with the script which we provided
-    ```
-    chmod +x parallel-container-run.sh && ./parallel-container-run.sh
-    ```
+Compile the executable
+```
+make build
+```
+Run the executable file for scanning
+```
+chmod +x veinmind-sensitive && ./veinmind-sensitive scan xxx
+```
+### Based on the parallel container pattern
+Make sure you have 'docker' and 'docker-compose' installed on your machine
+#### Makefile one-click command
+```
+make run.docker ARG="scan xxxx"
+```
+#### Build your own image for scanning
+Build the 'veinmind-sensitive' image
+```
+make build.docker
+```
+Run the container to scan
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-sensitive scan  xxx
+```
 
-## How to use
+## Use parameters
 
-1. Scan image with specified image name or ID(need to have a corresponding image locally)
+1. Specify the image name or image ID and scan (if the image exists locally)
 
-    ```
-    ./veinmind-sensitive scan [imagename/imageid]
-    ```
+```
+./veinmind-sensitive scan image [imagename/imageid]
+```
+![](../../../docs/veinmind-sensitive/sensitive-01.jpeg)
 
 2. Scan all local images
 
-    ```
-    ./veinmind-sensitive scan
-    ```
+```
+./veinmind-sensitive scan image
+```
+![](../../../docs/veinmind-sensitive/sensitive-02-1.jpg)
+![](../../../docs/veinmind-sensitive/sensitive-02-2.jpg)
 
-3. Specify the container runtime type
-    ```
-    ./veinmind-sensitive scan --containerd
-    ```
-
-   container runtime type
-    - dockerd
-    - containerd
-
-4. Specify output type
-    ```
-    ./veinmind-sensitive --output [outputtype] scan
-    ```
+Specify the output type
+Supported output formats:
+- html
+- json
+- cli (default)
+```
+./veinmind-sensitive scan image [imageID/imageName] -f html
+```
+The resulting result.html looks like this:
+![](../../../docs/veinmind-sensitive/sensitive-03.jpg)
 
 ## Rule Field Description
 
-- id: rule identifier
-- description: rule description
-- match: content matching rules, the default is regular
-- filepath: path matching rules, the default is regular
-- env: environment variable matching rules, the default is regular and ignores case
-
-## Demo
-
-1. Scan the image which name is `sensitive`
-   ![](../../../docs/veinmind-sensitive/sensitive-01.png)
-
-2. Scan all local images
-   ![](../../../docs/veinmind-sensitive/sensitive-02.png)
+-id: Rule identifier
+-description: Description of the rule
+-match: This is a content-matching rule, which defaults to regular
+-filepath: Path matching rule (regular by default
+-env: Environment variable matching rules; defaults to regular and ignores case

@@ -3,188 +3,48 @@ on:
   workflow_call:
 
 jobs:
-  test-veinmind-weakpass:
+  # build go plugins
+  build-plugins-amd64:
+    strategy:
+      matrix:
+        plugin: [
+          veinmind-basic,
+          veinmind-escalate,
+          veinmind-iac,
+          veinmind-log4j2,
+          veinmind-malicious,
+          veinmind-sensitive,
+          veinmind-unsafe-mount,
+          veinmind-vuln,
+          veinmind-weakpass,
+          veinmind-webshell,
+        ]
+        path: [ ./plugins/go/ ]
+        include:
+          - plugin: veinmind-malicious
+            path: ./plugins/go/
+            tags: community
+          - plugin: veinmind-weakpass # static build
+            path: ./plugins/go/
+            tags: static
+          - plugin: veinmind-runner # veinmind-runner
+            path: ./
+    name: ${{ matrix.plugin }}
     runs-on: ubuntu-20.04
+    container:
+      image: veinmind/go1.18:1.5.3-stretch
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64
+      TAGS: ${{matrix.TAGS}}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.18'
-      - run: |
-          sudo make install
-          cd ./plugins/go/veinmind-weakpass && go mod tidy 
-          cd hash && go test -tags dynamic
-          cd ../service && go test -tags dynamic
-#  build-amd64-veinmind-basic:
-#    uses: ./.github/workflows/build.yml
-#    with:
-#      path: ./plugins/go/veinmind-malicious
-#      file: veinmind-basic
-#      CI_GOOS: linux
-#      CI_GOARCH: amd64
-
-  build-amd64-veinmind-malicious:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-malicious
-      file: veinmind-malicious
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  build-amd64-veinmind-vuln:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-vuln
-      file: veinmind-vuln
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  build-amd64-veinmind-webshell:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-webshell
-      file: veinmind-webshell
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  build-amd64-veinmind-unsafe-mount:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-unsafe-mount
-      file: veinmind-unsafe-mount
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  build-amd64-veinmind-log4j2:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-log4j2
-      file: veinmind-log4j2
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  # statics build need ubuntu
-  build-amd64-static-veinmind-weakpass:
-    name: veinmind-weakpass-static
-    runs-on: ubuntu-20.04
-    needs: test-veinmind-weakpass
-    env:
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-      TAGS: "static"
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.18.3'
-      - run: make install
-      - run: cd ./plugins/go/veinmind-weakpass && /bin/bash -x script/build_amd64.sh
+      - run: make platform.${{ matrix.plugin }} CI_GOOS=${{ env.CI_GOOS }} CI_GOARCH=${{ env.CI_GOARCH }} TAGS=${{ env.TAGS }}
       - uses: actions/upload-artifact@v3
         with:
-          name: veinmind-weakpass-amd64
-          path: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
+          name: ${{ matrix.plugin }}-${{ env.CI_GOARCH }}
+          path: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARCH }}
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./plugins/go/veinmind-weakpass/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}}
-
-  build-amd64-dynamic-veinmind-weakpass:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: test-veinmind-weakpass
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-weakpass
-      file: veinmind-weakpass
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-      TAGS: "dynamic"
-
-  build-amd64-veinmind-iac:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-iac
-      file: veinmind-iac
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  build-amd64-veinmind-sensitive-go:
-    uses: ./.github/workflows/build.yml
-    with:
-      path: ./plugins/go/veinmind-sensitive
-      file: veinmind-sensitive-go
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-
-  # runner need tar so just write a standalone build job
-  build-amd64-veinmind-runner:
-    runs-on: ubuntu-latest
-    env:
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    needs: [
-      build-amd64-veinmind-malicious,
-      build-amd64-veinmind-vuln,
-      build-amd64-veinmind-webshell,
-      build-amd64-veinmind-unsafe-mount,
-      build-amd64-veinmind-log4j2,
-      build-amd64-static-veinmind-weakpass,
-      build-amd64-veinmind-iac,
-    ]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.18.3'
-      - run: make install
-      - run: cd veinmind-runner && /bin/bash -x script/build_veinmind_runner_amd64.sh
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-malicious-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-vuln-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-webshell-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-unsafe-mount-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-log4j2-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-weakpass-amd64
-      - uses: actions/download-artifact@v3
-        with:
-          name: veinmind-iac-amd64
-      - run: |
-          mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-malicious  
-          mv veinmind-vuln_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-vuln 
-          mv veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-webshell 
-          mv veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-unsafe-mount 
-          mv veinmind-log4j2_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-log4j2 
-          mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-weakpass 
-          mv veinmind-iac_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-iac 
-          mv ./plugins/python/veinmind-sensitive ./veinmind-sensitive 
-          mv ./plugins/python/veinmind-history ./veinmind-history
-          mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
-          mv ./veinmind-runner/artifacts/${{env.CI_GOOS}}-${{env.CI_GOARCH}}/veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner-entrypoint
-          rm -rf ./veinmind-runner && mv veinmind-runner-entrypoint veinmind-runner
-          chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac 
-          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell \
-          veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac \
-          ./veinmind-sensitive \
-          ./veinmind-history \
-          ./veinmind-backdoor \
-      - uses: actions/upload-artifact@v3
-        with:
-          name: veinmind-runner.tar.gz
-          path: veinmind-runner.tar.gz
-      - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: veinmind-runner.tar.gz
+          files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARC }}

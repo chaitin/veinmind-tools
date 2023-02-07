@@ -2,7 +2,7 @@
 
 for fast auto init a veinmind example plugin
 
-`make plugin.init `
+`make plugin `
 
 params:
 

@@ -24,32 +24,42 @@ veinmind-runner 是由长亭科技自研的一款问脉容器安全工具平台
 - linux/arm64
 - linux/arm
 
-## 开始之前
+## 使用方式
 
-### 安装方式一
+### 基于可执行文件
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
-
-可以选择手动编译 `veinmind-runner`，
-或者在[Release](https://github.com/chaitin/veinmind-tools/releases)页面中找到已经编译好的 `veinmind-runner` 进行下载
-
-### 安装方式二
-
-基于平行容器的模式，获取 `veinmind-runner` 的镜像并启动
+#### Makefile 一键命令
 
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' \
--v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock veinmind/veinmind-runner
+make run ARG="scan xxx"
 ```
+#### 自行编译可执行文件进行扫描
 
-或者使用项目提供的脚本启动
-
+编译可执行文件
 ```
-chmod +x parallel-container-run.sh && ./parallel-container-run.sh
+make build
 ```
-
-### 安装方式三
-
+运行可执行文件进行扫描
+```
+chmod +x veinmind-runner && ./veinmind-runner scan xxx 
+```
+### 基于平行容器模式
+确保机器上安装了`docker`以及`docker-compose`
+#### Makefile 一键命令
+```
+make run.docker ARG="scan xxxx"
+```
+#### 自行构建镜像进行扫描
+构建`veinmind-runner`镜像
+```
+make build.docker
+```
+运行容器进行扫描
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-runner scan xxx
+```
+### 基于kubernetes helm
 基于`Kubernetes`环境，使用`Helm`安装`veinmind-runner`，定时执行扫描任务
 
 请先安装`Helm`， 安装方法可以参考[官方文档](https://helm.sh/zh/docs/intro/install/)
@@ -63,137 +73,11 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 cd ./veinmind-runner/script/helm_chart/veinmind
 helm install veinmind .
 ```
-
-## 使用
-
-1.扫描本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
-
-```
-./veinmind-runner scan image [docker/containerd]:reference
-```
-
-2.扫描所有本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
-
-```
-./veinmind-runner scan image [docker/containerd]:reference
-```
-
-3.扫描远程镜像，若远程仓库需要认证需使用 -c 参数指定 toml 格式的认证信息文件（暂不支持 dockerhub 的私有镜像扫描）
-
-```
-./veinmind-runner scan image registry-image:reference
-```
-例如：
-```shell
-#扫描 docker.io 的 nginx 镜像 (所有 tag)
-./veinmind-runner scan image registry-image:nginx   
-```
-
-```shell
-#扫描 docker.io 的 bitnami/nginx 镜像 (所有 tag)
-./veinmind-runner scan image registry-image:bitnami/nginx 
-```
-
-```shell
-#扫描 registry.example.com 私有仓库下的 registry.example.com/library/ubuntu:latest 镜像
-./veinmind-runner scan image -c auth.toml registry-image:registry.example.com/library/ubuntu:latest
-```
-
-```shell
-#扫描 registry.example.com 私有仓库下的所有镜像
-./veinmind-runner scan image -c auth.toml registry:registry.example.com 
-```
-
-```shell
-#基于给定正则扫描 registry.example.com 私有仓库下的所有镜像
-./veinmind-runner scan image -c auth.toml --filter "nginx$" registry:registry.example.com 
-```
-
-`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码
-
-```
-[[auths]]
-	registry = "index.docker.io"
-	username = "admin"
-	password = "password"
-[[auths]]
-	registry = "registry.private.net"
-	username = "admin"
-	password = "password"
-```
-
-4.扫描本地IaC文件
-
-```
-./veinmind-runner scan iac host:path/to/iac-file
-./veinmind-runner scan iac path/to/iac-file
-```
-
-5.扫描远端 git 仓库的 IaC 文件
-
-```
-./veinmind-runner scan iac git:http://xxxxxx.git 
-```
-```shell
-# auth
-./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
-```
-```shell
-# add proxy
-./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
-```
-```shell
-# disable tls
-./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
-```
-
-6.扫描远端 kubernetes IaC 配置(需要手动指定kubeconfig file)
-
-```
-./veinmind-runner scan iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
-```
-
-7.扫描本地所有容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
-
-```
-./veinmind-runner scan container [dockerd:/containerd:]
-```
-
-8.扫描本地容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
-
-```
-./veinmind-runner scan container [dockerd:/containerd:]containerID/containerRef
-```
-容器运行时类型
-
-- dockerd
-- containerd
-
-9.使用`glob`筛选需要运行插件
-
-```
-./veinmind-runner scan image -g "**/veinmind-malicious"
-```
-
-10.列出当前插件列表
-
-```
-./veinmind-runner list plugin
-```
-
-11.指定容器运行时路径
-
-```
-./veinmind-runner scan image --docker-data-root [your_path]
-```
-
-```
-./veinmind-runner scan image --containerd-root [your_path]
-```
-
-12.支持 docker 镜像阻断功能
+## 使用参数
+### 基本参数
+参考 [veinmind-runner使用参数文档](docs/veinmind-runner.md)
+### 高级参数
+1.支持 docker 镜像阻断功能
 
 ```bash
 # first
@@ -247,3 +131,12 @@ risk_level_filter = ["High"]
 block = true
 alert = true
 ```
+2.插件自定义参数
+```
+./veinmind-runner scan image -- [插件名称]:[运行插件函数cmd].[参数名称]=[自定义值]
+```
+示例：
+```
+./veinmind-runner scan image -- veinmind-weakpass:scan/image.serviceName=ssh
+```
+![](../docs/runner_1.jpg)

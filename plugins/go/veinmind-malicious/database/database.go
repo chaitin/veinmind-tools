@@ -1,14 +1,16 @@
 package database
 
 import (
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	"os"
 	"path"
 	"sync"
+
+	"github.com/chaitin/libveinmind/go/plugin/log"
+	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
 )
 
 var instance *gorm.DB

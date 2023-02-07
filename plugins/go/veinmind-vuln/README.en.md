@@ -1,76 +1,110 @@
 <h1 align="center"> veinmind-vuln </h1>
 
 <p align="center">
-veinmind-vuln is mainly used to scan the internal assets information and vulnerabilities of images and containers
-</p>
+veinmind-vuln is used to scan container/images for internal assets and vulnerability information </p>
 
 ## Features
 
-- Scan image/container OS information
-- Scan the packages information installed in image/container
-- Scan the libraries installed by the application in image/container
-- Scan the CVE vulnerabilities in image/container (beta)
+- Scan the image/container for OS information
+- Scan images/containers for system-installed packages
+- Scan the image/container for libraries installed in the app
+- Scan images/containers for known Cves (beta)
 
-## How to use
+## Compatibility
 
-### Base Command
+- linux/amd64
+- linux/386
+- linux/arm64
+- linux/arm
+
+## Usage
+
+### Based on executable files
+
+Please install ` libveinmind `, installation method can refer to [official documentation] (https://github.com/chaitin/libveinmind)
+#### Makefile one-click command
 
 ```
-./veinmind-vuln scan image/container [image_name/image_id/container_name/container_id]
+make run ARG="scan xxx"
+```
+#### Compile your own executable file for scanning
+
+Compile the executable
+```
+make build
+```
+Run the executable file for scanning
+```
+chmod +x veinmind-vuln && ./veinmind-vuln scan xxx
+```
+### Based on the parallel container pattern
+Make sure you have 'docker' and 'docker-compose' installed on your machine
+#### Makefile one-click command
+```
+make run.docker ARG="scan xxxx"
+```
+#### Build your own image for scanning
+Build the 'veinmind-vuln' image
+```
+make build.docker
+```
+Run the container to scan
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-vuln scan xxx
 ```
 
-### User Options
+## Use parameters
 
-| Options Name                                      | Meaning                                | Must                      |
-|---------------------------------------------------|----------------------------------------|---------------------------|
-| image/container                                   | scan object is image or container      | true                      |
-| [image_name/image_id/container_name/container_id] | scan image's or container's name or id | false(default all)        |
-| -v                                                | show details                           | false(default no details) |
-| -f [csv/json/stdout]                              | appoint output: csv/json/stdout        | false(default stdout)     |
-| --type [os/python/jar/pip/npm...]                 | appoint asset type: os/python/jar/...  | false(default all)        |
-| --only-asset                                      | do not scan vulns info                 | false(default off)        |
+1. Specify the image name or image ID and scan (if the image exists locally)
 
-### Example
-
-1. Scan all local images
+```
+./veinmind-vuln scan image [imageID/imageName]
+```
+![](../../../docs/veinmind-vuln/vuln_scan_image_01.jpg)
+2. Scan all local images
 
 ```
 ./veinmind-vuln scan image
 ```
-![](../../../docs/veinmind-vuln/vuln-01.png)
+![](../../../docs/veinmind-vuln/vuln_scan_image_02.jpg)
+3. Specify the container name or container ID and scan
 
-2. Scan all local containers
+```
+./veinmind-vuln scan container [containerID/containerName]
+```
+![](../../../docs/veinmind-vuln/vuln_scan_container_01.jpg)
+
+4. Scan all local containers
 
 ```
 ./veinmind-vuln scan container
 ```
-![](../../../docs/veinmind-vuln/vuln-02.png)
+![](../../../docs/veinmind-vuln/vuln_scan_container_02.jpg)
 
-3. Scan image and show details(extends vulns details)
-
+Specify the output format
+Supported output formats:
+- html
+- json
+- cli (default)
 ```
-./veinmind-vuln scan image [imagename/imageid] -v
+./veinmind-vuln scan image [imageID/imageName] -f html
 ```
-![](../../../docs/veinmind-vuln/vuln-03.png)
-
-4. Scan image and show details with specified type results
-
+The resulting result.html looks like this:
+![](../../../docs/veinmind-vuln/vuln_scan_image_05.jpg)
+6. Show details
 ```
-./veinmind-vuln scan image [imagename/imageid] -v --type [os/python/jar/pip/npm.......]
+./veinmind-vuln scan image [imageID/imageName] -v
 ```
-![](../../../docs/veinmind-vuln/vuln-04.png)
-
-5. Output detailed results to file
-
+![](../../../docs/veinmind-vuln/vuln_scan_image_06.jpg)
+7. Display specific types of information
 ```
-./veinmind-vuln scan image [imagename/imageid] -f [csv/json]
+./veinmind-vuln scan image [imageID/imageName] --type [os/python/npm/jar.....]
 ```
-![](../../../docs/veinmind-vuln/vuln-05.png)
+![](../../../docs/veinmind-vuln/vuln_scan_image_07.jpeg)
 
-6. Only Scan Assets info
 
+8. Scan only asset information
 ```
-./veinmind-vuln scan image [imagename/imageid] --only-asset
+./veinmind-vuln scan image [imageID/imageName] --only-asset
 ```
-
-![](../../../docs/veinmind-vuln/vuln-06.png)
+![](../../../docs/veinmind-vuln/vuln_scan_image_08.jpg)

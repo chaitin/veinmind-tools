@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/VirusTotal/vt-go"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 	"os"
+
+	"github.com/VirusTotal/vt-go"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 )
 
 type AnalysisResult struct {

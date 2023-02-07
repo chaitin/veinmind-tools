@@ -1,17 +1,16 @@
 package engine
 
 import (
-	"encoding/json"
 	"path/filepath"
 	"time"
 
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/veinmind-common-go/service/report"
-
-	selfreport "github.com/chaitin/veinmind-tools/plugins/go/veinmind-unsafe-mount/pkg/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
-func DetectContainerUnsafeMount(container api.Container) (events []report.ReportEvent, err error) {
+const DetectType = "UnsafeMount"
+
+func DetectContainerUnsafeMount(container api.Container) (events []event.Event, err error) {
 	spec, err := container.OCISpec()
 	if err != nil {
 		return nil, err
@@ -25,27 +24,32 @@ func DetectContainerUnsafeMount(container api.Container) (events []report.Report
 			}
 
 			if matched {
-				eBytes, err := json.Marshal(selfreport.Event{
-					Source:      mount.Source,
-					Destination: mount.Destination,
-					Type:        mount.Type,
-				})
 				if err != nil {
 					continue
 				}
-
-				events = append(events, report.ReportEvent{
-					ID:             container.ID(),
-					Object:         report.Object{Raw: container},
-					Time:           time.Now(),
-					Level:          report.High,
-					DetectType:     report.Container,
-					EventType:      report.Risk,
-					GeneralDetails: []report.GeneralDetail{eBytes},
+				events = append(events, event.Event{
+					BasicInfo: &event.BasicInfo{
+						ID:         container.ID(),
+						Object:     event.NewObject(container),
+						Source:     "veinmind-unsafe-mount",
+						Time:       time.Now(),
+						Level:      event.High,
+						DetectType: event.Container,
+						EventType:  event.Risk,
+						AlertType:  DetectType,
+					},
+					DetailInfo: &event.DetailInfo{
+						AlertDetail: &event.UnSafeMountDetail{
+							Mount: event.MountEvent{
+								Source:      mount.Source,
+								Destination: mount.Destination,
+								Type:        mount.Type,
+							},
+						},
+					},
 				})
 			}
 		}
 	}
-
 	return
 }

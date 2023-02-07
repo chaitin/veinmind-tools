@@ -17,56 +17,68 @@ veinmind-sensitive 是由长亭科技自研的一款镜像敏感信息扫描工�
 - linux/arm64
 - linux/arm
 
-## 开始之前
+## 使用方式
 
-### 安装方式一
+### 基于可执行文件
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
-
-### 安装方式二
-
-基于平行容器的模式，获取 `veinmind-sensitive` 的镜像并启动
+#### Makefile 一键命令
 
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive-go
+make run ARG="scan xxx"
+```
+#### 自行编译可执行文件进行扫描
+
+编译可执行文件
+```
+make build
+```
+运行可执行文件进行扫描
+```
+chmod +x veinmind-sensitive && ./veinmind-sensitive scan xxx 
+```
+### 基于平行容器模式
+确保机器上安装了`docker`以及`docker-compose`
+#### Makefile 一键命令
+```
+make run.docker ARG="scan xxxx"
+```
+#### 自行构建镜像进行扫描
+构建`veinmind-sensitive`镜像
+```
+make build.docker
+```
+运行容器进行扫描
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-sensitive scan xxx
 ```
 
-或者使用项目提供的脚本启动
-
-```
-chmod +x parallel-container-run.sh && ./parallel-container-run.sh
-```
-
-## 使用
+## 使用参数
 
 1.指定镜像名称或镜像ID并扫描 (需要本地存在对应的镜像)
 
 ```
-./veinmind-sensitive scan [imagename/imageid]
+./veinmind-sensitive scan image [imagename/imageid]
 ```
+![](../../../docs/veinmind-sensitive/sensitive-01.jpeg)
 
 2.扫描所有本地镜像
 
 ```
-./veinmind-sensitive scan
+./veinmind-sensitive scan image
 ```
-
-3.指定镜像类型
-
+![](../../../docs/veinmind-sensitive/sensitive-02-1.jpeg)
+![](../../../docs/veinmind-sensitive/sensitive-02-2.jpeg)
+3.指定输出类型
+支持的输出格式：
+- html
+- json
+- cli（默认）
 ```
-./veinmind-sensitive scan --containerd
+./veinmind-sensitive scan image [imageID/imageName] -f html
 ```
-
-镜像类型
-
-- dockerd
-- containerd
-
-4.指定输出类型
-
-```
-./veinmind-sensitive --output [outputtype] scan
-```
+生成的result.html效果如图：
+![](../../../docs/veinmind-sensitive/sensitive-03.jpg)
 
 ## 规则字段说明
 
@@ -75,11 +87,3 @@ chmod +x parallel-container-run.sh && ./parallel-container-run.sh
 - match: 内容匹配规则，默认为正则
 - filepath: 路径匹配规则，默认为正则
 - env: 环境变量匹配规则，默认为正则且忽略大小写
-
-## 演示
-
-1.扫描指定镜像名称 `sensitive`
-![](../../../docs/veinmind-sensitive/sensitive-01.png)
-
-2.扫描所有镜像
-![](../../../docs/veinmind-sensitive/sensitive-02.png)

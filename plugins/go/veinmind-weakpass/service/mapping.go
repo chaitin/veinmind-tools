@@ -1,19 +1,19 @@
 package service
 
 import (
-	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
-func GetType(service IService) report.WeakpassService {
+func GetType(service IService) event.WeakpassService {
 	switch service.(type) {
 	case *SshService:
-		return report.SSH
+		return event.SSH
 	case *redisService:
-		return report.Redis
+		return event.Redis
 	case *mysqlService:
-		return report.Mysql
+		return event.Mysql
 	case *tomcatService:
-		return report.Tomcat
+		return event.Tomcat
 	default:
 		return 0
 	}

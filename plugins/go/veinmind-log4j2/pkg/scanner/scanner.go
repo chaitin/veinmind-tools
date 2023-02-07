@@ -5,14 +5,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
+	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
 func ScanImage(image api.Image, result *[]*Result) error {

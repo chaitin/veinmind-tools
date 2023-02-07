@@ -11,7 +11,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"veinmind-webshell/pkg/filter"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-webshell/pkg/filter"
 )
 
 type FileInfo struct {

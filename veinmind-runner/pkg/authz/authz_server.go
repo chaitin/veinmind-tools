@@ -1,11 +1,10 @@
 package authz
 
 import (
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
 type Runner interface {
@@ -67,7 +66,7 @@ func (s *defaultServer) Close() error {
 	return nil
 }
 
-func handlePolicyCheck(policy Policy, events []reporter.ReportEvent) bool {
+func handlePolicyCheck(policy Policy, events []*event.Event) bool {
 	riskLevelFilter := make(map[string]struct{})
 	for _, level := range policy.RiskLevelFilter {
 		riskLevelFilter[level] = struct{}{}

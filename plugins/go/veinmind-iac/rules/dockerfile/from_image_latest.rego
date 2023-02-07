@@ -8,17 +8,17 @@ import data.common
 risks[res] {
     inner := input[_]
 	inner.Cmd == "from"
-	some val in inner.Value
-        contains(val, ":latest")
-        not contains(val, "scratch")
+	args := concat(" ", inner.Value)
+    contains(args, ":latest")
+    not contains(args, "scratch")
 	res := common.result(inner, "DF-003")
 }
 
 risks[res] {
     inner := input[_]
 	inner.Cmd == "from"
-	some val in inner.Value
-        not contains(val, ":")
-        not contains(val, "scratch")
+	args := concat(" ", inner.Value)
+    not contains(args, ":")
+    not contains(args, "scratch")
 	res := common.result(inner, "DF-003")
 }

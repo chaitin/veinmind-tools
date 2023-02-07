@@ -1,8 +1,9 @@
 package cache
 
 import (
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 	"github.com/gogf/gf/os/gmutex"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 )
 
 var PathRule = pathRuleCache{

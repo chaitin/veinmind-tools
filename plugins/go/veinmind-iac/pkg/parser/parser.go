@@ -1,14 +1,15 @@
 package parser
 
 import (
+	"io"
+	"os"
+	"strings"
+
 	api "github.com/chaitin/libveinmind/go/iac"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"gopkg.in/yaml.v3"
-	"io"
-	"os"
-	"strings"
 )
 
 type parseHandle func(file *os.File, path string) (interface{}, error)

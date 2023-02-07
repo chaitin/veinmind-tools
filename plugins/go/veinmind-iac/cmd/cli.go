@@ -4,52 +4,43 @@ import (
 	"os"
 	"time"
 
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-common-go/service/report"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/output"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/scanner"
-	"github.com/open-policy-agent/opa/ast"
-
 	"github.com/chaitin/libveinmind/go/cmd"
 	iacApi "github.com/chaitin/libveinmind/go/iac"
 	"github.com/chaitin/libveinmind/go/plugin"
+	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
+	"github.com/open-policy-agent/opa/ast"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/scanner"
 )
 
 var (
+	pluginInfo = plugin.Manifest{
+		Name:        "veinmind-iac",
+		Author:      "veinmind-team",
+		Description: "veinmind-iac scan IAC file and discovery risks of them",
+	}
+
+	reportService = &report.Service{}
+
 	results   []scanner.Result
 	scanStart = time.Now()
 	scanTotal = 0
 
-	reportLevelMap = map[string]report.Level{
-		"Low":      report.Low,
-		"Medium":   report.Medium,
-		"High":     report.High,
-		"Critical": report.Critical,
+	reportLevelMap = map[string]event.Level{
+		"Low":      event.Low,
+		"Medium":   event.Medium,
+		"High":     event.High,
+		"Critical": event.Critical,
+	}
+	scanCmd = &cmd.Command{
+		Use: "scan",
 	}
 	rootCmd    = &cmd.Command{}
 	scanIaCCmd = &cmd.Command{
-		Use:   "scan-iac",
-		Short: "scan image command",
-		PostRun: func(cmd *cmd.Command, args []string) {
-			format, _ := cmd.Flags().GetString("format")
-			spend := time.Since(scanStart)
-
-			output.Stream(spend, scanTotal, func() error {
-				switch format {
-				case output.STDOUT:
-					if err := output.Stdout(results); err != nil {
-						log.Error("Stdout error", err)
-						return err
-					}
-				case output.JSON:
-					if err := output.Json(results); err != nil {
-						log.Error("Export Results JSON False", err)
-						return err
-					}
-				}
-				return nil
-			})
-		},
+		Use:   "iac",
+		Short: "scan iac command",
 	}
 )
 
@@ -69,16 +60,21 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 
 	uniqueAppend(res)
 
-	reportDetails := make([]report.AlertDetail, 0)
-	reportLevel := report.Low
 	for _, data := range res {
 		for _, risk := range data.Risks {
-			if reportLevel < reportLevelMap[data.Rule.Severity] {
-				reportLevel = reportLevelMap[data.Rule.Severity]
-			}
-			reportDetails = append(reportDetails, report.AlertDetail{
-				IaCDetail: &report.IaCDetail{
-					RuleInfo: report.IaCRule{
+			reportEvent := event.Event{
+				BasicInfo: &event.BasicInfo{
+					ID:         iac.Path,
+					Object:     event.NewObject(iac),
+					Time:       time.Now(),
+					Source:     pluginInfo.Name,
+					Level:      reportLevelMap[data.Rule.Severity],
+					DetectType: event.Container,
+					EventType:  event.Risk,
+					AlertType:  event.IaCRisk,
+				},
+				DetailInfo: event.NewDetailInfo(&event.IaCDetail{
+					RuleInfo: event.IaCRule{
 						Id:          data.Rule.Id,
 						Name:        data.Rule.Name,
 						Description: data.Rule.Description,
@@ -87,47 +83,28 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 						Solution:    data.Rule.Solution,
 						Type:        data.Rule.Type,
 					},
-					FileInfo: report.IaCData{
+					FileInfo: event.IaCData{
 						StartLine: risk.StartLine,
 						EndLine:   risk.EndLine,
 						FilePath:  risk.FilePath,
 						Original:  risk.Original,
 					},
-				},
-			})
+				}),
+			}
+			err = reportService.Client.Report(&reportEvent)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 		}
 	}
-
-	if len(reportDetails) > 0 {
-		//if you want display at runner report, you should send your result to report event
-		reportEvent := report.ReportEvent{
-			ID:             iac.Path,                 // iac id info
-			Object:         report.Object{Raw: iac},  // object
-			Time:           time.Now(),               // report time, usually use time.Now
-			Level:          reportLevel,              // report event level
-			DetectType:     report.IaC,               // report scan object type
-			EventType:      report.Risk,              // report event type: Risk/Invasion/Info
-			AlertType:      report.IaCRisk,           // report alert type, we provide some clearly types of security events,
-			AlertDetails:   reportDetails,            // add report detail data in there
-			GeneralDetails: []report.GeneralDetail{}, // if your report event does not in alert type, you can use GeneralDetails type which consists of json bytes
-		}
-		err = report.DefaultReportClient(report.WithDisableLog()).Report(reportEvent)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(cmd.MapIACCommand(scanIaCCmd, scanIaC))
-	rootCmd.AddCommand(cmd.NewInfoCommand(plugin.Manifest{
-		Name:        "veinmind-iac",
-		Author:      "veinmind-team",
-		Description: "veinmind-iac scan IAC file and discovery risks of them",
-	}))
-	scanIaCCmd.Flags().StringP("format", "f", "stdout", "export file format")
+	rootCmd.AddCommand(scanCmd)
+	scanCmd.AddCommand(report.MapReportCmd(cmd.MapIACCommand(scanIaCCmd, scanIaC), reportService))
+	rootCmd.AddCommand(cmd.NewInfoCommand(pluginInfo))
 }
 
 func uniqueAppend(res []scanner.Result) {

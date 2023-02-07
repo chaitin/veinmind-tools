@@ -1,4 +1,4 @@
-FROM veinmind/python3.6:1.5.1-stretch
+FROM veinmind/python3.6:1.5.1-slim
 WORKDIR /tool
 ADD . .
 RUN pip install -r requirements.txt

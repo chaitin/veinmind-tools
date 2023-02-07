@@ -7,7 +7,7 @@ import (
 
 	"github.com/magiconair/properties/assert"
 
-	"veinmind-webshell/pkg/filter"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-webshell/pkg/filter"
 )
 
 func TestKit_Detect(t *testing.T) {
