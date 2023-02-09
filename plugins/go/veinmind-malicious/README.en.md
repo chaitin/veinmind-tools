@@ -67,6 +67,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-malicious scan image
 ```
 ![](../../../docs/veinmind-malicious/malicious_scan_image2-1.jpg)
+
 ![](../../../docs/veinmind-malicious/malicious_scan_image2-2.jpg)
 
 

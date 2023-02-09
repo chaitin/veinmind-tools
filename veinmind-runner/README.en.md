@@ -4,27 +4,27 @@
 veinmind-runner is a safety tool platform for pulse container developed by Changting Technology
 </p>
 
-## Basic Introduction
+## 📸 Basic Introduction
 
 With rich research and development experience as the background, Changting team designed a set of plug-in system in [veinmind-sdk](). With the support of the plugin system, you only need to call the API provided by [veinmind-sdk]() to automatically generate plug-ins that meet the standard specifications. (
 See [example](./example)) for a code example.
 As a plugin platform, 'veinmind-runner' will automatically scan for compliant plugins and pass the image information to the corresponding plugin.
 ! [](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220321150601.png)
 
-## Features
+## 🔥 Features
 
 - Automatically scan and register plugins in the current directory (including subdirectories)
 - Run different language plugins in one way
 - Plugins can communicate with the 'runner' to alert on events, etc
 
-## Compatibility
+## 💻 Compatibility
 
 - linux/amd64
 - linux/386
 - linux/arm64
 - linux/arm
 
-## Usage
+## 🕹 Usage
 
 ### Based on executable files
 
@@ -73,7 +73,7 @@ Install 'veinmind-runner' using Helm
 cd ./veinmind-runner/script/helm_chart/veinmind
 helm install veinmind .
 ```
-## Use parameters
+## ⚙ Use parameters
 ### Basic parameters
 Refer to [veinmind-runner usage parameters documentation](docs/veinmind-runner.md)
 ### Advanced parameters

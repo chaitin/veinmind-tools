@@ -55,12 +55,17 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ## 使用
 
 1. 登录[百川平台](https://rivers.chaitin.cn/)，激活关山 Webshell 检测产品
-   ![](../../../docs/veinmind-webshell/readme1.png)
+
+![](../../../docs/veinmind-webshell/readme1.png)
 
 2. 点击左下角组织配置创建 API Token (基础版每日限制检测 100 次， 高级版可联系问脉小助手/百川平台获取)
-   ![](../../../docs/veinmind-webshell/readme2.png)
-   ![](../../../docs/veinmind-webshell/readme3.png)
+
+![](../../../docs/veinmind-webshell/readme2.png)
+
+![](../../../docs/veinmind-webshell/readme3.png)
+
 3. 使用token扫描指定镜像
+
 ```
 ./veinmind-webshell scan image [imageID/imageName] --token [关山token]
 ```
@@ -81,6 +86,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-webshell scan container  --token [关山token]
 ```
+
 ![](../../../docs/veinmind-webshell/scan_container_2.jpg)
 
 6. 指定输出格式

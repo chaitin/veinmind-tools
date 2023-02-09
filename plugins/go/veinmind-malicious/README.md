@@ -19,9 +19,20 @@ veinmind-malicious 是由长亭科技自研的一款镜像恶意文件扫描工�
 
 ## 使用方式
 
+开始之前请先确保机器上安装了clamav，并设置配置文件
+
+```
+cp dockerfiles/clamd.conf /etc/clamav/clamd.conf
+```
+
+如果您使用的是`VirusTotal`，则需要在环境变量或`scripts/.env`文件中声明`VT_API_KEY`
+```
+export VT_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 ### 基于可执行文件
 
 请先安装`libveinmind`，安装方法可以参考[官方文档](https://github.com/chaitin/libveinmind)
+
 #### Makefile 一键命令
 
 ```
@@ -67,6 +78,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-malicious scan image
 ```
 ![](../../../docs/veinmind-malicious/malicious_scan_image2-1.jpg)
+
 ![](../../../docs/veinmind-malicious/malicious_scan_image2-2.jpg)
 
 

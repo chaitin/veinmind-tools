@@ -68,6 +68,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-sensitive scan image
 ```
 ![](../../../docs/veinmind-sensitive/sensitive-02-1.jpeg)
+
 ![](../../../docs/veinmind-sensitive/sensitive-02-2.jpeg)
 3.指定输出类型
 支持的输出格式：
@@ -78,6 +79,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-sensitive scan image [imageID/imageName] -f html
 ```
 生成的result.html效果如图：
+
 ![](../../../docs/veinmind-sensitive/sensitive-03.jpg)
 
 ## 规则字段说明

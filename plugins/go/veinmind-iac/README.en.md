@@ -80,7 +80,7 @@ Supported output formats:
 - json
 - cli (default)
 ```
-  ./veinmind-iac scan iac -f html IACFILE/PATH
-  ```
-  The resulting result.html looks like this:
-  ![img.png](../../../docs/veinmind-iac/iac_scan_iac_04.jpg)
+./veinmind-iac scan iac -f html IACFILE/PATH
+```
+The resulting result.html looks like this:
+![img.png](../../../docs/veinmind-iac/iac_scan_iac_04.jpg)

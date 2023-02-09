@@ -68,6 +68,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-sensitive scan image
 ```
 ![](../../../docs/veinmind-sensitive/sensitive-02-1.jpg)
+
 ![](../../../docs/veinmind-sensitive/sensitive-02-2.jpg)
 
 Specify the output type
