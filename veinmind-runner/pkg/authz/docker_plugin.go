@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"io"
 	"net"
 	"os"
 	"sync"
 
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/route"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 	"github.com/docker/docker/pkg/authorization"
 	"github.com/docker/docker/pkg/plugins"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/action"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz/route"
 )
 
 type DockerServerOption func(option *dockerServerOption) error
@@ -211,7 +212,7 @@ func (s *dockerPluginServer) handleAuthZReq(req *authorization.Request) *authori
 	}
 	policy := val.(Policy)
 	var (
-		eventListCh <-chan []reporter.ReportEvent
+		eventListCh <-chan []*event.Event
 		result      bool
 		err         error
 	)

@@ -8,139 +8,108 @@ on:
         required: true
 
 jobs:
-  push-veinmind-backdoor:
-    uses: ./.github/workflows/push.yml
-    with:
-      path: ./plugins/python/veinmind-backdoor
-      file: veinmind-backdoor
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  #  Deprecated
-  #  push-veinmind-sensitive:
-  #    uses: ./.github/workflows/push.yml
-  #    with:
-  #      path: ./plugins/python/veinmind-sensitive
-  #      file: veinmind-sensitive
-  #    secrets:
-  #      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  #      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-
-  push-veinmind-history:
-    uses: ./.github/workflows/push.yml
-    with:
-      path: ./plugins/python/veinmind-history
-      file: veinmind-history
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-malicious:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-malicious
-      file: veinmind-malicious
+  # push python plugins
+  push-python-plugins:
+    strategy:
+      matrix:
+        plugin: [
+          veinmind-backdoor,
+          veinmind-history
+        ]
+        path: [ ./plugins/python/ ]
+    name: ${{ matrix.plugin }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v3
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+            linux/arm64
+            linux/386
+          tags: |
+            veinmind/${{ matrix.plugin }}:latest
+            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
+          context: ${{ matrix.path }}/${{ matrix.plugin }}
+          build-args: |
+            CI_GOOS=${{env.CI_GOOS}}
+            CI_GOARCH=${{env.CI_GOARCH}}
+  # push go plugins
+  push-go-plugins:
+    strategy:
+      matrix:
+        plugin: [
+          veinmind-basic,
+          veinmind-escalate,
+          veinmind-iac,
+          veinmind-log4j2,
+          veinmind-malicious,
+          veinmind-sensitive,
+          veinmind-unsafe-mount,
+          veinmind-vuln,
+          veinmind-weakpass,
+          veinmind-webshell,
+        ]
+        path: [ ./plugins/go/ ]
+    name: ${{ matrix.plugin }}
+    runs-on: ubuntu-20.04
+    env:
       CI_GOOS: linux
       CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-weakpass:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-weakpass
-      file: veinmind-weakpass
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-vuln:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-vuln
-      file: veinmind-vuln
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-webshell:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-webshell
-      file: veinmind-webshell
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-unsafe-mount:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-unsafe-mount
-      file: veinmind-unsafe-mount
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-log4j2:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-log4j2
-      file: veinmind-log4j2
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-iac:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-iac
-      file: veinmind-iac
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  push-veinmind-sensitive-go:
-    uses: ./.github/workflows/push-amd64.yml
-    with:
-      path: ./plugins/go/veinmind-sensitive
-      file: veinmind-sensitive-go
-      CI_GOOS: linux
-      CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v3
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+#            linux/arm64
+          tags: |
+            veinmind/${{ matrix.plugin }}:latest
+            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
+          context: ${{ matrix.path }}/${{ matrix.plugin }}
+          build-args: |
+            CI_GOOS=${{env.CI_GOOS}}
+            CI_GOARCH=${{env.CI_GOARCH}}
 
   push-veinmind-runner:
-    uses: ./.github/workflows/push-amd64.yml
-    needs: [ push-veinmind-backdoor,
-             push-veinmind-sensitive-go,
-             push-veinmind-history,
-             push-veinmind-malicious,
-             push-veinmind-weakpass,
-             push-veinmind-vuln,
-             push-veinmind-log4j2,
-             push-veinmind-unsafe-mount,
-             push-veinmind-iac ]
-    with:
-      path: ./veinmind-runner
-      file: veinmind-runner
+    name: veinmind-runner
+    needs: [ push-python-plugins, push-go-plugins ]
+    env:
       CI_GOOS: linux
       CI_GOARCH: amd64
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v3
+        with:
+          push: true
+          platforms: |
+            linux/amd64
+#            linux/arm64
+          tags: |
+            veinmind/veinmind-runner:latest
+            veinmind/veinmind-runner:${{github.ref_name}}
+          context: veinmind-runner
+          build-args: |
+            CI_GOOS=${{env.CI_GOOS}}
+            CI_GOARCH=${{env.CI_GOARCH}}

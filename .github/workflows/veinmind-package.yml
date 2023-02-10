@@ -1,22 +1,117 @@
-name: veinmind-tools-pacakge
+name: veinmind-tools-package
 on:
   workflow_call:
 
 jobs:
-  package-veinmind-backdoor:
-    uses: ./.github/workflows/package.yml
-    with:
-      path: ./plugins/python/veinmind-backdoor
-      file: veinmind-backdoor.tar.gz
+  # package python plugins
+  package-python-plugins:
+    strategy:
+      matrix:
+        plugin: [
+          veinmind-backdoor,
+          veinmind-history
+        ]
+        path: [ ./plugins/python/ ]
+    name: ${{ matrix.plugin }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+      - run: |
+          cd ${{ matrix.path }}/${{ matrix.plugin }}
+          tar -cvzf ${{ matrix.plugin }}.tar.gz *
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.plugin }}
+          path: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}.tar.gz
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}.tar.gz
 
-  package-veinmind-sensitive:
-    uses: ./.github/workflows/package.yml
-    with:
-      path: ./plugins/python/veinmind-sensitive
-      file: veinmind-sensitive.tar.gz
+  # package all artifacts
+  package-runner:
+    name: veinmind-runner
+    runs-on: ubuntu-latest
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    needs: [ package-python-plugins ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-malicious-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-vuln-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-webshell-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-unsafe-mount-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-log4j2-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-weakpass-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-iac-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-escalate-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-sensitive-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-basic-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-runner-amd64
+          path: ./
+      - run: |
+          mv veinmind-malicious_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-malicious  
+          mv veinmind-vuln_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-vuln 
+          mv veinmind-webshell_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-webshell 
+          mv veinmind-unsafe-mount_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-unsafe-mount 
+          mv veinmind-log4j2_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-log4j2 
+          mv veinmind-sensitive_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-sensitive  
+          mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-weakpass 
+          mv veinmind-iac_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-iac 
+          mv veinmind-basic_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-basic
+          mv veinmind-escalate_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-escalate  
+          mv ./plugins/python/veinmind-history ./veinmind-history
+          mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
+          rm -rf ./veinmind-runner && mv veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner
+          chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate 
+          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell \
+          veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate \
+          ./veinmind-history \
+          ./veinmind-backdoor \
+      - uses: actions/upload-artifact@v3
+        with:
+          name: veinmind-runner.tar.gz
+          path: veinmind-runner.tar.gz
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: veinmind-runner.tar.gz
 
-  package-veinmind-history:
-    uses: ./.github/workflows/package.yml
-    with:
-      path: ./plugins/python/veinmind-history
-      file: veinmind-history.tar.gz
+

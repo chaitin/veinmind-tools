@@ -1,33 +1,31 @@
 package authz
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"io"
 
-	"github.com/chaitin/veinmind-common-go/service/report"
-
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
-
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
-func toLevelStr(level report.Level) string {
+func toLevelStr(level event.Level) string {
 	switch level {
-	case report.Low:
+	case event.Low:
 		return "Low"
-	case report.Medium:
+	case event.Medium:
 		return "Medium"
-	case report.High:
+	case event.High:
 		return "High"
-	case report.Critical:
+	case event.Critical:
 		return "Critical"
 	}
 
 	return "None"
 }
 
-func processReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Policy,
-	pluginLog io.Writer) (reportFlag bool, results []reporter.ReportEvent) {
+func processReportEvents(eventListCh <-chan []*event.Event, policy Policy,
+	pluginLog io.Writer) (reportFlag bool, results []*event.Event) {
 	riskLevelFilter := make(map[string]struct{})
 	for _, level := range policy.RiskLevelFilter {
 		riskLevelFilter[level] = struct{}{}
@@ -44,7 +42,8 @@ func processReportEvents(eventListCh <-chan []reporter.ReportEvent, policy Polic
 	}
 	return reportFlag, results
 }
-func handleDockerPluginReportEvents(eventListCh <-chan []reporter.ReportEvent, bpolicy Policy,
+
+func handleDockerPluginReportEvents(eventListCh <-chan []*event.Event, bpolicy Policy,
 	pluginLog io.Writer) {
 	filter, events := processReportEvents(eventListCh, bpolicy, pluginLog)
 	if filter {
@@ -52,7 +51,26 @@ func handleDockerPluginReportEvents(eventListCh <-chan []reporter.ReportEvent, b
 			log.GetModule(log.AuthzModuleKey).Warn(fmt.Sprintf("action %s has risks!", bpolicy.Action))
 		}
 	}
-	if err := reporter.WriteEvents2Log(events, pluginLog); err != nil {
+	if err := WriteEvents2Log(events, pluginLog); err != nil {
 		log.GetModule(log.AuthzModuleKey).Warn(err)
 	}
+}
+
+func WriteEvents2Log(events []*event.Event, writer io.Writer) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	eventsBytes, err := json.MarshalIndent(events, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(eventsBytes)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write([]byte("\n"))
+	return err
 }

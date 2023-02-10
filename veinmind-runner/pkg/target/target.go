@@ -10,8 +10,8 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
-	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/plugind"
 )
 
@@ -21,7 +21,7 @@ type Target struct {
 	Opts           *Options
 	Plugins        []*plugin.Plugin
 	ServiceManager *plugind.Manager
-	ReportService  *report.ReportService
+	ReportService  *report.Service
 }
 
 // WithDefaultOptions Transfer Target.Options to plugin.ExecOption
@@ -74,7 +74,7 @@ func (t *Target) WithDefaultOptions(opts ...Option) []plugin.ExecOption {
 // containerd:imageRef 		   -> scan imageRef with containerd runtime
 // registry: 				   -> scan all with remote runtime(do not support docker.io)
 // registry: imageRef		   -> scan imageRef with remote runtime
-func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, serviceManager *plugind.Manager, reportService *report.ReportService, opts ...Option) []*Target {
+func NewTargets(cmd *cmd.Command, args []string, plugins []*plugin.Plugin, serviceManager *plugind.Manager, reportService *report.Service, opts ...Option) []*Target {
 	targets := make([]*Target, 0)
 	// extends flags
 	objArgs, specFlags := splitArgs(cmd, args)

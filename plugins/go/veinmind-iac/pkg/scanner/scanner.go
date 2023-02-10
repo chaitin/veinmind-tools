@@ -3,16 +3,18 @@ package scanner
 import (
 	"context"
 	"errors"
-	api "github.com/chaitin/libveinmind/go/iac"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/parser"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/rules"
-	"github.com/mitchellh/mapstructure"
-	"github.com/open-policy-agent/opa/ast"
-	"github.com/open-policy-agent/opa/rego"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	api "github.com/chaitin/libveinmind/go/iac"
+	"github.com/mitchellh/mapstructure"
+	"github.com/open-policy-agent/opa/ast"
+	"github.com/open-policy-agent/opa/rego"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/parser"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/rules"
 )
 
 type Scanner struct {

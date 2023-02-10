@@ -8,29 +8,28 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
-	"github.com/chaitin/veinmind-common-go/service/report"
-
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/veinfs"
 )
 
-func localRuleLevel2EventLevel(level string) report.Level {
+func localRuleLevel2EventLevel(level string) event.Level {
 	switch level {
 	case "critical":
-		return report.Critical
+		return event.Critical
 	case "high":
-		return report.High
+		return event.High
 	case "medium":
-		return report.Medium
+		return event.Medium
 	case "low":
-		return report.Low
+		return event.Low
 	}
 
-	return report.None
+	return event.None
 }
 
-func file2FileDetail(info *veinfs.FileInfo, path string) (report.FileDetail, error) {
-	return report.FileDetail{
+func file2FileDetail(info *veinfs.FileInfo, path string) (event.FileDetail, error) {
+	return event.FileDetail{
 		Path: path,
 		Perm: info.Perm,
 		Size: int64(info.Size),
@@ -42,7 +41,7 @@ func file2FileDetail(info *veinfs.FileInfo, path string) (report.FileDetail, err
 	}, nil
 }
 
-func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileInfo, image api.Image, contextContent string, contextContentHighlightLocation []int64) (*report.ReportEvent, error) {
+func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileInfo, image api.Image, contextContent string, contextContentHighlightLocation []int64) (*event.Event, error) {
 	fDetail, err := file2FileDetail(info, path)
 	if err != nil {
 		return nil, err
@@ -74,24 +73,25 @@ func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileIn
 		}
 	}
 
-	r := &report.ReportEvent{
-		ID:         image.ID(),
-		Object:     report.Object{Raw: image},
-		Time:       time.Now(),
-		Level:      localRuleLevel2EventLevel(rule.Level),
-		DetectType: report.Image,
-		EventType:  report.Risk,
-		AlertType:  report.Sensitive,
-		AlertDetails: []report.AlertDetail{
-			{
-				SensitiveFileDetail: &report.SensitveFileDetail{
-					FileDetail:                   fDetail,
-					RuleID:                       rule.Id,
-					RuleName:                     rule.Name,
-					RuleDescription:              rule.Description,
-					ContextContent:               contextContent,
-					ContextContentHighlightRange: contextContentHighlightLocation,
-				},
+	r := &event.Event{
+		BasicInfo: &event.BasicInfo{
+			ID:         image.ID(),
+			Object:     event.NewObject(image),
+			Source:     "veinmind-sensitive",
+			Time:       time.Now(),
+			Level:      localRuleLevel2EventLevel(rule.Level),
+			DetectType: event.Image,
+			EventType:  event.Risk,
+			AlertType:  event.SensitiveFile,
+		},
+		DetailInfo: &event.DetailInfo{
+			AlertDetail: &event.SensitiveFileDetail{
+				FileDetail:                   fDetail,
+				RuleID:                       rule.Id,
+				RuleName:                     rule.Name,
+				RuleDescription:              rule.Description,
+				ContextContent:               contextContent,
+				ContextContentHighlightRange: contextContentHighlightLocation,
 			},
 		},
 	}

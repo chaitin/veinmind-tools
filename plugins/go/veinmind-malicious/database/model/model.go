@@ -46,8 +46,8 @@ type ReportLayer struct {
 	MaliciousFileInfos []MaliciousFileInfo `gorm:"foreignKey:LayerID;references:LayerID"`
 }
 
-func (self *ReportImage) IsMalicious() bool {
-	if self.MaliciousFileCount > 0 {
+func (r *ReportImage) IsMalicious() bool {
+	if r.MaliciousFileCount > 0 {
 		return true
 	} else {
 		return false

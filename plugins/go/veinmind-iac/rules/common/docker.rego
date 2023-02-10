@@ -5,8 +5,8 @@ meta_data["DF-001"] = {
    "name": "expose port 22",
    "type": "dockerfile",
    "severity": "Medium",
-   "description": "开放22端口的容器可能允许用户通过SSH进行登录，请确认应用是否需要使用，并避免使用22端口",
-   "solution": "取消22端口的Expose操作",
+   "description": "The container with port 22 open may allow users to log in through SSH. Therefore, check whether the application needs to use port 22 and avoid using port 22",
+   "solution": "Cancel the Expose operation on port 22",
    "reference": "",
 }
 
@@ -15,8 +15,8 @@ meta_data["DF-002"]  := {
     "name": "expose out of range [1-65535]",
     "type": "dockerfile",
     "severity": "High",
-    "description": "Expose 端口号超出了端口的正常范围: [0-65535]",
-    "solution": "确认 Expose 端口号正确",
+    "description": "The Expose port number is out of the normal range of ports: [0-65535]",
+    "solution": "Make sure the Expose port number is correct",
     "reference": "",
 }
 
@@ -25,8 +25,8 @@ meta_data["DF-003"] := {
     "name": "from latest image",
     "type": "dockerfile",
     "severity": "Medium",
-    "description": "使用了latest镜像，会导致镜像更新出现非预期的错误",
-    "solution": "使用指定的tag镜像版本替代latest",
+    "description": "Using the latest image will cause an unexpected error in the image update",
+    "solution": "Use the specified tag image version instead of latest",
     "reference": "",
 }
 
@@ -35,8 +35,8 @@ meta_data["DF-004"] := {
     "name": "from use platform",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "在FROM指令发现了platform参数，请尽量去除不必要的platform指定",
-    "solution": "去除platform的指定",
+    "description": "The platform parameter was found in the FROM directive. Please try to remove unnecessary platform designations",
+    "solution": "Removes the platform designation",
     "reference": "",
 }
 
@@ -45,8 +45,8 @@ meta_data["DF-005"] := {
     "name": "user root",
     "type": "dockerfile",
     "severity": "High",
-    "description": "使用root启动容器可能会造成容器逃逸，最佳实践是在Dockerfile通过`USER`指定非root用户启动",
-    "solution": "添加 `USER xxxx` 在Dockerfile中并确保用户为非root用户",
+    "description": "Starting the container with root can cause container escape. The best practice is to start the container with 'USER' in the Dockerfile as a non-root user",
+    "solution": "Add 'USER xxxx' to the Dockerfile and make sure the user is not root",
     "reference": "",
 }
 
@@ -55,8 +55,8 @@ meta_data["DF-006"] := {
     "name": "WORKDIR not absolute",
     "type": "dockerfile",
     "severity": "High",
-    "description": "WORKDIR 使用了非绝对路径",
-    "solution": "在WORKDIR中使用绝对路径",
+    "description": "WORKDIR uses a non-absolute path",
+    "solution": "Use absolute paths in WORKDIR",
     "reference": "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#workdir",
 }
 
@@ -66,8 +66,8 @@ meta_data["DF-007"] := {
     "name": "using HEALTHCHECK",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "请使用HEALTHCHECK保证业务正常",
-    "solution": "使用HEALTHCHECK来保证业务正常运行",
+    "description": "Use HEALTHCHECK to ensure normal services",
+    "solution": "Use HEALTHCHECK to keep your business running",
     "reference": "https://docs.docker.com/engine/reference/builder/#healthcheck",
 }
 
@@ -76,8 +76,8 @@ meta_data["DF-008"] := {
     "name": "multiple HEALTHCHECK",
     "type": "dockerfile",
     "severity": "Medium",
-    "description": "重复声明了 HEALTHCHECK",
-    "solution": "保留唯一的 HEALTHCHECK",
+    "description": "HEALTHCHECK is repeated",
+    "solution": "Keep the unique HEALTHCHECK",
     "reference": "https://docs.docker.com/engine/reference/builder/#healthcheck",
 }
 
@@ -86,8 +86,8 @@ meta_data["DF-009"] := {
     "name": "chwon flag in COPY",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "当用户只需要执行权限时，确保不使用--chown参数",
-    "solution": "去除 --chown",
+    "description": "Make sure not to use the --chown parameter when the user only needs enforcement rights",
+    "solution": "delete --chown",
     "reference": "",
 }
 
@@ -97,8 +97,8 @@ meta_data["DF-010"] := {
     "name": "use COPY instead of ADD",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "除非要提取tar文件，否则应使用COPY而不是ADD。 ADD指令将提取tar文件，这增加了基于Zip的漏洞的风险。因此，建议使用不提取tar文件的COPY指令",
-    "solution": "使用COPY代替ADD指令",
+    "description": "Use COPY instead of ADD unless you want to extract a tar file. The ADD directive extracts tar files, which increases the risk of ZIP-based vulnerabilities. Therefore, the COPY directive, which does not extract tar files, is recommended",
+    "solution": "Use COPY instead of the ADD directive",
     "reference": "https://docs.docker.com/engine/reference/builder/#add",
 }
 
@@ -107,8 +107,8 @@ meta_data["DF-011"] := {
     "name": "use ADD to fetch package",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "使用ADD从远程获取packages是极度危险的，请使用curl/wget来获取packages",
-    "solution": "使用curl/wget来替代ADD",
+    "description": "Retrieving packages remotely using ADD is extremely dangerous. Use curl/wget to retrieve packages",
+    "solution": "Use curl/wget instead of ADD",
     "reference": "https://docs.docker.com/engine/reference/builder/#add",
 }
 
@@ -117,8 +117,8 @@ meta_data["DF-012"] := {
     "name": "secret value in ENV",
     "type": "dockerfile",
     "severity": "Medium",
-    "description": "ENV内写入了敏感信息，可能会导致信息泄漏",
-    "solution": "去除非必要的敏感信息",
+    "description": "Sensitive information is written to ENV, which may leak",
+    "solution": "Remove unless necessary sensitive information",
     "reference": "",
 }
 
@@ -127,8 +127,8 @@ meta_data["DF-013"] := {
     "name": "both use wget and curl",
     "type": "dockerfile",
     "severity": "Low",
-    "description": "同时使用了wget和curl，两者的功能相同",
-    "solution": "确保使用同一种相同功能的工具",
+    "description": "Both wget and curl are used, and they do the same thing",
+    "solution": "Make sure you use the same tool that does the same thing",
     "reference": "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#run",
 }
 
@@ -137,7 +137,7 @@ meta_data["DF-014"] := {
     "name": "run with sudo",
     "type": "dockerfile",
     "severity": "CRITICAL",
-    "description": "避免使用`sudo` 在`RUN`指令中，这可能会导致非预期的结果",
-    "solution": "避免使用sudo",
+    "description": "Avoid using 'sudo' in the 'RUN' instruction, which may lead to unexpected results",
+    "solution": "Avoid using sudo",
     "reference": "https://docs.docker.com/engine/reference/builder/#run",
 }

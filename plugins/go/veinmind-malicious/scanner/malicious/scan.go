@@ -1,30 +1,32 @@
 package malicious
 
 import (
-	"code.cloudfoundry.org/bytefmt"
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
 	"debug/elf"
 	"encoding/hex"
-	veinmindcommon "github.com/chaitin/libveinmind/go"
-	docker "github.com/chaitin/libveinmind/go/docker"
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/clamav"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/virustotal"
-	fs "io/fs"
+	"io/fs"
 	"io/ioutil"
 	"net"
 	"os"
 	"strings"
 	"syscall"
 	"time"
+
+	"code.cloudfoundry.org/bytefmt"
+	api "github.com/chaitin/libveinmind/go"
+	"github.com/chaitin/libveinmind/go/docker"
+	"github.com/chaitin/libveinmind/go/plugin/log"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/clamav"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av/virustotal"
 )
 
-func Scan(image veinmindcommon.Image) (scanReport model.ReportImage, err error) {
+func Scan(image api.Image) (scanReport model.ReportImage, err error) {
 	// 判断是否已经扫描过
 	database.GetDbInstance().Preload("Layers").Preload("Layers.MaliciousFileInfos").Where("image_id = ?", image.ID()).Find(&scanReport)
 	if scanReport.ImageID != "" {

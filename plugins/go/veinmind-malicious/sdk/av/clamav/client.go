@@ -2,11 +2,13 @@ package clamav
 
 import (
 	"errors"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
-	"github.com/testwill/go-clamd"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/testwill/go-clamd"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/av"
 )
 
 var client = func() *clamd.Clamd {

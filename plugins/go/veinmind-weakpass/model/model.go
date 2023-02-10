@@ -1,8 +1,6 @@
 package model
 
-import (
-	"github.com/chaitin/veinmind-common-go/service/report"
-)
+import "github.com/chaitin/veinmind-common-go/service/report/event"
 
 type ScanImageResult struct {
 	// 镜像名称
@@ -23,7 +21,7 @@ type WeakpassResult struct {
 	Username    string
 	Password    string
 	Filepath    string
-	ServiceType report.WeakpassService
+	ServiceType event.WeakpassService
 }
 
 // 从文件中解析出来的相关信息

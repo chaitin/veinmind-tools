@@ -19,7 +19,6 @@
 ## 🔥 Demo
 ![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220415144819.gif)
 
-
 ## 🕹️ 快速开始
 ### 1. 确保机器上正确安装 docker
 ```
@@ -41,19 +40,20 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 ## 🔨 工具列表
 
-| 工具                                                        | 功能              | 
-|-----------------------------------------------------------|-----------------|
-| [veinmind-runner](veinmind-runner/README.md)              | 扫描工具运行宿主        |
-| [veinmind-malicious](plugins/go/veinmind-malicious)       | 扫描镜像中的恶意文件      |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描 镜像/容器 中的弱口令  |
-| [veinmind-log4j2](plugins/go/veinmind-log4j2)             | 扫描镜像中的log4j2漏洞  |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息      |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门        |
-| [veinmind-history](plugins/python/veinmind-history)       | 扫描镜像中的异常历史命令    |
-| [veinmind-vuln](plugins/go/veinmind-vuln)                 | 扫描镜像中的资产信息和漏洞   |
-| [veinmind-webshell](plugins/go/veinmind-webshell)         | 扫描镜像中的 Webshell |
-| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | 扫描容器中的不安全挂载目录   |
-| [veinmind-iac](plugins/go/veinmind-iac)                   | 扫描IaC文件         |
+| 工具                                                        | 功能                | 
+|-----------------------------------------------------------|-------------------|
+| [veinmind-runner](veinmind-runner/README.md)              | 扫描工具运行宿主          |
+| [veinmind-malicious](plugins/go/veinmind-malicious)       | 扫描容器/镜像中的恶意文件     |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描容器/镜像中的弱口令      |
+| [veinmind-log4j2](plugins/go/veinmind-log4j2)             | 扫描容器/镜像中的log4j2漏洞 |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息        |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门          |
+| [veinmind-history](plugins/python/veinmind-history)       | 扫描镜像中的异常历史命令      |
+| [veinmind-vuln](plugins/go/veinmind-vuln)                 | 扫描容器/镜像中的资产信息和漏洞  |
+| [veinmind-webshell](plugins/go/veinmind-webshell)         | 扫描镜像中的 Webshell   |
+| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | 扫描容器中的不安全挂载目录     |
+| [veinmind-iac](plugins/go/veinmind-iac)                   | 扫描IaC文件           |
+| [veinmind-escalate](plugins/go/veinmind-escalate)         | 扫描容器/镜像中的逃逸风险     |
     
 PS: 目前所有工具均已支持平行容器的方式运行
 
@@ -72,6 +72,7 @@ PS: 目前所有工具均已支持平行容器的方式运行
 | Harbor                                                      | 镜像仓库  | ✔️   |
 | Docker                                                      | 容器运行时 | ✔️   |
 | Containerd                                                  | 容器运行时 | ✔️   |
+| Kubernetes                                                  | 集群    | ✔️   |
 
 ## 🛴 工作原理
 ![](docs/architecture.png)

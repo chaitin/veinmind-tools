@@ -5,8 +5,8 @@ meta_data["KN-001"] = {
     "name": "Pod Container Use Latest Image",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "使用了latest镜像，会导致镜像更新出现非预期的错误",
-    "solution": "使用指定的tag镜像版本替代latest",
+    "description": "Using the latest image will cause an unexpected error in the image update",
+    "solution": "Use the specified tag image version instead of latest",
     "reference": "",
 }
 
@@ -15,8 +15,8 @@ meta_data["KN-002"] = {
     "name": "Pod Container Process Elevate Self",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "容器中的程序可以提升自己的权限并以root身份运行，这可能会使程序控制容器和节点。",
-    "solution": "将 containers[].securityContext.allowPrivilegeEscalation 置为false",
+    "description": "Programs in a container can elevate their privileges and run as root, potentially giving them control over containers and nodes.",
+    "solution": "Set containers[].SecurityContext.AllowPrivilegeEscalation to false",
     "reference": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
 }
 
@@ -25,8 +25,8 @@ meta_data["KN-003"] = {
     "name": "Default AppArmor profile not set",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "未设置默认AppArmor配置，容器中的程序可以绕过AppArmor保护策略。",
-    "solution": "删除 `container.apparmor.security.beta.kubernetes.io`注释或设置为`runtime/default`。",
+    "description": "Without the default AppArmor configuration set, programs in the container can bypass the AppArmor protection policy.",
+    "solution": "Delete `container.Apparmor.Security.Beta.Kubernetes.IO` comments or set to `runtime/default`.",
     "reference": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
 }
 
@@ -35,8 +35,8 @@ meta_data["KN-004"] = {
     "name": "SElinux set custom options",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "应禁止设置自定义SELinux用户或角色选项。",
-    "solution": "删除 `spec.securityContext.seLinuxOptions`、`spec.securityContext.seLinuxOptions` 以及 `spec.initContainers[*].securityContext.seLinuxOptions.`",
+    "description": "Setting custom SELinux user or role options should be disallowed.",
+    "solution": "Delete `spec.securityContext.seLinuxOptions`、`spec.securityContext.seLinuxOptions` and `spec.initContainers[*].securityContext.seLinuxOptions.`",
     "reference": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
 }
 meta_data["KN-005"] = {
@@ -44,8 +44,8 @@ meta_data["KN-005"] = {
     "name": "insecure-port enabled",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "apiserver的insecure-port不会进行身份验证，开启此选项会造成apiserver的未授权访问。",
-    "solution": "删除 /etc/kubernetes/manifest/kube-apiserver.yaml中的`--insecure-port=xxx`选项",
+    "description": "Insecure-port of apiserver does not perform authentication. Enabling this option will cause unauthorized access to apiserver.",
+    "solution": "Delete the option `--insecure-port=xxx` in /etc/kubernetes/manifest/kube-apiserver.yaml",
     "reference": "",
 }
 meta_data["KN-006"] = {
@@ -53,8 +53,8 @@ meta_data["KN-006"] = {
     "name": "secure-port wrong setting",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "如果错误地将`system:anonymous`用户绑定到`cluster-admin`用户组，则6443 端口允许匿名用户以管理员权限向集群内部下发指令",
-    "solution": "删除错误的system:anonymous clusterrolebinding配置",
+    "description": "If a 'system:anonymous' user is mistakenly bound to a' cluster-admin 'user group, port 6443 allows anonymous users to issue commands internally to the cluster with administrator rights",
+    "solution": "Delete the setting of system:anonymous clusterrolebinding",
     "reference": "",
 }
 meta_data["KN-007"] = {
@@ -62,8 +62,8 @@ meta_data["KN-007"] = {
     "name": "10250 port access wrong setting",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "如果在/var/lib/config.yaml中进行了错误的配置，会导致10250端口的未授权访问，通过该端口可以创建pod和控制pod",
-    "solution": "将/var/lib/kubelet/config.yml中authentication的anonymous的enabled设置为false，authorization的mode设置为webhook",
+    "description": "Incorrect configuration in /var/lib/config.yaml can result in unauthorized access to port 10250, through which Pods can be created and controlled",
+    "solution": "Set `authentication:anonymous:enabled` to false and `authorization:mode` to `webhook` in /var/lib/kubelet/config.yml",
     "reference": "",
 }
 meta_data["KN-008"] = {
@@ -71,8 +71,8 @@ meta_data["KN-008"] = {
     "name": "dashboard wrong access",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "如果对dashboard部署采用了错误的配置会导致dashboard登陆界面存在跳过按钮，可以未授权访问",
-    "solution": "将dashboard部署的配置文件中的`--enable-skip-login`删除",
+    "description": "If you configure the dashboard deployment incorrectly, the skip button may exist on the dashboard login page, and unauthorized access is possible",
+    "solution": "Delete `--enable-skip-login` in dashboard configure file",
     "reference": "",
 }
 meta_data["KN-009"] = {
@@ -80,8 +80,8 @@ meta_data["KN-009"] = {
     "name": "missing --client-cert-auth=true",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "未检测到etcd配置文件中的--client-cert-auth=true选项，可能会造成etcd不安全访问",
-    "solution": "在etcd配置文件中添加--client-cert-auth=true配置项",
+    "description": "The `--client-cert-auth=true` option in the etcd configuration file is not detected, which may result in insecure etcd access",
+    "solution": "Add the ``--client-cert-auth=true` configuration item to the etcd configuration file",
     "reference": "",
 }
 meta_data["KN-010"] = {
@@ -89,8 +89,8 @@ meta_data["KN-010"] = {
     "name": "missing --peer-client-cert-auth=true",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "未检测到etcd配置文件中的--peer-client-cert-auth=true选项，可能会造成etcd不安全访问",
-    "solution": "在etcd配置文件中添加--peer-client-cert-auth=true配置项",
+    "description": "The `--peer-client-cert-auth=true` option in the etcd configuration file is not detected, which may result in insecure etcd access",
+    "solution": "Add the ``--peer-client-cert-auth=true` configuration item to the etcd configuration file",
     "reference": "",
 }
 meta_data["KN-011"] = {
@@ -98,8 +98,8 @@ meta_data["KN-011"] = {
     "name": "Pod Container Use Privileged Mode",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器采用特权模式启动，有逃逸风险",
-    "solution": "将pod配置文件中的securityContext的privileged设置为false",
+    "description": "A container in pod has been started in privileged mode, and there is an escape risk. Procedure",
+    "solution": "Set the privileged of the securityContext in the pod profile to false",
     "reference": "",
 }
 meta_data["KN-012"] = {
@@ -107,8 +107,8 @@ meta_data["KN-012"] = {
     "name": "Pod Container Insecure Permission Granted:SYS_ADMIN",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器被授予了SYS_ADMIN权限，拥有该权限的容器可以通过notify_on_release或devices.allow等方式逃逸，有逃逸风险",
-    "solution": "将pod配置文件中的capabilities下的SYS_ADMIN权限删除",
+    "description": "It is detected that a container in pod has been granted SYS_ADMIN permission. Containers with this permission can escape by notify_on_release or devices.allow",
+    "solution": "Delete the SYS_ADMIN permissions in capabilities in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-013"] = {
@@ -116,8 +116,8 @@ meta_data["KN-013"] = {
     "name": "Pod Container Insecure Permission Granted:DAC_READ_SEARCH",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器被授予了CAP_DAC_READ_SEARCH权限，拥有该权限的容器可以通过open_by_handle_at函数读取宿主机的文件，有逃逸风险",
-    "solution": "将pod配置文件中的capabilities下的DAC_READ_SEARCH权限删除",
+    "description": "It is detected that a container in pod has the CAP_DAC_READ_SEARCH permission. The container with this permission can read files of the host through the open_by_handle_at function, which is at risk of escaping. Procedure",
+    "solution": "Delete the CAP_DAC_READ_SEARCH permissions in capabilities in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-014"] = {
@@ -125,8 +125,8 @@ meta_data["KN-014"] = {
     "name": "Pod Container Insecure Permission Granted:SYS_MODULE",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器被授予了SYS_MODULE权限，拥有该权限的容器可以加载内核模块，有逃逸风险",
-    "solution": "将pod配置文件中的capabilities下的SYS_MODULE权限删除",
+    "description": "A container in pod has been granted SYS_MODULE permission. A container with this permission can load kernel modules and is at risk of escaping",
+    "solution": "Delete the SYS_MODULE permission in capabilities in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-015"] = {
@@ -134,8 +134,8 @@ meta_data["KN-015"] = {
     "name": "Pod Container Insecure Permission Granted:DAC_OVERRIDE",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器被授予了DAC_OVERRIDE权限，拥有该权限的容器可以绕过文件读、写、执行权限的检查，有逃逸风险",
-    "solution": "将pod配置文件中的capabilities下的DAC_OVERRIDE权限删除",
+    "description": "It is detected that a container in pod is granted DAC_OVERRIDE permission. A container with this permission can bypass the check of file read, write, and execute permissions, causing risks to escape",
+    "solution": "Delete the DAC_OVERRIDE permission in capabilities in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-016"] = {
@@ -143,8 +143,8 @@ meta_data["KN-016"] = {
     "name": "Pod Container Insecure File Mount :docker.sock",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器挂载了不安全的目录docker.sock，挂载了docker.sock的容器可以利用向docker.sock发送命令的方式逃逸，有逃逸风险",
-    "solution": "将pod配置文件中的volumes下的hostpath挂载的docker.sock删除",
+    "description": "Unsafe directory docker.sock is mounted to a container in pod. Containers mounted with docker.sock can escape by sending commands to docker.sock, and there is a risk of escape",
+    "solution": "Delete `docker.sock` attached to hostpath on volumes in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-017"] = {
@@ -152,8 +152,8 @@ meta_data["KN-017"] = {
     "name": "Pod Container Insecure File Mount :lxcfs",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器挂载了不安全的目录lxcfs，挂载了lxcfs的容器可以利用重写devices.allow等方式进行逃逸，有逃逸风险",
-    "solution": "将pod配置文件中的volumes下的hostpath挂载的lxcfs删除",
+    "description": "An insecure directory lxcfs is mounted to a container in pod. The container mounted with lxcfs can escape by means of overriding devices.allow",
+    "solution": "Delete `lxcfs` that are attached to hostpath of volumes in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-018"] = {
@@ -161,8 +161,8 @@ meta_data["KN-018"] = {
     "name": "Pod Container Insecure File Mount :/",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器挂载了根目录，挂载了根目录的容器可以读写根目录下的文件，有逃逸风险",
-    "solution": "将pod配置文件中的volumes下的hostpath挂载的/删除",
+    "description": "The root directory is mounted to a container in pod. The container mounted to the root directory can read and write files in the root directory, causing an escape risk. Procedure",
+    "solution": "Delete `/` that are attached to hostpath of volumes in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-019"] = {
@@ -170,8 +170,8 @@ meta_data["KN-019"] = {
     "name": "Pod Container Insecure File Mount :/proc",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器挂载了/proc目录，挂载了/proc目录的容器可以通过/proc/sys/kernel/core_pattern的特性在宿主机上执行命令，有逃逸风险",
-    "solution": "将pod配置文件中的volumes下的hostpath挂载的/proc删除",
+    "description": "The /proc directory is mounted to a container in pod. The container can run commands on the host using the /proc/sys/kernel/core_pattern feature, which has a risk of escaping.",
+    "solution": "Delete `/proc` that are attached to hostpath of volumes in the pod configuration file",
     "reference": "",
 }
 meta_data["KN-020"] = {
@@ -179,7 +179,7 @@ meta_data["KN-020"] = {
     "name": "Pod Container Insecure Permission Granted:SYS_PTRACE",
     "type": "kubernetes",
     "severity": "Medium",
-    "description": "检测到pod内有容器被授予了SYS_PTRACE权限，并且pid设置为true。在这种情况下容器可以进行进程代码注入，有逃逸风险",
-    "solution": "将pod配置文件中的capabilities下的SYS_PTRACE权限删除,并将hostPid设置为false",
+    "description": "Detected that a container in pod has been granted SYS_PTRACE permission and pid is set to true. In this case, the container can do process code injection, with the risk of escape",
+    "solution": "Delete the DAC_OVERRIDE permission in capabilities in the pod configuration file and set hostPid to false",
     "reference": "",
 }

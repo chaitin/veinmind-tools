@@ -7,8 +7,9 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/conf"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/embed"
 	"github.com/gogf/gf/errors/gerror"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/embed"
 )
 
 type Config struct {

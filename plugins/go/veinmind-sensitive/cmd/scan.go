@@ -7,15 +7,15 @@ import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	reportService "github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/gabriel-vasile/mimetype"
+	"github.com/gogf/gf/text/gstr"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/cache"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/veinfs"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/vregex"
-	"github.com/gabriel-vasile/mimetype"
-	"github.com/gogf/gf/text/gstr"
-	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -167,7 +167,7 @@ func reportEvent(path string, r rule.Rule, info *veinfs.FileInfo, image api.Imag
 		return
 	}
 
-	err = reportService.DefaultReportClient().Report(*evt)
+	err = reportService.Client.Report(evt)
 	if err != nil {
 		log.Error(image.ID(), path, err)
 	}

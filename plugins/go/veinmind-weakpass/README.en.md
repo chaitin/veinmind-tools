@@ -1,99 +1,120 @@
 <h1 align="center"> veinmind-weakpass </h1>
 
 <p align="center">
-veinmind-weakpass is a weak password scanning tool for image developed by Chaitin Technology
+veinmind-weakpass is a container/image weak password scanning tool developed by Changting Technology
 </p>
 
 ## Features
 
-- Quickly scan the weak password in image
-- Support weak password macro definition
-- Support concurrent scanning for weak passwords
-- Support custom username and dictionary
-- Support container runtime `containerd` and `dockerd`
+- Quickly scan images/containers for weak passwords
+- Support for weak password macros
+- Support concurrent scanning of weak passwords
+- Support for custom usernames and dictionaries
+- Support for the 'containerd'/' dockerd 'container runtime
 
-## compatibility
+## Compatibility
 
 - linux/amd64
 - linux/386
 - linux/arm64
 - linux/arm
+## Usage
 
-## Prepare
+### Based on executable files
 
-### install by package manager 
+Please install ` libveinmind `, installation method can refer to [official documentation] (https://github.com/chaitin/libveinmind)
+#### Makefile one-click command
 
--  install `libveinmind`  firstlly ，you can click here [offical document](https://github.com/chaitin/libveinmind) for more info
+```
+make run ARG="scan xxx"
+```
+#### Compile your own executable file for scanning
 
-### install by parallel container
-- Install by Parallel Container，pull `veinmind-weakpass` iamge  and start
-    ```
-    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-weakpass scan image
-    ```
-- or start with the script which we provided
-    ```
-    chmod +x parallel-container-run.sh && ./parallel-container-run.sh scan image
-    ```
+Compile the executable
+```
+make build
+```
+Run the executable file for scanning
+```
+chmod +x veinmind-weakpass && ./veinmind-weakpass scan xxx
+```
+### Based on the parallel container pattern
+Make sure you have 'docker' and 'docker-compose' installed on your machine
+#### Makefile one-click command
+```
+make run.docker ARG="scan xxxx"
+```
+#### Build your own image for scanning
+Build the 'veinmind-weakpass' image
+```
+make build.docker
+```
+Run the container to scan
+```
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-weakpass scan  xxx
+```
 
-## How to use
-
-1. Scan image with specified image name or ID(need to have a corresponding image locally)
-    ```
-    ./veinmind-weakpass scan image [imagename/imageid]
-    ```
-   
-2. Scan container with specified container name or ID(need to have a corresponding container locally)
-    ```
-    ./veinmind-weakpass scan container [imagename/imageid]
-    ```
-
+## Use parameters
+1. Specify the image name or image ID and scan (if the image exists locally)
+```
+./veinmind-weakpass scan image [imagename/imageid]
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_1.jpeg)
+2. Specify the container name or ID and scan (if the corresponding container exists locally)
+```
+./veinmind-weakpass scan container [containername/containerid]
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_container_1.jpg)
 
 3. Scan all local images
+```
+./veinmind-weakpass scan container [containername/containerid]
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_3.jpeg)
 
-    ```
-    ./veinmind-weakpass scan image
-    ```
+4. Scan all local containers
+```
+./veinmind-weakpass scan container 
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_container_2.jpg)
 
-4. Specify container runtime type
-    ```
-    ./veinmind-weakpass scan image --containerd
-    ```
+Specify the scan username type
+```
+./veinmind-weakpass scan image -u username
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_5.jpeg)
 
-    container runtime type
-    - dockerd
-    - containerd
+6. Specify a custom scan dictionary
+```
+./veinmind-weakpass scan image -d ./pass.dict
+```
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_6.jpeg)
 
-5. Specify the username which you want to scan
-    ```
-    ./veinmind-weakpass scan image -u username
-    ```
+7. Specify the service for the custom scan
+```
+./veinmind-weakpass scan image -s ssh,mysql,redis
+```
+Currently supported services
 
-6. Specify the custom dict
-    ```
-    ./veinmind-weakpass scan image -d ./pass.dict
-    ```
-7. Specify the services name
-    ```
-    ./veinmind-weakpass scan image -a ssh,mysql,redis
-    ```
-    - support these service currently
-
-        | serverName | version |
+| serverName | version |
         |:----------:|:-------:|
-        |     ssh    |   all   |
-        |    mysql   |   8.X   |
-        |    redis   |   all   |
-        |   tomcat   |   all   |
+|     ssh    |   all   |
+|    mysql   |   8.X   |
+|    redis   |   all   |
+|   tomcat   |   all   |
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
 
-8. Extract default dictionary to local disk
-    ```
-    ./veinmind-weakpass extract
-    ```
-
-## Demo
-1.  Scan the image which name is `test` and all service supported
-![](../../../docs/veinmind-weakpass/weakpasscandemo1.png)
-2. Specify the image `test` and scan `ssh` service in the image
-![](../../../docs/veinmind-weakpass/weakpasscandemo2.png)
-2. Scan `ssh` service in all images
-![](../../../docs/veinmind-weakpass/weakpasscandemo3.png)
+8. Unzip the default dictionary to local disk
+```
+./veinmind-weakpass extract
+```
+9. Specify the output format
+Supported output formats:
+- html
+- json
+- cli (default)
+```
+./veinmind-weakpass scan image [imageID/imageName] -f html
+```
+The resulting result.html looks like this:
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpeg)

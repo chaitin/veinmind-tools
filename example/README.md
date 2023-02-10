@@ -2,7 +2,7 @@
 
 快速的初始化一个veinmind插件
 
-`make plugin.init `
+`make plugin `
 
 参数：
 

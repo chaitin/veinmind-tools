@@ -9,6 +9,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/dict/embed"
@@ -22,6 +23,7 @@ var threads int
 var username string
 var dictpath string
 
+var reportService = &report.Service{}
 var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
 	Use:   "extract",
@@ -63,7 +65,7 @@ func scanImage(c *cmd.Command, image api.Image) (err error) {
 			log.Error(err)
 			continue
 		}
-		err = utils.GenerateImageReport(ModuleResult, image)
+		err = utils.GenerateImageReport(ModuleResult, image, reportService)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -83,7 +85,7 @@ func scanContainer(c *cmd.Command, container api.Container) (err error) {
 			log.Error(err)
 			continue
 		}
-		err = utils.GenerateContainerReport(ModuleResult, container)
+		err = utils.GenerateContainerReport(ModuleResult, container, reportService)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -108,10 +110,10 @@ func scanContainer(c *cmd.Command, container api.Container) (err error) {
 					err = utils.GenerateContainerReport([]model.WeakpassResult{
 						{
 							Password:    envs[1],
-							ServiceType: report.Env,
+							ServiceType: event.Env,
 							Filepath:    env,
 						},
-					}, container)
+					}, container, reportService)
 					if err != nil {
 						log.Error(err)
 						continue
@@ -137,8 +139,8 @@ func init() {
 	scanCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "username e.g. root")
 	scanCmd.PersistentFlags().StringVarP(&dictpath, "dictpath", "d", "", "dict path e.g. ./mypass.dict")
 	scanCmd.PersistentFlags().StringSliceVarP(&serviceName, "serviceName", "s", []string{"mysql", "tomcat", "redis", "ssh"}, "find weakpass in these service e.g. ssh")
-	scanCmd.AddCommand(cmd.MapImageCommand(scanImageCmd, scanImage))
-	scanCmd.AddCommand(cmd.MapContainerCommand(scanContainerCmd, scanContainer))
+	scanCmd.AddCommand(report.MapReportCmd(cmd.MapImageCommand(scanImageCmd, scanImage), reportService))
+	scanCmd.AddCommand(report.MapReportCmd(cmd.MapContainerCommand(scanContainerCmd, scanContainer), reportService))
 }
 
 func main() {

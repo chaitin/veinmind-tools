@@ -2,11 +2,17 @@
 name: veinmind-tools
 on: [ push, pull_request ]
 jobs:
-  package:
-    uses: ./.github/workflows/veinmind-package.yml
+  test:
+    uses: ./.github/workflows/veinmind-test.yml
   build:
+    needs: [ test ]
     uses: ./.github/workflows/veinmind-build.yml
+  package:
+    needs: [ build ]
+    uses: ./.github/workflows/veinmind-package.yml
   push:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ test ]
     uses: ./.github/workflows/veinmind-push.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

@@ -1,9 +1,14 @@
-FROM veinmind/go1.18:1.5.1-stretch as builder
+FROM veinmind/go1.18:1.5.3-stretch as builder
 WORKDIR /build
 COPY . .
-RUN chmod +x script/build.sh && /bin/bash script/build.sh
+RUN make build
 
-FROM veinmind/base:1.5.1-stretch
+FROM alpine:3.9 as compresser
+WORKDIR /build
+COPY --from=builder /build/veinmind-malicious .
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk add upx && upx -9 veinmind-malicious
+
+FROM veinmind/base:1.5.3-stretch
 # install clamav
 COPY dockerfiles/sources.list /etc/apt/sources.list
 RUN apt update && apt-get install -y clamav clamav-daemon && freshclam
@@ -15,8 +20,7 @@ ENV CI_GOOS $CI_GOOS
 ARG CI_GOARCH
 ENV CI_GOARCH $CI_GOARCH
 WORKDIR /tool
-COPY dockerfiles/clamd.sh .
-COPY --from=builder /build/veinmind-malicious ./veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
-RUN echo "#!/bin/bash\n\n/bin/bash clamd.sh\n\n./veinmind-malicious_${CI_GOOS}_${CI_GOARCH} \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
+COPY --from=compresser /build/veinmind-malicious ./veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
+RUN echo "#!/bin/bash\n\n/bin/bash clamd\n\n./veinmind-malicious_${CI_GOOS}_${CI_GOARCH} \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
 ENTRYPOINT ["/tool/entrypoint.sh"]
 

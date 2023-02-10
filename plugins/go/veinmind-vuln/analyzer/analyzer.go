@@ -2,7 +2,6 @@ package analyzer
 
 import (
 	"context"
-	"encoding/json"
 	"io/fs"
 	"os"
 	"strings"
@@ -15,10 +14,10 @@ import (
 	"github.com/aquasecurity/trivy/pkg/fanal/types"
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/chaitin/veinmind-common-go/service/report"
+	"golang.org/x/sync/semaphore"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-vuln/model"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-vuln/sdk/osv"
-	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -96,104 +95,6 @@ func ScanAsset(fileSystem api.FileSystem, parallel int64) *analyzer.AnalysisResu
 	return res
 }
 
-func TransferAsset(res model.ScanResult) *report.AssetDetail {
-	assetDetail := &report.AssetDetail{
-		OS: report.AssetOSDetail{
-			Family: res.OSInfo.Family,
-			Name:   res.OSInfo.Name,
-			Eosl:   res.OSInfo.Eosl,
-		},
-		PackageInfos: transferPackage(res),
-		Applications: transferApplication(res),
-	}
-	return assetDetail
-}
-
-func TransferVuln(res model.ScanResult) report.GeneralDetail {
-	vulnList := make([]osv.Vulnerability, 0)
-	for _, pkgInfo := range res.PackageInfos {
-		for _, pkg := range pkgInfo.Packages {
-			vulnList = append(vulnList, pkg.Vulnerabilities...)
-		}
-	}
-	for _, app := range res.Applications {
-		for _, pkg := range app.Libraries {
-			vulnList = append(vulnList, pkg.Vulnerabilities...)
-		}
-	}
-	data, err := json.Marshal(vulnList)
-	if err != nil {
-		log.Error(err)
-		return nil
-	}
-	return data
-}
-
-func transferPackage(res model.ScanResult) []report.AssetPackageDetails {
-	var assetPackageDetailsList []report.AssetPackageDetails
-	var assetPackageDetails []report.AssetPackageDetail
-
-	for _, pkgInfo := range res.PackageInfos {
-		for i, pkg := range pkgInfo.Packages {
-			// temp arch format
-			if pkg.Arch == "" || pkg.Arch == "None" {
-				pkgInfo.Packages[i].Arch = defaultArch
-			}
-			assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
-				Name:       pkg.Name,
-				Version:    pkg.Version,
-				Release:    pkg.Release,
-				Epoch:      pkg.Epoch,
-				Arch:       pkgInfo.Packages[i].Arch,
-				SrcName:    pkg.SrcName,
-				SrcEpoch:   pkg.SrcEpoch,
-				SrcRelease: pkg.SrcRelease,
-				SrcVersion: pkg.SrcVersion,
-			})
-		}
-		assetPackageDetailsList = append(assetPackageDetailsList, report.AssetPackageDetails{
-			FilePath: pkgInfo.FilePath,
-			Packages: assetPackageDetails,
-		})
-		assetPackageDetails = []report.AssetPackageDetail{}
-	}
-
-	return assetPackageDetailsList
-}
-
-func transferApplication(res model.ScanResult) []report.AssetApplicationDetails {
-	var assetApplicationDetailsList []report.AssetApplicationDetails
-	var assetPackageDetails []report.AssetPackageDetail
-
-	for _, app := range res.Applications {
-		for i, pkg := range app.Libraries {
-			// temp arch format
-			if pkg.Arch == "" || pkg.Arch == "None" {
-				app.Libraries[i].Arch = defaultArch
-			}
-			assetPackageDetails = append(assetPackageDetails, report.AssetPackageDetail{
-				Name:       pkg.Name,
-				Version:    pkg.Version,
-				Release:    pkg.Release,
-				Epoch:      pkg.Epoch,
-				Arch:       app.Libraries[i].Arch,
-				SrcName:    pkg.SrcName,
-				SrcEpoch:   pkg.SrcEpoch,
-				SrcRelease: pkg.SrcRelease,
-				SrcVersion: pkg.SrcVersion,
-			})
-		}
-		assetApplicationDetailsList = append(assetApplicationDetailsList, report.AssetApplicationDetails{
-			Type:     app.Type,
-			FilePath: app.FilePath,
-			Packages: assetPackageDetails,
-		})
-		assetPackageDetails = []report.AssetPackageDetail{}
-	}
-
-	return assetApplicationDetailsList
-}
-
 func parseResult(scanRes *analyzer.AnalysisResult) model.ScanResult {
 	osInfo := &types.OS{}
 	if scanRes.OS != nil {
@@ -220,26 +121,6 @@ func parseResult(scanRes *analyzer.AnalysisResult) model.ScanResult {
 	}
 }
 
-func parsePackage(scanRes *analyzer.AnalysisResult) []model.PackageInfo {
-	var pkgInfos = make([]model.PackageInfo, 0)
-	for _, pkgs := range scanRes.PackageInfos {
-		info := model.PackageInfo{
-			FilePath: pkgs.FilePath,
-			Packages: make([]model.Package, 0),
-		}
-		for _, pkg := range pkgs.Packages {
-			info.Packages = append(info.Packages, model.Package{
-				Package:         pkg,
-				Vulnerabilities: make([]osv.Vulnerability, 0),
-			})
-		}
-		if len(info.Packages) > 0 {
-			pkgInfos = append(pkgInfos, info)
-		}
-	}
-	return pkgInfos
-}
-
 func parseApplication(scanRes *analyzer.AnalysisResult) []model.Application {
 	var appInfos = make([]model.Application, 0)
 	for _, apps := range scanRes.Applications {
@@ -259,4 +140,24 @@ func parseApplication(scanRes *analyzer.AnalysisResult) []model.Application {
 		}
 	}
 	return appInfos
+}
+
+func parsePackage(scanRes *analyzer.AnalysisResult) []model.PackageInfo {
+	var pkgInfos = make([]model.PackageInfo, 0)
+	for _, pkgs := range scanRes.PackageInfos {
+		info := model.PackageInfo{
+			FilePath: pkgs.FilePath,
+			Packages: make([]model.Package, 0),
+		}
+		for _, pkg := range pkgs.Packages {
+			info.Packages = append(info.Packages, model.Package{
+				Package:         pkg,
+				Vulnerabilities: make([]osv.Vulnerability, 0),
+			})
+		}
+		if len(info.Packages) > 0 {
+			pkgInfos = append(pkgInfos, info)
+		}
+	}
+	return pkgInfos
 }

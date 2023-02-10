@@ -46,19 +46,20 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 ## 🔨 Toolset
 
-| Tool                                                                 | Description                                 | 
-|----------------------------------------------------------------------|---------------------------------------------|
-| [veinmind-runner](veinmind-runner/README.en.md)                      | scanner host                                |
-| [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | scan images for malicious files             |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan images/containers for weak passwords   |
-| [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan images for log4j2(CVE-2021-44228)      |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information       |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                   |
-| [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands   |
-| [veinmind-vuln](plugins/go/veinmind-vuln/README.en.md)             | scan images for asset information and vulns |
-| [veinmind-webshell](plugins/go/veinmind-webshell)                    | scan images for webshell                    |
-| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)            | scan containers for unsafe mount            |
-| [veinmind-iac](plugins/go/veinmind-iac)                              | scan IaC file                               |
+| Tool                                                                 | Description                                            | 
+|----------------------------------------------------------------------|--------------------------------------------------------|
+| [veinmind-runner](veinmind-runner/README.en.md)                      | scanner host                                           |
+| [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | Scan containers/images for malicious files             |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan containers/images for weak passwords              |
+| [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan containers/images for log4j2(CVE-2021-44228)      |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information                  |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                              |
+| [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands              |
+| [veinmind-vuln](plugins/go/veinmind-vuln/README.en.md)               | scan containers/images for asset information and vulns |
+| [veinmind-webshell](plugins/go/veinmind-webshell)                    | scan containers/images for webshell                    |
+| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)            | scan containers for unsafe mount                       |
+| [veinmind-iac](plugins/go/veinmind-iac)                              | scan IaC file                                          |
+| [veinmind-escalate](plugins/go/veinmind-escalate)                    | Scan containers/images for escape risks                |
 
 PS: All tools currently support running in parallel containers
 
@@ -68,16 +69,17 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 
 ## ☁️ Cloud-native infrastructure compatibility
 
-| Name | Type | Compatibility |
-|------|------|----------|
-| [Jenkins](https://github.com/chaitin/veinmind-jenkins)  | CI/CD | ✔️ |
-| Gitlab CI | CI/CD | ✔️ |
-| [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD | ✔️ |
-| DockerHub | Registry | ✔️ |
-| Docker Registry | Registry | ✔️ |
-| Harbor | Registry | ✔️ |
-| Docker | Runtime | ✔️ |
-| Containerd | Runtime | ✔️ |
+| Name                                                        | Type     | Compatibility |
+|-------------------------------------------------------------|----------|---------------|
+| [Jenkins](https://github.com/chaitin/veinmind-jenkins)      | CI/CD    | ✔️            |
+| Gitlab CI                                                   | CI/CD    | ✔️            |
+| [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD    | ✔️            |
+| DockerHub                                                   | Registry | ✔️            |
+| Docker Registry                                             | Registry | ✔️            |
+| Harbor                                                      | Registry | ✔️            |
+| Docker                                                      | Runtime  | ✔️            |
+| Containerd                                                  | Runtime  | ✔️            |
+| kubernetes                                                  | Cluster  | ✔️            |
 
 ## 🛴 Architecture
 ![](docs/architecture.png)

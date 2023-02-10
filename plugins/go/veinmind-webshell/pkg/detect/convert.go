@@ -1,31 +1,32 @@
 package detect
 
 import (
+	"errors"
 	"io/fs"
 	"syscall"
 
 	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/veinmind-common-go/service/report"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
-func Convert2ReportEvent(image api.Image, info FileInfo, res Result) (*report.ReportEvent, error) {
+func Convert2ReportEvent(fs api.FileSystem, info FileInfo, res Result) (*event.Event, error) {
 	if res.Data.RiskLevel == 0 {
 		return nil, nil
 	}
 
-	var reportLevel report.Level
+	var reportLevel event.Level
 	switch level := res.Data.RiskLevel; {
 	case level <= 5:
-		reportLevel = report.Low
+		reportLevel = event.Low
 		break
 	case level <= 10:
-		reportLevel = report.Medium
+		reportLevel = event.Medium
 		break
 	case level <= 15:
-		reportLevel = report.High
+		reportLevel = event.High
 		break
 	case level <= 20:
-		reportLevel = report.Critical
+		reportLevel = event.Critical
 		break
 	default:
 		return nil, nil
@@ -36,30 +37,54 @@ func Convert2ReportEvent(image api.Image, info FileInfo, res Result) (*report.Re
 		return nil, err
 	}
 
-	return &report.ReportEvent{
-		ID:         image.ID(),
-		Object:     report.Object{Raw: image},
-		Level:      reportLevel,
-		DetectType: report.Image,
-		EventType:  report.Invasion,
-		AlertType:  report.Backdoor,
-		AlertDetails: []report.AlertDetail{
-			{
-				WebshellDetail: &report.WebshellDetail{
+	switch obj := fs.(type) {
+	case api.Image:
+		return &event.Event{
+			BasicInfo: &event.BasicInfo{
+				ID:         obj.ID(),
+				Object:     event.NewObject(obj),
+				Level:      reportLevel,
+				DetectType: event.Image,
+				EventType:  event.Invasion,
+				AlertType:  event.Webshell,
+			},
+			DetailInfo: &event.DetailInfo{
+				AlertDetail: &event.WebshellDetail{
 					FileDetail: fileDetail,
 					Type:       res.Data.Type,
 					Engine:     res.Data.Engine,
 					Reason:     res.Data.Reason,
 				},
 			},
-		},
-	}, nil
+		}, nil
+	case api.Container:
+		return &event.Event{
+			BasicInfo: &event.BasicInfo{
+				ID:         obj.ID(),
+				Object:     event.NewObject(obj),
+				Level:      reportLevel,
+				DetectType: event.Container,
+				EventType:  event.Invasion,
+				AlertType:  event.Webshell,
+			},
+			DetailInfo: &event.DetailInfo{
+				AlertDetail: &event.WebshellDetail{
+					FileDetail: fileDetail,
+					Type:       res.Data.Type,
+					Engine:     res.Data.Engine,
+					Reason:     res.Data.Reason,
+				},
+			},
+		}, nil
+	}
+
+	return nil, errors.New("not supported")
 }
 
-func file2FileDetail(info fs.FileInfo, path string) (report.FileDetail, error) {
+func file2FileDetail(info fs.FileInfo, path string) (event.FileDetail, error) {
 	sys := info.Sys().(*syscall.Stat_t)
 
-	return report.FileDetail{
+	return event.FileDetail{
 		Path: path,
 		Perm: info.Mode(),
 		Size: info.Size(),
