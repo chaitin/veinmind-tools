@@ -47,4 +47,4 @@ jobs:
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARC }}
+          files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARCH }}

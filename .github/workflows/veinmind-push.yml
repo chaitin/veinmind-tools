@@ -35,8 +35,8 @@ jobs:
             linux/arm64
             linux/386
           tags: |
-            dvkunion/${{ matrix.plugin }}:latest
-            dvkunion/${{ matrix.plugin }}:${{github.ref_name}}
+            veinmind/${{ matrix.plugin }}:latest
+            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
           context: ${{ matrix.path }}/${{ matrix.plugin }}
           build-args: |
             CI_GOOS=${{env.CI_GOOS}}
@@ -78,14 +78,15 @@ jobs:
             linux/amd64
 #            linux/arm64
           tags: |
-            dvkunion/${{ matrix.plugin }}:latest
-            dvkunion/${{ matrix.plugin }}:${{github.ref_name}}
+            veinmind/${{ matrix.plugin }}:latest
+            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
           context: ${{ matrix.path }}/${{ matrix.plugin }}
           build-args: |
             CI_GOOS=${{env.CI_GOOS}}
             CI_GOARCH=${{env.CI_GOARCH}}
 
   push-veinmind-runner:
+    name: veinmind-runner
     needs: [ push-python-plugins, push-go-plugins ]
     env:
       CI_GOOS: linux
@@ -106,8 +107,8 @@ jobs:
             linux/amd64
 #            linux/arm64
           tags: |
-            dvkunion/veinmind-runner:latest
-            dvkunion/veinmind-runner:${{github.ref_name}}
+            veinmind/veinmind-runner:latest
+            veinmind/veinmind-runner:${{github.ref_name}}
           context: veinmind-runner
           build-args: |
             CI_GOOS=${{env.CI_GOOS}}
