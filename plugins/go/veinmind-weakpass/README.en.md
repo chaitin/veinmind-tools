@@ -117,4 +117,4 @@ Supported output formats:
 ./veinmind-weakpass scan image [imageID/imageName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpeg)
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpg)

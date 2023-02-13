@@ -116,4 +116,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-weakpass scan image [imageID/imageName] -f html
 ```
 生成的result.html效果如图：
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpeg)
+![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpg)
