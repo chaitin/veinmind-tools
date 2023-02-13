@@ -1,13 +1,14 @@
 package main
 
 import (
+	"os"
+	"time"
+
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/output"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-iac/pkg/scanner"
 	"github.com/open-policy-agent/opa/ast"
-	"os"
-	"time"
 
 	"github.com/chaitin/libveinmind/go/cmd"
 	iacApi "github.com/chaitin/libveinmind/go/iac"
@@ -100,7 +101,8 @@ func scanIaC(c *cmd.Command, iac iacApi.IAC) error {
 	if len(reportDetails) > 0 {
 		//if you want display at runner report, you should send your result to report event
 		reportEvent := report.ReportEvent{
-			ID:             iac.Path,                 // image id info
+			ID:             iac.Path,                 // iac id info
+			Object:         report.Object{Raw: iac},  // object
 			Time:           time.Now(),               // report time, usually use time.Now
 			Level:          reportLevel,              // report event level
 			DetectType:     report.IaC,               // report scan object type

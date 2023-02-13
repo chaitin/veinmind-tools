@@ -1,19 +1,6 @@
 package main
 
 import (
-	"github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/libveinmind/go/cmd"
-	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	reportService "github.com/chaitin/veinmind-common-go/service/report"
-	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
-	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
-	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/scanner/malicious"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"
-	"github.com/spf13/cobra"
 	_ "net/http/pprof"
 	"os"
 	"path"
@@ -21,6 +8,20 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	api "github.com/chaitin/libveinmind/go"
+	"github.com/chaitin/libveinmind/go/cmd"
+	"github.com/chaitin/libveinmind/go/plugin"
+	"github.com/chaitin/libveinmind/go/plugin/log"
+	reportService "github.com/chaitin/veinmind-common-go/service/report"
+
+	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/config"
+	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
+	_ "github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/database/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/embed"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/scanner/malicious"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-malicious/sdk/common/report"
 )
 
 var reportData = model.ReportData{}
@@ -31,7 +32,7 @@ var rootCmd = &cmd.Command{}
 var extractCmd = &cmd.Command{
 	Use:   "extract",
 	Short: "Extract config file",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cmd.Command, args []string) error {
 		embed.ExtractAll()
 		return nil
 	},
@@ -39,7 +40,7 @@ var extractCmd = &cmd.Command{
 var scanCmd = &cmd.Command{
 	Use:   "scan",
 	Short: "Scan image malicious files",
-	PostRun: func(cmd *cobra.Command, args []string) {
+	PostRun: func(cmd *cmd.Command, args []string) {
 		// 计算扫描数据
 		spend := time.Since(scanStart)
 		reportData.ScanSpendTime = spend.String()
@@ -115,6 +116,7 @@ func scan(_ *cmd.Command, image api.Image) error {
 		}
 		reportEvent := reportService.ReportEvent{
 			ID:           image.ID(),
+			Object:       reportService.Object{Raw: image},
 			Level:        reportService.High,
 			DetectType:   reportService.Image,
 			EventType:    reportService.Risk,

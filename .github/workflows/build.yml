@@ -22,9 +22,10 @@ on:
 
 jobs:
   base-build:
+    name: ${{inputs.file}}
     runs-on: ubuntu-20.04
     container:
-      image: veinmind/go1.18:1.5.1-stretch
+      image: veinmind/go1.18:1.5.3-stretch
     env:
       CI_GOOS: ${{inputs.CI_GOOS}}
       CI_GOARCH: ${{inputs.CI_GOARCH}}

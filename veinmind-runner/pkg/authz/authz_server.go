@@ -8,7 +8,6 @@ import (
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
 )
 
-//
 type Runner interface {
 	Run() error
 }

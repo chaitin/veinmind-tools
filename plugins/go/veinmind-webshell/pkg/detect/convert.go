@@ -38,6 +38,7 @@ func Convert2ReportEvent(image api.Image, info FileInfo, res Result) (*report.Re
 
 	return &report.ReportEvent{
 		ID:         image.ID(),
+		Object:     report.Object{Raw: image},
 		Level:      reportLevel,
 		DetectType: report.Image,
 		EventType:  report.Invasion,

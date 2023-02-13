@@ -2,14 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"time"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-log4j2/pkg/scanner"
-	"os"
-	"time"
 )
 
 var rootCmd = &cmd.Command{}
@@ -46,6 +48,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 	if len(result) > 0 {
 		reportEvent := report.ReportEvent{
 			ID:         image.ID(),
+			Object:     report.Object{Raw: image},
 			Time:       time.Now(),
 			Level:      report.Critical,
 			DetectType: report.Image,
@@ -85,6 +88,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	if len(result) > 0 {
 		reportEvent := report.ReportEvent{
 			ID:         container.ID(),
+			Object:     report.Object{Raw: container},
 			Time:       time.Now(),
 			Level:      report.Critical,
 			DetectType: report.Container,

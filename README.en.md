@@ -41,24 +41,24 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ### 4. Quick scan local images
 
 ```
-./run.sh scan-host image
+./run.sh scan image
 ```
 
 ## 🔨 Toolset
 
-| Tool                                                                 | Description                               | 
-|----------------------------------------------------------------------|-------------------------------------------|
-| [veinmind-runner](veinmind-runner/README.en.md)                      | scanner host                              |
-| [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | scan images for malicious files           |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan images/containers for weak passwords |
-| [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan images for log4j2(CVE-2021-44228)    |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information     |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                 |
-| [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands |
-| [veinmind-asset](plugins/go/veinmind-asset/README.en.md)             | scan images for asset information         |
-| [veinmind-webshell](plugins/go/veinmind-webshell)                    | scan images for webshell                  |
-| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)            | scan containers for unsafe mount          |
-| [veinmind-iac](plugins/go/veinmind-iac)                              | scan IaC file                             |
+| Tool                                                                 | Description                                 | 
+|----------------------------------------------------------------------|---------------------------------------------|
+| [veinmind-runner](veinmind-runner/README.en.md)                      | scanner host                                |
+| [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | scan images for malicious files             |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan images/containers for weak passwords   |
+| [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan images for log4j2(CVE-2021-44228)      |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information       |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                   |
+| [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands   |
+| [veinmind-vuln](plugins/go/veinmind-vuln/README.en.md)             | scan images for asset information and vulns |
+| [veinmind-webshell](plugins/go/veinmind-webshell)                    | scan images for webshell                    |
+| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)            | scan containers for unsafe mount            |
+| [veinmind-iac](plugins/go/veinmind-iac)                              | scan IaC file                               |
 
 PS: All tools currently support running in parallel containers
 

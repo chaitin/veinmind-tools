@@ -9,6 +9,7 @@ import (
 	"github.com/chaitin/veinmind-common-go/group"
 	"github.com/chaitin/veinmind-common-go/passwd"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/veinfs"
 )
@@ -75,6 +76,7 @@ func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileIn
 
 	r := &report.ReportEvent{
 		ID:         image.ID(),
+		Object:     report.Object{Raw: image},
 		Time:       time.Now(),
 		Level:      localRuleLevel2EventLevel(rule.Level),
 		DetectType: report.Image,

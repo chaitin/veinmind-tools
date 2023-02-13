@@ -2,14 +2,14 @@ package main
 
 import (
 	"github.com/chaitin/libveinmind/go/cmd"
+
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/authz"
-	"github.com/spf13/cobra"
 )
 
 var authCmd = &cmd.Command{
 	Use:   "authz",
-	Short: "authz as docker plugin",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Short: "Authz as docker plugin",
+	RunE: func(cmd *cmd.Command, args []string) error {
 		path, err := cmd.Flags().GetString("config")
 		if err != nil {
 			return err

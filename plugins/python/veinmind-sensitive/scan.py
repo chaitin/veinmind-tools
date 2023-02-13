@@ -118,7 +118,7 @@ def scan_images(image):
                                            detect_type=DetectType.Image.value,
                                            event_type=EventType.Risk.value,
                                            alert_type=AlertType.Sensitive.value,
-                                           alert_details=[detail])
+                                           alert_details=[detail], native_object=image)
                 report_event_list.append(report_event)
                 report(report_event)
 
@@ -141,7 +141,7 @@ def scan_images(image):
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
                                                        alert_type=AlertType.Sensitive.value,
-                                                       alert_details=[detail])
+                                                       alert_details=[detail], native_object=image)
                             report_event_list.append(report_event)
                             report(report_event)
                             break
@@ -166,7 +166,7 @@ def scan_images(image):
                             report_event = ReportEvent(id=image.id(), level=r["level"],
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
-                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail])
+                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail], native_object=image)
                             report_event_list.append(report_event)
                             report(report_event)
                             break
@@ -216,7 +216,7 @@ def scan_images(image):
                             report_event = ReportEvent(id=image.id(), level=r["level"],
                                                        detect_type=DetectType.Image.value,
                                                        event_type=EventType.Risk.value,
-                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail])
+                                                       alert_type=AlertType.Sensitive.value, alert_details=[detail], native_object=image)
                             report_event_list.append(report_event)
                             report(report_event)
                             match = True
@@ -257,7 +257,7 @@ def scan_images(image):
                                                                detect_type=DetectType.Image.value,
                                                                event_type=EventType.Risk.value,
                                                                alert_type=AlertType.Sensitive.value,
-                                                               alert_details=[detail])
+                                                               alert_details=[detail], native_object=image)
                                     report_event_list.append(report_event)
                                     report(report_event)
                             else:
@@ -271,7 +271,7 @@ def scan_images(image):
                                                                detect_type=DetectType.Image.value,
                                                                event_type=EventType.Risk.value,
                                                                alert_type=AlertType.Sensitive.value,
-                                                               alert_details=[detail])
+                                                               alert_details=[detail], native_object=image)
                                     report_event_list.append(report_event)
                                     report(report_event)
             except Exception as e:

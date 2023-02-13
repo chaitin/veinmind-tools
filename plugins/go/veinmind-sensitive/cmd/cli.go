@@ -5,8 +5,6 @@ import (
 
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/spf13/cobra"
-
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-sensitive/rule"
 )
 
@@ -15,7 +13,7 @@ var (
 	scanCommand = &cmd.Command{
 		Use:   "scan image sensitive info",
 		Short: "scan image sensitive info",
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRun: func(cmd *cmd.Command, args []string) {
 			rule.Init()
 		},
 	}

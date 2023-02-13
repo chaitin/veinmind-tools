@@ -24,6 +24,7 @@ on:
 jobs:
   base-push:
     if: startsWith(github.ref, 'refs/tags/')
+    name: ${{ inputs.file }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3

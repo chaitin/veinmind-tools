@@ -1,13 +1,13 @@
 # entry
 name: veinmind-tools
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
-   package:
-     uses: ./.github/workflows/veinmind-package.yml
-   build:
-     uses: ./.github/workflows/veinmind-build.yml
-   push:
-     uses: ./.github/workflows/veinmind-push.yml
-     secrets:
-       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  package:
+    uses: ./.github/workflows/veinmind-package.yml
+  build:
+    uses: ./.github/workflows/veinmind-build.yml
+  push:
+    uses: ./.github/workflows/veinmind-push.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

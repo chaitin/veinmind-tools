@@ -3,22 +3,23 @@ package main
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
-	"github.com/spf13/cobra"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 )
 
 // listCmd used to display relevant information
 var listCmd = &cmd.Command{
 	Use:   "list",
-	Short: "list relevant information",
+	Short: "List relevant information",
 }
 
 var listPluginCmd = &cmd.Command{
 	Use:   "plugin",
-	Short: "list plugin information",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Short: "List plugin information",
+	RunE: func(cmd *cmd.Command, args []string) error {
 		ps, err := plugin.DiscoverPlugins(context.Background(), ".")
 		if err != nil {
 			return err
@@ -33,20 +34,17 @@ var listPluginCmd = &cmd.Command{
 			if verbose {
 				pJsonByte, err := json.MarshalIndent(p.Manifest, "", "	")
 				if err != nil {
-					log.Error(err)
+					log.GetModule(log.CmdModuleKey).Error(err)
 					continue
 				}
-				log.Info("\n" + string(pJsonByte))
+				log.GetModule(log.CmdModuleKey).Info("\n" + string(pJsonByte))
 			} else {
-				log.Info("Plugin Name: " + p.Name)
+				log.GetModule(log.CmdModuleKey).Infof("plugin name: %s", p.Name)
 			}
 		}
 		return nil
 	},
 }
-
-// perhaps let user display load IaC rules
-var listIaCRuleCmd = &cmd.Command{}
 
 func init() {
 	listCmd.AddCommand(listPluginCmd)

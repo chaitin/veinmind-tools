@@ -66,63 +66,50 @@ helm install veinmind .
 
 ## 使用
 
-1.指定镜像名称或镜像 ID 并扫描 (需要本地存在对应的镜像)
+1.扫描本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner scan-host image [imagename/imageid]
+./veinmind-runner scan image [docker/containerd]:reference
 ```
 
-2.扫描所有本地镜像
+2.扫描所有本地镜像(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
 
 ```
-./veinmind-runner scan-host image
+./veinmind-runner scan image [docker/containerd]:reference
 ```
 
-3.扫描所有本地容器
+3.扫描远程镜像，若远程仓库需要认证需使用 -c 参数指定 toml 格式的认证信息文件（暂不支持 dockerhub 的私有镜像扫描）
 
 ```
-./veinmind-runner scan-host container
+./veinmind-runner scan image registry-image:reference
+```
+例如：
+```shell
+#扫描 docker.io 的 nginx 镜像 (所有 tag)
+./veinmind-runner scan image registry-image:nginx   
 ```
 
-4.扫描本地IaC文件
-
-```
-./veinmind-runner scan-iac local ./
-./veinmind-runner scan-iac local /path/to/iac-file
+```shell
+#扫描 docker.io 的 bitnami/nginx 镜像 (所有 tag)
+./veinmind-runner scan image registry-image:bitnami/nginx 
 ```
 
-5.扫描远端 git 仓库的 IaC 文件
-
-```
-./veinmind-runner scan-iac git http://xxxxxx.git 
-# auth
-./veinmind-runner scan-iac git git@xxxxxx --sshkey=/your/ssh/key/path
-./veinmind-runner scan-iac git http://{username}:password@xxxxxx.git
-# add proxy
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=http://127.0.0.1:8080
-./veinmind-runner scan-iac git http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
-# disable tls
-./veinmind-runner scan-iac git http://xxxxxx.git --insecure-skip=true
+```shell
+#扫描 registry.example.com 私有仓库下的 registry.example.com/library/ubuntu:latest 镜像
+./veinmind-runner scan image -c auth.toml registry-image:registry.example.com/library/ubuntu:latest
 ```
 
-6.扫描远端 kubernetes IaC 配置(需要手动指定kubeconfig file)
-```
-./veinmind-runner scan-iac k8s --kubeconfig=/your/k8sConfig/path
-```
-
-7.扫描远程仓库中的`centos`镜像(不指定仓库默认为`index.docker.io`)
-
-```
-./veinmind-runner scan-registry image centos
+```shell
+#扫描 registry.example.com 私有仓库下的所有镜像
+./veinmind-runner scan image -c auth.toml registry:registry.example.com 
 ```
 
-8.扫描远程私有仓库中的镜像`registry.private.net/library/nginx`镜像，其中`auth.toml`为认证信息配置文件，里面包含了对应的认证信息
-
+```shell
+#基于给定正则扫描 registry.example.com 私有仓库下的所有镜像
+./veinmind-runner scan image -c auth.toml --filter "nginx$" registry:registry.example.com 
 ```
-./veinmind-runner scan-registry image -c auth.toml registry.private.net/library/nginx
-```
 
-`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码或 token
+`auth.toml` 的格式如下， `registry` 代表仓库地址， `username` 代表用户名， `password` 代表密码
 
 ```
 [[auths]]
@@ -135,40 +122,78 @@ helm install veinmind .
 	password = "password"
 ```
 
-9.指定容器运行时类型
+4.扫描本地IaC文件
 
 ```
-./veinmind-runner scan-host image --containerd
+./veinmind-runner scan iac host:path/to/iac-file
+./veinmind-runner scan iac path/to/iac-file
 ```
 
+5.扫描远端 git 仓库的 IaC 文件
+
+```
+./veinmind-runner scan iac git:http://xxxxxx.git 
+```
+```shell
+# auth
+./veinmind-runner scan iac git:git@xxxxxx --sshkey=/your/ssh/key/path
+./veinmind-runner scan iac git:http://{username}:password@xxxxxx.git
+```
+```shell
+# add proxy
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=http://127.0.0.1:8080
+./veinmind-runner scan iac git:http://xxxxxx.git --proxy=scoks5://127.0.0.1:8080
+```
+```shell
+# disable tls
+./veinmind-runner scan iac git:http://xxxxxx.git --insecure-skip=true
+```
+
+6.扫描远端 kubernetes IaC 配置(需要手动指定kubeconfig file)
+
+```
+./veinmind-runner scan iac kubernetes:resource/name -n namespace --kubeconfig=/your/k8sConfig/path
+```
+
+7.扫描本地所有容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
+
+```
+./veinmind-runner scan container [dockerd:/containerd:]
+```
+
+8.扫描本地容器(容器运行时类型未指定的情况下默认会依次尝试docker，containerd)
+
+```
+./veinmind-runner scan container [dockerd:/containerd:]containerID/containerRef
+```
 容器运行时类型
 
 - dockerd
 - containerd
 
-10.使用`glob`筛选需要运行插件
+9.使用`glob`筛选需要运行插件
 
 ```
-./veinmind-runner scan-host image -g "**/veinmind-malicious"
+./veinmind-runner scan image -g "**/veinmind-malicious"
 ```
 
-11.列出当前插件列表
+10.列出当前插件列表
 
 ```
 ./veinmind-runner list plugin
 ```
 
-12.指定容器运行时路径
+11.指定容器运行时路径
 
 ```
-./veinmind-runner scan-host image --docker-data-root [your_path]
+./veinmind-runner scan image --docker-data-root [your_path]
 ```
 
 ```
-./veinmind-runner scan-host image --containerd-root [your_path]
+./veinmind-runner scan image --containerd-root [your_path]
 ```
 
-13.支持 docker 镜像阻断功能
+12.支持 docker 镜像阻断功能
 
 ```bash
 # first

@@ -5,10 +5,9 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v1.1.0
 	github.com/chaitin/libveinmind v1.5.1
-	github.com/chaitin/veinmind-common-go v1.1.9-r0
+	github.com/chaitin/veinmind-common-go v1.3.0
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gogf/gf v1.16.9
-	github.com/spf13/cobra v1.4.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 )
 
@@ -49,6 +48,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/cobra v1.4.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	go.opentelemetry.io/otel/trace v1.7.0 // indirect

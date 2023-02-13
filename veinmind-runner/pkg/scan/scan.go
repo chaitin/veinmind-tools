@@ -8,12 +8,18 @@ import (
 	"github.com/chaitin/libveinmind/go/cmd"
 	"github.com/chaitin/libveinmind/go/docker"
 	"github.com/chaitin/libveinmind/go/plugin"
-	"github.com/chaitin/libveinmind/go/plugin/log"
+	logService "github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/libveinmind/go/plugin/service"
 	"github.com/chaitin/libveinmind/go/plugin/specflags"
 	"github.com/chaitin/veinmind-common-go/service/report"
+
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/log"
 	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/reporter"
+	"github.com/chaitin/veinmind-tools/veinmind-runner/pkg/target"
 )
+
+// DispatchTask declare func that how to scan a target object
+type DispatchTask func(ctx context.Context, targets []*target.Target) error
 
 func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.Plugin, error) {
 	ps, err := plugin.DiscoverPlugins(ctx, ".")
@@ -38,12 +44,12 @@ func FindTargetPlugins(ctx context.Context, enablePlugins []string) ([]*plugin.P
 func ScanLocalImage(ctx context.Context, imageName string,
 	enabledPlugins []string, pluginParams []string) (events []reporter.ReportEvent, err error) {
 	reportService := report.NewReportService()
-	runnerReporter, _ := reporter.NewReporter()
+	runnerReporter, _ := reporter.NewReporter(ctx)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	go startReportService(ctx, runnerReporter, reportService)
 	go runnerReporter.Listen()
-	defer runnerReporter.StopListen()
+	defer runnerReporter.Close()
 
 	veinmindRuntime, err := docker.New()
 	if err != nil {
@@ -60,16 +66,16 @@ func ScanLocalImage(ctx context.Context, imageName string,
 	for _, id := range imageIDs {
 		image, err := veinmindRuntime.OpenImageByID(id)
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.ScanModuleKey).Error(err)
 			continue
 		}
 		err = ScanImage(ctx, finalPs, image, reportService,
 			specflags.WithSpecFlags(pluginParams))
 		if err != nil {
-			log.Error(err)
+			log.GetModule(log.ScanModuleKey).Error(err)
 		}
 	}
-	return runnerReporter.GetEvents()
+	return runnerReporter.Events()
 }
 
 func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
@@ -80,7 +86,7 @@ func ScanImage(ctx context.Context, rang plugin.ExecRange, image api.Image,
 	) error {
 		// Register Service
 		reg := service.NewRegistry()
-		reg.AddServices(log.WithFields(log.Fields{
+		reg.AddServices(logService.WithFields(logService.Fields{
 			"plugin":  plug.Name,
 			"command": path.Join(c.Path...),
 		}))
