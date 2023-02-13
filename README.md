@@ -17,7 +17,7 @@
 <p align="center"> 中文文档 | <a href="README.en.md">English</a> </p>
 
 ## 🔥 Demo
-![](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220415144819.gif)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/index.gif)
 
 ## 🕹️ 快速开始
 ### 1. 确保机器上正确安装 docker
