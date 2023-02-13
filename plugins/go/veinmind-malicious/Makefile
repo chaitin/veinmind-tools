@@ -8,7 +8,7 @@ ARG = ""
 # build params
 IMAGE_TAG = latest
 CI_GOOS = linux
-CI_GOARCH = amd64
+CI_GOARCH=$(shell uname -m)
 TAGS = community
 
 ##@ Init
