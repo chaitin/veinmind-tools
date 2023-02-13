@@ -102,6 +102,7 @@ endif
 
 ##@ Build
 all: ## 			build all plugins
+	$(MAKE) $(shell ls plugins/go/)
 
 veinmind-%: ##			build go plugins. e.g. `make veinmind-basic`
 	$(MAKE) -C plugins/go/$@ build
@@ -109,9 +110,9 @@ veinmind-%: ##			build go plugins. e.g. `make veinmind-basic`
 platform.veinmind-runner:
 	$(MAKE) -C veinmind-runner build.platform CI_GOOS=${CI_GOOS} CI_GOARCH=${CI_GOARCH} TAGS=${TAGS}
 
-platform.veinmind-%: ##   build go plugins with platform. e.g. `make veinmind-basic CI_GOOS=linux CI_GOARCH=amd64 TAGS=xxxx`
+platform.veinmind-%: ##   	build go plugins with platform. e.g. `make veinmind-basic CI_GOOS=linux CI_GOARCH=amd64 TAGS=xxxx`
 	$(MAKE) -C plugins/go/$(subst platform.,,$@) build.platform CI_GOOS=${CI_GOOS} CI_GOARCH=${CI_GOARCH} TAGS=${TAGS}
 
 .PHONY: help
 help:
-	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-\\.%]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make \033[36m<target>\033[0m\n"} /^[a-zA-Z_\-\\.%]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
