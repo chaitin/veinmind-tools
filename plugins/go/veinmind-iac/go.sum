@@ -283,8 +283,9 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/chaitin/libveinmind v1.5.2 h1:dHew6695cdPmWC8pHGzStSL4R6+xpeMAaXTzRkGTU6M=
 github.com/chaitin/libveinmind v1.5.2/go.mod h1:TXLYL6GeSAQ7pQ5IxPG4Tp0DuB1QvPPFhqdOjyiWxVU=
+github.com/chaitin/libveinmind v1.5.4 h1:ty10MR4rSdSqdHp6/b7pd7hc2Hsu/HyF3RoA1iZTUO8=
+github.com/chaitin/libveinmind v1.5.4/go.mod h1:TXLYL6GeSAQ7pQ5IxPG4Tp0DuB1QvPPFhqdOjyiWxVU=
 github.com/chaitin/veinmind-common-go v1.4.2 h1:+AK2lt/OI7/kGQpt3rkp1gVJvoxfosnxxFaBfi6nbGw=
 github.com/chaitin/veinmind-common-go v1.4.2/go.mod h1:+dshrlmHiBtRV7ATyObBIg3SZoffpNCr1PdahT1LUQo=
 github.com/checkpoint-restore/go-criu/v4 v4.1.0/go.mod h1:xUQBLp4RLc5zJtWY++yjOoMoB5lihDt7fai+75m+rGw=
