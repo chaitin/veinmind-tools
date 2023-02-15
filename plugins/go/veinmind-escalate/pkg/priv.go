@@ -2,7 +2,9 @@ package pkg
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"github.com/chaitin/libveinmind/go/pkg/vfs"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"os"
 	"strconv"
@@ -15,49 +17,7 @@ import (
 
 type checkMode int
 
-var CAPStringsList = []string{
-	"CAP_CHOWN",
-	"CAP_DAC_OVERRIDE",
-	"CAP_DAC_READ_SEARCH",
-	"CAP_FOWNER",
-	"CAP_FSETID",
-	"CAP_KILL",
-	"CAP_SETGID",
-	"CAP_SETUID",
-	"CAP_SETPCAP",
-	"CAP_LINUX_IMMUTABLE",
-	"CAP_NET_BIND_SERVICE",
-	"CAP_NET_BROADCAST",
-	"CAP_NET_ADMIN",
-	"CAP_NET_RAW",
-	"CAP_IPC_LOCK",
-	"CAP_IPC_OWNER",
-	"CAP_SYS_MODULE",
-	"CAP_SYS_RAWIO",
-	"CAP_SYS_CHROOT",
-	"CAP_SYS_PTRACE",
-	"CAP_SYS_PACCT",
-	"CAP_SYS_ADMIN",
-	"CAP_SYS_BOOT",
-	"CAP_SYS_NICE",
-	"CAP_SYS_RESOURCE",
-	"CAP_SYS_TIME",
-	"CAP_SYS_TTY_CONFIG",
-	"CAP_MKNOD",
-	"CAP_LEASE",
-	"CAP_AUDIT_WRITE",
-	"CAP_AUDIT_CONTROL",
-	"CAP_SETFCAP",
-	"CAP_MAC_OVERRIDE",
-	"CAP_MAC_ADMIN",
-	"CAP_SYSLOG",
-	"CAP_WAKE_ALARM",
-	"CAP_BLOCK_SUSPEND",
-	"CAP_AUDIT_READ",
-	"CAP_PERFMON",
-	"CAP_BPF",
-	"CAP_CHECKPOINT_RESTORE",
-}
+var hostConfig = make(map[string]interface{}, 0)
 var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "PRIVILEGED", "CAP_SYS_ADMIN", "CAP_SYS_CHROOT", "CAP_BPF", "CAP_DAC_OVERRIDE"}
 
 func UnsafePrivCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
@@ -116,34 +76,36 @@ func UnsafeSuidCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 }
 
 func ContainerUnsafeCapCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
-	var res = make([]*event.EscapeDetail, 0)
-	file, err := fs.Open("/proc/1/status")
+	err := getContainerHostConfig(fs)
 	if err != nil {
 		log.Error(err)
-		return res, err
+		return nil, err
 	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if strings.HasPrefix(scanner.Text(), "CapEff:") {
-			if strings.HasSuffix(scanner.Text(), "fffffffff") {
-				res = append(res, &event.EscapeDetail{
-					Target: "/proc/1/status",
-					Reason: CAPREASON,
-					Detail: "UnSafeCapability PRIVILEGED",
-				})
-			} else {
-				Cap, err := parseCapEff(scanner.Text())
-				if err != nil {
-					log.Error(err)
-					return res, err
-				}
-				UnSafeCaps := intersect(Cap, UnSafeCapList)
-				for _, UnSafeCap := range UnSafeCaps {
+	var res = make([]*event.EscapeDetail, 0)
+	if hostConfig["Privileged"] == true {
+		res = append(res, &event.EscapeDetail{
+			Target: "LINUX CAPABILITY",
+			Reason: CAPREASON,
+			Detail: "UnSafeCapability PRIVILEGED",
+		})
+	} else {
+		Caps := hostConfig["CapAdd"]
+		if Caps != nil {
+			UnSafeCaps := intersect(UnSafeCapList, Caps.([]interface{}))
+			for _, value := range UnSafeCaps {
+				if value == "CAP_SYS_PTRACE" {
+					if hostConfig["PidMode"] == "host" {
+						res = append(res, &event.EscapeDetail{
+							Target: "LINUX CAPABILITY",
+							Reason: CAPREASON,
+							Detail: "UnSafeCapability " + value + " and you start the container with parameter : `pid=host`",
+						})
+					}
+				} else {
 					res = append(res, &event.EscapeDetail{
-						Target: "/proc/1/status",
+						Target: "LINUX CAPABILITY",
 						Reason: CAPREASON,
-						Detail: "UnSafeCapability " + UnSafeCap,
+						Detail: "UnSafeCapability " + value,
 					})
 				}
 			}
@@ -194,7 +156,26 @@ func CheckEmptyPasswdRoot(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	return res, nil
 }
 
-func intersect(a []string, b []string) []string {
+func getContainerHostConfig(container api.FileSystem) error {
+	fileContent, err := vfs.Open("/var/lib/docker/containers/" + strings.TrimPrefix(container.(api.Container).ID(), "sha256:") + "/hostconfig.json")
+	if err != nil {
+		return err
+	}
+	defer fileContent.Close()
+	fileInfo, err := vfs.Stat("/var/lib/docker/containers/" + strings.TrimPrefix(container.(api.Container).ID(), "sha256:") + "/hostconfig.json")
+	if err != nil {
+		return err
+	}
+	content := make([]byte, fileInfo.Size())
+	fileContent.Read(content)
+	err = json.Unmarshal(content, &hostConfig)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func intersect(a []string, b []interface{}) []string {
 	iter := make([]string, 0)
 	mp := make(map[string]bool, 0)
 	for _, value := range a {
@@ -203,8 +184,13 @@ func intersect(a []string, b []string) []string {
 		}
 	}
 	for _, value := range b {
-		if _, ok := mp[value]; ok {
-			iter = append(iter, value)
+		str, err := value.(string)
+		if err == false {
+			log.Error(value, "is not string")
+			return nil
+		}
+		if _, ok := mp[str]; ok {
+			iter = append(iter, str)
 		}
 	}
 	return iter
@@ -247,24 +233,6 @@ func isContainSUID(content os.FileInfo) bool {
 		return true
 	}
 	return false
-}
-
-func parseCapEff(capHex string) ([]string, error) {
-	capHex = strings.TrimSpace(strings.TrimPrefix(capHex, "CapEff:"))
-	var capTextList []string
-	numb, err := strconv.ParseUint(capHex, 16, 64)
-	if err != nil {
-		return nil, err
-	}
-	for i := 0; i < len(CAPStringsList); i++ {
-		flag := numb & 0x1
-		if flag == uint64(1) {
-			capTextList = append(capTextList, CAPStringsList[i])
-		}
-		numb = numb >> 1
-	}
-
-	return capTextList, nil
 }
 
 func init() {
