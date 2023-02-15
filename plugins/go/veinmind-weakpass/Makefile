@@ -23,7 +23,6 @@ arm: ## Install arm build dependency.
 ##@ Build
 .PHONY: build
 build: deps   ## Build Apps.
-	export CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-Wl,.*' GOOS="${CI_GOOS}" GOARCH="${CI_GOARCH}" TAGS=${TAGS} ; \
 	go build -ldflags '-s -w' -v -trimpath  -a -tags ${TAGS} -o ${APP} ${CMD}
 
 .PHONY: build.platform

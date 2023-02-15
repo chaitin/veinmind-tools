@@ -44,7 +44,9 @@ jobs:
         with:
           name: ${{ matrix.plugin }}-${{ env.CI_GOARCH }}
           path: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARCH }}
-      - uses: softprops/action-gh-release@v1
+      - uses: dvkunion/action-gh-release@releaser
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          retries: 5
+          retry_interval: 30000
           files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}_${{ env.CI_GOOS }}_${{ env.CI_GOARCH }}

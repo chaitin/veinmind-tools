@@ -25,7 +25,6 @@ arm: ## Install arm static build .
 ##@ Build
 .PHONY: build
 build: deps   ## 	Build Apps.
-	export CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-Wl,.*'; \
 	go build -ldflags '-s -w' -v -trimpath -a -tags ${TAGS}  -o ${APP} ${CMD}
 
 .PHONY: build.platform
