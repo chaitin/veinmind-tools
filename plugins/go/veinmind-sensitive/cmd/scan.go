@@ -42,7 +42,9 @@ func Scan(c *cmd.Command, image api.Image) (err error) {
 		if err != nil {
 			return nil
 		}
-
+		if !info.Type.IsRegular() || info.Size > 3*1024*1024 {
+			return nil
+		}
 		count += 1
 		eg.Go(func() error {
 			return scan(image, info.Path, info, conf)
