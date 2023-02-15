@@ -1,6 +1,8 @@
 FROM veinmind/go1.18:1.5.3-stretch as builder
 WORKDIR /build
 COPY . .
+ARG TARGETARCH
+ENV GOOS=linux GOARCH=${TARGETARCH}
 RUN make build
 
 FROM veinmind/veinmind-basic:latest as basic

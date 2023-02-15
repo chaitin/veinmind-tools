@@ -14,7 +14,7 @@ BLUE=\033[96m
 
 # platform
 CI_GOOS=linux
-CI_GOARCH = amd64
+CI_GOARCH=$(shell uname -m)
 TAGS ?=
 
 ifeq ("$(shell uname)", "Darwin")
