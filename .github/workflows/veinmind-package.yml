@@ -27,9 +27,11 @@ jobs:
         with:
           name: ${{ matrix.plugin }}
           path: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}.tar.gz
-      - uses: softprops/action-gh-release@v1
+      - uses: dvkunion/action-gh-release@releaser
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          retries: 5
+          retry_interval: 30000
           files: ${{ matrix.path }}/${{ matrix.plugin }}/${{ matrix.plugin }}.tar.gz
 
   # package all artifacts
@@ -109,9 +111,11 @@ jobs:
         with:
           name: veinmind-runner.tar.gz
           path: veinmind-runner.tar.gz
-      - uses: softprops/action-gh-release@v1
+      - uses: dvkunion/action-gh-release@releaser
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          retries: 5
+          retry_interval: 30000
           files: veinmind-runner.tar.gz
 
 
