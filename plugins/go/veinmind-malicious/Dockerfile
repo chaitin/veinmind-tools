@@ -22,7 +22,7 @@ ENV CI_GOOS $CI_GOOS
 ARG CI_GOARCH
 ENV CI_GOARCH $CI_GOARCH
 WORKDIR /tool
-COPY --from=compresser /build/veinmind-malicious ./veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
-RUN echo "#!/bin/bash\n\n/bin/bash clamd\n\n./veinmind-malicious_${CI_GOOS}_${CI_GOARCH} \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious_${CI_GOOS}_${CI_GOARCH}
+COPY --from=compresser /build/veinmind-malicious ./veinmind-malicious
+RUN echo "#!/bin/bash\n\n/bin/bash clamd\n\n./veinmind-malicious \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious
 ENTRYPOINT ["/tool/entrypoint.sh"]
 
