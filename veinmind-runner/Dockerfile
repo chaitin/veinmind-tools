@@ -28,7 +28,7 @@ COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 COPY --from=builder /build/veinmind-runner .
 COPY --from=basic /tool/veinmind-basic .
 COPY --from=weakpass /tool/veinmind-weakpass .
-COPY --from=malicious /tool/veinmind-malicious_linux_amd64 .
+COPY --from=malicious /tool/veinmind-malicious .
 COPY --from=sensitive /tool /tool/veinmind-sensitive
 COPY --from=history /tool /tool/veinmind-history
 COPY --from=backdoor /tool /tool/veinmind-backdoor
