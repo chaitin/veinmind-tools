@@ -46,7 +46,7 @@ jobs:
   ### REQUIRED ###
   - name: veinmind-runner
     image:
-      repository: veinmind/veinmind-runner
+      repository: registry.veinmind.tech/veinmind/veinmind-runner
       tag: latest
       imagePullPolicy: IfNotPresent
     schedule: "0 */8 * * *"   ### 扫描周期配置

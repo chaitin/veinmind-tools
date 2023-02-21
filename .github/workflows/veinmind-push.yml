@@ -25,8 +25,11 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: registry.veinmind.tech
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: docker/build-push-action@v3
         with:
           push: true
@@ -35,8 +38,8 @@ jobs:
             linux/arm64
             linux/386
           tags: |
-            veinmind/${{ matrix.plugin }}:latest
-            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
+            registry.veinmind.tech/veinmind/${{ matrix.plugin }}:latest
+            registry.veinmind.tech/veinmind/${{ matrix.plugin }}:${{github.ref_name}}
           context: ${{ matrix.path }}/${{ matrix.plugin }}
 
   # push go plugins
@@ -67,8 +70,11 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: registry.veinmind.tech
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: docker/build-push-action@v3
         with:
           push: true
@@ -76,8 +82,8 @@ jobs:
             linux/amd64
             linux/arm64
           tags: |
-            veinmind/${{ matrix.plugin }}:latest
-            veinmind/${{ matrix.plugin }}:${{github.ref_name}}
+            registry.veinmind.tech/veinmind/${{ matrix.plugin }}:latest
+            registry.veinmind.tech/veinmind/${{ matrix.plugin }}:${{github.ref_name}}
           context: ${{ matrix.path }}/${{ matrix.plugin }}
 
   push-veinmind-runner:
@@ -93,8 +99,9 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: registry.veinmind.tech
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
       - uses: docker/build-push-action@v3
         with:
           push: true
@@ -102,6 +109,6 @@ jobs:
             linux/amd64
             linux/arm64
           tags: |
-            veinmind/veinmind-runner:latest
-            veinmind/veinmind-runner:${{github.ref_name}}
+            registry.veinmind.tech/veinmind/veinmind-runner:latest
+            registry.veinmind.tech/veinmind/veinmind-runner:${{github.ref_name}}
           context: veinmind-runner

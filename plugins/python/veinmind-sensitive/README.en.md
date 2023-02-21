@@ -33,7 +33,7 @@ veinmind-sensitive is an image sensitive information scanning tool developed by 
 
 1. Install by Parallel Container，pull `veinmind-sensitive` iamge  and start
     ```
-    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive
+    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-sensitive
     ```
 2. or start with the script which we provided
     ```

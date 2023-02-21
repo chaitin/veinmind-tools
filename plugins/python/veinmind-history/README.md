@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 基于平行容器的模式，获取 `veinmind-history` 的镜像并启动
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-history
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-history
 ```
 
 或者使用项目提供的脚本启动
