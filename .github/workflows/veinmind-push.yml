@@ -6,6 +6,10 @@ on:
         required: true
       DOCKERHUB_TOKEN:
         required: true
+      HARBOR_USERNAME:
+        required: true
+      HARBOR_PASSWORD:
+        required: true
 
 jobs:
   # push python plugins
