@@ -58,7 +58,7 @@ run.clamav: deps ## Run Apps. 			e.g. : `make run ARG="scan image"` .
 run.docker:	## Run With Parallel Container Mode. e.g. : `make run.docker ARG="scan image"` .
 	source .evn
 	docker run --rm -it -d -p 3310:3310 clamav/clamav:latest
-	docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/data veinmind/${APP} ${ARG}
+	docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/data registry.veinmind.tech/veinmind/${APP} ${ARG}
 
 ##@ Clean
 .PHONY: clean

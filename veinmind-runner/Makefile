@@ -36,7 +36,7 @@ run: deps ## Run Apps. 			e.g. : `make run ARG="scan image"` .
 
 .PHONY: run.docker
 run.docker:	## Run With Parallel Container Mode. e.g. : `make run.docker ARG="scan image"` .
-	docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock  veinmind/${APP} ${ARG}
+	docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' -v `pwd`:/tool/resource -v /var/run/docker.sock:/var/run/docker.sock  registry.veinmind.tech/veinmind/${APP} ${ARG}
 
 .PHONY: help
 help:

@@ -32,7 +32,7 @@ veinmind-history is an image anomaly history command scanning tool developed by 
 ### install by parallel container
 1. Install by Parallel Container，pull `veinmind-history` iamge  and start
     ```
-    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-history
+    docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-history
     ```
 
 2. or start with the script which we provided

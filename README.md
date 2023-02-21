@@ -26,7 +26,7 @@ docker info
 ```
 ### 2. 安装 [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) 镜像
 ```
-docker pull veinmind/veinmind-runner:latest
+docker pull registry.veinmind.tech/veinmind/veinmind-runner:latest
 ```
 ### 3. 下载 [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) 平行容器启动脚本
 ```

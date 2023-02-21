@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 基于平行容器的模式，获取 `veinmind-sensitive` 的镜像并启动
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-sensitive
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-sensitive
 ```
 
 或者使用项目提供的脚本启动

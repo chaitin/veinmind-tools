@@ -29,7 +29,7 @@ docker info
 ### 2. Install [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) image
 
 ```
-docker pull veinmind/veinmind-runner:latest
+docker pull registry.veinmind.tech/veinmind/veinmind-runner:latest
 ```
 
 ### 3. Download [veinmind-runner](https://github.com/chaitin/veinmind-tools/tree/master/veinmind-runner) parallel container startup script

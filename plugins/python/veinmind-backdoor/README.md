@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 基于平行容器的模式，获取 `veinmind-backdoor` 的镜像并启动
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind/veinmind-backdoor
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-backdoor
 ```
 
 或者使用项目提供的脚本启动
