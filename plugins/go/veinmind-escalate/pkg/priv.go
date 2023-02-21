@@ -2,23 +2,24 @@ package pkg
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"github.com/chaitin/libveinmind/go/pkg/vfs"
-	"github.com/chaitin/veinmind-common-go/service/report/event"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
 type checkMode int
 
-var hostConfig = make(map[string]interface{}, 0)
-var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "PRIVILEGED", "CAP_SYS_ADMIN", "CAP_SYS_CHROOT", "CAP_BPF", "CAP_DAC_OVERRIDE"}
+var cap = make([]string, 0)
+var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "CAP_SYS_ADMIN", "CAP_DAC_OVERRIDE"}
 
 func UnsafePrivCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	var res = make([]*event.EscapeDetail, 0)
@@ -76,41 +77,45 @@ func UnsafeSuidCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 }
 
 func ContainerUnsafeCapCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
-	err := getContainerHostConfig(fs)
+	var res = make([]*event.EscapeDetail, 0)
+	container, ok := fs.(api.Container)
+	if ok == false {
+		log.Error(fs, "is not a container")
+		return nil, nil
+	}
+	err := getCapEff(container)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	var res = make([]*event.EscapeDetail, 0)
-	if hostConfig["Privileged"] == true {
+	if isPrivileged(container) {
 		res = append(res, &event.EscapeDetail{
 			Target: "LINUX CAPABILITY",
 			Reason: CAPREASON,
 			Detail: "UnSafeCapability PRIVILEGED",
 		})
 	} else {
-		Caps := hostConfig["CapAdd"]
-		if Caps != nil {
-			UnSafeCaps := intersect(UnSafeCapList, Caps.([]interface{}))
-			for _, value := range UnSafeCaps {
-				if value == "CAP_SYS_PTRACE" {
-					if hostConfig["PidMode"] == "host" {
-						res = append(res, &event.EscapeDetail{
-							Target: "LINUX CAPABILITY",
-							Reason: CAPREASON,
-							Detail: "UnSafeCapability " + value + " and you start the container with parameter : `pid=host`",
-						})
-					}
-				} else {
+		UnSafeCap := intersect(cap, UnSafeCapList)
+
+		for _, value := range UnSafeCap {
+			if value == "CAP_SYS_PTRACE" {
+				if isPidEqualHost(container) {
 					res = append(res, &event.EscapeDetail{
 						Target: "LINUX CAPABILITY",
 						Reason: CAPREASON,
-						Detail: "UnSafeCapability " + value,
+						Detail: "UnSafeCapability " + value + " and you start the container with parameter : `pid=host`",
 					})
 				}
+			} else {
+				res = append(res, &event.EscapeDetail{
+					Target: "LINUX CAPABILITY",
+					Reason: CAPREASON,
+					Detail: "UnSafeCapability " + value,
+				})
 			}
 		}
 	}
+
 	return res, nil
 }
 
@@ -156,26 +161,67 @@ func CheckEmptyPasswdRoot(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	return res, nil
 }
 
-func getContainerHostConfig(container api.FileSystem) error {
-	fileContent, err := vfs.Open("/var/lib/docker/containers/" + strings.TrimPrefix(container.(api.Container).ID(), "sha256:") + "/hostconfig.json")
+func isPrivileged(container api.Container) bool {
+	state, err := container.OCIState()
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	if state.Pid == 0 {
+		return false
+	}
+
+	status, err := ioutil.ReadFile(filepath.Join(func() string {
+		fs := os.Getenv("LIBVEINMIND_HOST_ROOTFS")
+		if fs == "" {
+			return "/"
+		}
+		return fs
+	}(), "proc", strconv.Itoa(state.Pid), "status"))
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	pattern := regexp.MustCompile(`(?i)capeff:\s*?([a-z0-9]+)\s`)
+	matched := pattern.FindStringSubmatch(string(status))
+
+	if len(matched) != 2 {
+		return false
+	}
+
+	if strings.HasSuffix(matched[1], "ffffffff") {
+		return true
+	}
+
+	return false
+}
+
+func isPidEqualHost(container api.Container) bool {
+	spec, err := container.OCISpec()
+	if err != nil {
+		return false
+	}
+	namespaces := spec.Linux.Namespaces
+	for _, value := range namespaces {
+		if value.Type == "pid" {
+			return false
+		}
+	}
+	return true
+}
+
+func getCapEff(container api.Container) error {
+	spec, err := container.OCISpec()
 	if err != nil {
 		return err
 	}
-	defer fileContent.Close()
-	fileInfo, err := vfs.Stat("/var/lib/docker/containers/" + strings.TrimPrefix(container.(api.Container).ID(), "sha256:") + "/hostconfig.json")
-	if err != nil {
-		return err
-	}
-	content := make([]byte, fileInfo.Size())
-	fileContent.Read(content)
-	err = json.Unmarshal(content, &hostConfig)
-	if err != nil {
-		return err
-	}
+	cap = append(cap, spec.Process.Capabilities.Effective...)
 	return nil
 }
 
-func intersect(a []string, b []interface{}) []string {
+func intersect(a []string, b []string) []string {
 	iter := make([]string, 0)
 	mp := make(map[string]bool, 0)
 	for _, value := range a {
@@ -184,13 +230,8 @@ func intersect(a []string, b []interface{}) []string {
 		}
 	}
 	for _, value := range b {
-		str, err := value.(string)
-		if err == false {
-			log.Error(value, "is not string")
-			return nil
-		}
-		if _, ok := mp[str]; ok {
-			iter = append(iter, str)
+		if _, ok := mp[value]; ok {
+			iter = append(iter, value)
 		}
 	}
 	return iter
