@@ -6,6 +6,7 @@ jobs:
   # build go plugins
   build-plugins-amd64:
     strategy:
+      fail-fast: false
       matrix:
         plugin: [
           veinmind-basic,
