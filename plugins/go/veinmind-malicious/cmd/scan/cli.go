@@ -74,7 +74,7 @@ func scan(_ *cmd.Command, image api.Image) error {
 					reportEvent := event.Event{
 						&event.BasicInfo{
 							ID:         image.ID(),
-							Object:     event.Object{Raw: image},
+							Object:     event.NewObject(image),
 							Time:       time.Now(),
 							Level:      event.High,
 							DetectType: event.Image,
