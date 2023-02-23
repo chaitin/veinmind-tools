@@ -211,9 +211,9 @@ func scanPreRun(c *cmd.Command, args []string) error {
 
 	glob, err := c.Flags().GetString("glob")
 	if err == nil && glob != "" {
-		ps, err = plugin.DiscoverPlugins(ctx, ".", plugin.WithGlob(glob))
+		ps, err = plugin.DiscoverPlugins(ctx, "./plugin", plugin.WithGlob(glob))
 	} else {
-		ps, err = plugin.DiscoverPlugins(ctx, ".")
+		ps, err = plugin.DiscoverPlugins(ctx, "./plugin")
 	}
 	if err != nil {
 		return err

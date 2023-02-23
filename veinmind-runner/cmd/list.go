@@ -20,7 +20,7 @@ var listPluginCmd = &cmd.Command{
 	Use:   "plugin",
 	Short: "List plugin information",
 	RunE: func(cmd *cmd.Command, args []string) error {
-		ps, err := plugin.DiscoverPlugins(context.Background(), ".")
+		ps, err := plugin.DiscoverPlugins(context.Background(), "./plugin")
 		if err != nil {
 			return err
 		}
