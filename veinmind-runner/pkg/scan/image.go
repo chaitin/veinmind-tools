@@ -30,41 +30,42 @@ import (
 func DispatchImages(ctx context.Context, targets []*target.Target) error {
 	errG := errgroup.Group{}
 	for _, obj := range targets {
+		o := obj
 		errG.Go(func() error {
-			switch obj.Proto {
+			switch o.Proto {
 			case target.DOCKERD:
 				r, err := docker.New()
 				if err != nil {
 					return err
 				}
-				return HostImage(ctx, obj, r)
+				return HostImage(ctx, o, r)
 			case target.CONTAINERD:
 				r, err := containerd.New()
 				if err != nil {
 					return err
 				}
-				return HostImage(ctx, obj, r)
+				return HostImage(ctx, o, r)
 			case target.REGISTRY_IMAGE:
-				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
+				path := filepath.Join(o.Opts.TempPath, xid.NewWithTime(time.Now()).String())
 				r, err := remote.New(path)
 				if err != nil {
 					return err
 				}
-				return RegistryImage(ctx, obj, r)
+				return RegistryImage(ctx, o, r)
 			case target.REGISTRY:
-				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
+				path := filepath.Join(o.Opts.TempPath, xid.NewWithTime(time.Now()).String())
 				r, err := remote.New(path)
 				if err != nil {
 					return err
 				}
-				return Registry(ctx, obj, r)
+				return Registry(ctx, o, r)
 			case target.TARBALL:
-				path := filepath.Join(obj.Opts.TempPath, xid.NewWithTime(time.Now()).String())
+				path := filepath.Join(o.Opts.TempPath, xid.NewWithTime(time.Now()).String())
 				t, err := tarball.New(tarball.WithRoot(path))
 				if err != nil {
 					return err
 				}
-				return TarballImage(ctx, obj, t)
+				return TarballImage(ctx, o, t)
 			default:
 				return errors.New(fmt.Sprintf("individual image protol: %s", obj.Proto))
 			}
