@@ -13,7 +13,8 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 FROM veinmind/base:1.5.3-stretch
 # install clamav
 COPY dockerfiles/sources.list /etc/apt/sources.list
-RUN apt update && apt-get install -y clamav clamav-daemon && freshclam
+RUN apt update && apt-get install -y clamav clamav-daemon && \
+    rm -rf /var/lib/apt/lists/* && freshclam
 COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 
 # copy veinmind-malicious from context
