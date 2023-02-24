@@ -22,23 +22,24 @@ FROM veinmind/python3.6:1.5.3-stretch as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
-RUN apt update && apt-get install -y clamav clamav-daemon && freshclam
+RUN apt update && apt-get install -y --no-install-recommends clamav clamav-daemon && \
+    rm -rf /var/lib/apt/lists/* && mkdir plugin && freshclam
 COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 
 COPY --from=builder /build/veinmind-runner .
-COPY --from=basic /tool/veinmind-basic .
-COPY --from=weakpass /tool/veinmind-weakpass .
-COPY --from=malicious /tool/veinmind-malicious .
-COPY --from=sensitive /tool /tool/veinmind-sensitive
-COPY --from=history /tool /tool/veinmind-history
-COPY --from=backdoor /tool /tool/veinmind-backdoor
-COPY --from=log4j2 /tool/veinmind-log4j2  .
-COPY --from=unsafe-mount /tool/veinmind-unsafe-mount .
-COPY --from=iac /tool/veinmind-iac .
-COPY --from=vuln /tool/veinmind-vuln .
-COPY --from=escalate /tool/veinmind-escalate .
+COPY --from=basic /tool/veinmind-basic ./plugin/
+COPY --from=weakpass /tool/veinmind-weakpass ./plugin/
+COPY --from=malicious /tool/veinmind-malicious ./plugin/
+COPY --from=sensitive /tool/veinmind-sensitive ./plugin/
+COPY --from=history /tool /tool/plugin/veinmind-history
+COPY --from=backdoor /tool /tool/plugin/veinmind-backdoor
+COPY --from=log4j2 /tool/veinmind-log4j2  ./plugin/
+COPY --from=unsafe-mount /tool/veinmind-unsafe-mount ./plugin
+COPY --from=iac /tool/veinmind-iac ./plugin
+COPY --from=vuln /tool/veinmind-vuln ./plugin
+COPY --from=escalate /tool/veinmind-escalate ./plugin
 
-RUN pip install -r veinmind-history/requirements.txt && pip install -r veinmind-backdoor/requirements.txt && chmod +x */scan.py
+RUN pip install -r plugin/veinmind-history/requirements.txt && pip install -r plugin/veinmind-backdoor/requirements.txt && chmod +x plugin/*/scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner
 ENTRYPOINT ["/tool/entrypoint.sh"]
 
