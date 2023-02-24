@@ -12,4 +12,4 @@ params:
 
 example:
 
-![demo](../docs/veinmind-example/exampledemo.png)
+![demo](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-example/exampledemo.png)

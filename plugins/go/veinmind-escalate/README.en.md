@@ -61,21 +61,21 @@ Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagatio
 ```
 . / veinmind-escalate scan image [imageID/imageName].
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_image_01.jpg)
 
 2. Scan all local images.
 
 ```
 . / veinmind-escalate scan image.
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_image_02.jpg)
 
 3. Specify the container name or container ID and scan.
 
 ```
 . / veinmind-escalate scan container [containerID/containerName].
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_container_01.jpg)
 
 
 4. Scan all local containers.
@@ -83,7 +83,7 @@ Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagatio
 ```
 . / veinmind-escalate scan container.
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_02)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_container_02)
 
 5. Specify output format
 
@@ -91,4 +91,4 @@ Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagatio
 ./veinmind-escalate scan container [containerID/containerName] -f html
 #supported format： html,json,cli（default）
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_format.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_format.jpg)

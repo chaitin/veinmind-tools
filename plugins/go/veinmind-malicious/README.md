@@ -71,15 +71,15 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-malicious scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-malicious/malicious_scan_image1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-malicious/malicious_scan_image1.jpg)
 2.扫描所有本地镜像
 
 ```
 ./veinmind-malicious scan image
 ```
-![](../../../docs/veinmind-malicious/malicious_scan_image2-1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-malicious/malicious_scan_image2-1.jpg)
 
-![](../../../docs/veinmind-malicious/malicious_scan_image2-2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-malicious/malicious_scan_image2-2.jpg)
 
 
 
@@ -93,4 +93,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-malicious scan image -f html
 ```
 生成的result.html效果如图：
-![](../../../docs/veinmind-malicious/malicious_format.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-malicious/malicious_format.jpg)

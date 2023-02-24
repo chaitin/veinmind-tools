@@ -82,7 +82,7 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 | kubernetes                                                  | Cluster  | ✔️            |
 
 ## 🛴 Architecture
-![](docs/architecture.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/architecture.png)
 
 ## 🏘️ Contact Us
 
@@ -90,7 +90,7 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 2. By scanning the QR code below (use wechat), you can join the discussion group of veinmind users for detailed
    discussions by adding the veinmind assistant.
 
-![](docs/veinmind-group-qrcode.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-group-qrcode.jpg)
 
 ## ✨ 404 starlink project
 

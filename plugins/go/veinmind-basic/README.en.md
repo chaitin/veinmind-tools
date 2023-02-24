@@ -60,26 +60,26 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-basic scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-basic/basic_scan_image_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_image_1.jpeg)
 
 2. Scan all local images
 
 ```
 ./veinmind-basic scan image
 ```
-![](../../../docs/veinmind-basic/basic_scan_image_2.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_image_2.jpeg)
 
 3. Specify the container name or ID and scan (if the corresponding container exists locally)
 ```
 ./veinmind-basic scan container [containerName/containerid]
 ```
-![](../../../docs/veinmind-basic/basic_scan_container_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_container_1.jpeg)
 
 4. Scan all local containers
 ```
 ./veinmind-basic scan container
 ```
-![](../../../docs/veinmind-basic/basic_scan_container_2.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_container_2.jpeg)
 
 Specify the output type
 Supported output formats:
@@ -90,4 +90,4 @@ Supported output formats:
 ./veinmind-basic scan image [imageID/imageName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-basic/basic_format_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_format_1.jpg)

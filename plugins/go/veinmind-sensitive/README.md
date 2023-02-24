@@ -60,16 +60,16 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-sensitive scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-sensitive/sensitive-01.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-01.jpeg)
 
 2.扫描所有本地镜像
 
 ```
 ./veinmind-sensitive scan image
 ```
-![](../../../docs/veinmind-sensitive/sensitive-02-1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-02-1.jpeg)
 
-![](../../../docs/veinmind-sensitive/sensitive-02-2.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-02-2.jpeg)
 3.指定输出类型
 支持的输出格式：
 - html
@@ -80,7 +80,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 生成的result.html效果如图：
 
-![](../../../docs/veinmind-sensitive/sensitive-03.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-03.jpg)
 
 ## 规则字段说明
 

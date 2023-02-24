@@ -61,25 +61,25 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-escalate scan image [imageID/imageName]
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_image_01.jpg)
 2.扫描所有本地镜像
 
 ```
 ./veinmind-escalate scan image
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_image_02.jpg)
 3.指定容器名称或容器ID并扫描
 
 ```
 ./veinmind-escalate scan container [containerID/containerName]
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_container_01.jpg)
 4.扫描所有本地容器
 
 ```
 ./veinmind-escalate scan container
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_scan_container_02.jpg)
 5.指定输出格式
 支持的输出格式： 
 - html
@@ -90,4 +90,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 生成的result.html效果如图：
 
-![](../../../docs/veinmind-escalate/veinmind-escalate_format.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-escalate/veinmind-escalate_format.jpg)

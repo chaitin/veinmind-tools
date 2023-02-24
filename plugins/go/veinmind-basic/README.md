@@ -60,26 +60,26 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-basic scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-basic/basic_scan_image_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_image_1.jpeg)
 
 2.扫描所有本地镜像
 
 ```
 ./veinmind-basic scan image
 ```
-![](../../../docs/veinmind-basic/basic_scan_image_2.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_image_2.jpeg)
 
 3.指定容器名称或容器ID并扫描 (需要本地存在对应的容器)
 ```
 ./veinmind-basic scan container [containerName/containerid]
 ```
-![](../../../docs/veinmind-basic/basic_scan_container_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_container_1.jpeg)
 
 4.扫描所有本地容器
 ```
 ./veinmind-basic scan container
 ```
-![](../../../docs/veinmind-basic/basic_scan_container_2.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_scan_container_2.jpeg)
 
 5.指定输出类型
   支持的输出格式：
@@ -90,4 +90,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-basic scan image [imageID/imageName] -f html
 ```
 生成的result.html效果如图：
-![](../../../docs/veinmind-basic/basic_format_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-basic/basic_format_1.jpg)

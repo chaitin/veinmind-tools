@@ -57,12 +57,12 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-unsafe-mount scan container [containerID/containerName]
 ```
-![](../../../docs/veinmind-unsafe-mount/unsafemount_scan_container_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-unsafe-mount/unsafemount_scan_container_01.jpg)
 2. Scan all local containers
 ```
 ./veinmind-unsafe-mount scan container
 ```
-![](../../../docs/veinmind-unsafe-mount/unsafemount_scan_container_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-unsafe-mount/unsafemount_scan_container_02.jpg)
 3. Specify the output format
 Supported output formats:
 - html
@@ -72,4 +72,4 @@ Supported output formats:
 ./veinmind-unsafe-mount scan container [containerID/containerName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-unsafe-mount/unsafemount_scan_container_03.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-unsafe-mount/unsafemount_scan_container_03.jpg)

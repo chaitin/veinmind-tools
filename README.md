@@ -75,13 +75,13 @@ PS: 目前所有工具均已支持平行容器的方式运行
 | Kubernetes                                                  | 集群    | ✔️   |
 
 ## 🛴 工作原理
-![](docs/architecture.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/architecture.png)
 
 ## 🏘️ 联系我们
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
 2. 扫描下方二维码可以通过添加问脉小助手，以加入问脉用户讨论群进行详细讨论
 
-![](docs/veinmind-group-qrcode.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-group-qrcode.jpg)
 
 ## ✨ 404星链计划
 <img src="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">

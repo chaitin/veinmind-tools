@@ -59,36 +59,36 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-weakpass scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_1.jpeg)
 2. Specify the container name or ID and scan (if the corresponding container exists locally)
 ```
 ./veinmind-weakpass scan container [containername/containerid]
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_container_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_container_1.jpg)
 
 3. Scan all local images
 ```
 ./veinmind-weakpass scan container [containername/containerid]
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_3.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_3.jpeg)
 
 4. Scan all local containers
 ```
 ./veinmind-weakpass scan container 
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_container_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_container_2.jpg)
 
 Specify the scan username type
 ```
 ./veinmind-weakpass scan image -u username
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_5.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_5.jpeg)
 
 6. Specify a custom scan dictionary
 ```
 ./veinmind-weakpass scan image -d ./pass.dict
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_6.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_6.jpeg)
 
 7. Specify the service for the custom scan
 ```
@@ -102,7 +102,7 @@ Currently supported services
 |    mysql   |   8.X   |
 |    redis   |   all   |
 |   tomcat   |   all   |
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
 
 8. Unzip the default dictionary to local disk
 ```
@@ -117,4 +117,4 @@ Supported output formats:
 ./veinmind-weakpass scan image [imageID/imageName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_9.jpg)

@@ -60,16 +60,16 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-sensitive scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-sensitive/sensitive-01.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-01.jpeg)
 
 2. Scan all local images
 
 ```
 ./veinmind-sensitive scan image
 ```
-![](../../../docs/veinmind-sensitive/sensitive-02-1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-02-1.jpg)
 
-![](../../../docs/veinmind-sensitive/sensitive-02-2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-02-2.jpg)
 
 Specify the output type
 Supported output formats:
@@ -80,7 +80,7 @@ Supported output formats:
 ./veinmind-sensitive scan image [imageID/imageName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-sensitive/sensitive-03.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-sensitive/sensitive-03.jpg)
 
 ## Rule Field Description
 

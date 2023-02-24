@@ -60,26 +60,26 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-vuln scan image [imageID/imageName]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_01.jpg)
 2. Scan all local images
 
 ```
 ./veinmind-vuln scan image
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_02.jpg)
 3. Specify the container name or container ID and scan
 
 ```
 ./veinmind-vuln scan container [containerID/containerName]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_container_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_container_01.jpg)
 
 4. Scan all local containers
 
 ```
 ./veinmind-vuln scan container
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_container_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_container_02.jpg)
 
 Specify the output format
 Supported output formats:
@@ -90,21 +90,21 @@ Supported output formats:
 ./veinmind-vuln scan image [imageID/imageName] -f html
 ```
 The resulting result.html looks like this:
-![](../../../docs/veinmind-vuln/vuln_scan_image_05.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_05.jpg)
 6. Show details
 ```
 ./veinmind-vuln scan image [imageID/imageName] -v
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_06.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_06.jpg)
 7. Display specific types of information
 ```
 ./veinmind-vuln scan image [imageID/imageName] --type [os/python/npm/jar.....]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_07.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_07.jpeg)
 
 
 8. Scan only asset information
 ```
 ./veinmind-vuln scan image [imageID/imageName] --only-asset
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_08.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_08.jpg)

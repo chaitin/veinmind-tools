@@ -59,35 +59,35 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-weakpass scan image [imagename/imageid]
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_1.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_1.jpeg)
 2.指定容器名称或容器ID并扫描 (需要本地存在对应的容器)
 ```
 ./veinmind-weakpass scan container [containername/containerid]
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_container_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_container_1.jpg)
 3.扫描所有本地镜像
 ```
 ./veinmind-weakpass scan image 
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_3.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_3.jpeg)
 
 4.扫描本地所有容器
 ```
 ./veinmind-weakpass scan container 
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_container_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_container_2.jpg)
 
 5.指定扫描用户名类型
 ```
 ./veinmind-weakpass scan image -u username
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_5.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_5.jpeg)
 
 6.指定自定义扫描字典
 ```
 ./veinmind-weakpass scan image -d ./pass.dict
 ```
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_6.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_6.jpeg)
 
 7.指定自定义扫描的服务
 ```
@@ -101,7 +101,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 |    mysql   |   8.X   |
 |    redis   |   all   |
 |   tomcat   |   all   |
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
 
 8.解压默认字典到本地磁盘
 ```
@@ -116,4 +116,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-weakpass scan image [imageID/imageName] -f html
 ```
 生成的result.html效果如图：
-![](../../../docs/veinmind-weakpass/weakpass_scan_image_9.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-weakpass/weakpass_scan_image_9.jpg)

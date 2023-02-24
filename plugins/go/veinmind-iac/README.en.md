@@ -57,7 +57,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-iac scan iac IACFILE
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_01.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_01.jpg)
 
 
 2. Specify the types of IaC files that may exist in the scan directory
@@ -65,14 +65,14 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-iac scan iac PATH
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_02.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_02.jpg)
 
 3. Specify a specific IaC file type to scan
 
 ```
 ./veinmind-iac scan iac --iac-type kubernetes/dockerfile IACFILE/PATH
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_03.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_03.jpg)
 
 Specify the output format
 Supported output formats:
@@ -83,4 +83,4 @@ Supported output formats:
 ./veinmind-iac scan iac -f html IACFILE/PATH
 ```
 The resulting result.html looks like this:
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_04.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_04.jpg)

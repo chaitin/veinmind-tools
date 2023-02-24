@@ -56,38 +56,38 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 
 1. 登录[百川平台](https://rivers.chaitin.cn/)，激活关山 Webshell 检测产品
 
-![](../../../docs/veinmind-webshell/readme1.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/readme1.png)
 
 2. 点击左下角组织配置创建 API Token (基础版每日限制检测 100 次， 高级版可联系问脉小助手/百川平台获取)
 
-![](../../../docs/veinmind-webshell/readme2.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/readme2.png)
 
-![](../../../docs/veinmind-webshell/readme3.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/readme3.png)
 
 3. 使用token扫描指定镜像
 
 ```
 ./veinmind-webshell scan image [imageID/imageName] --token [关山token]
 ```
-![](../../../docs/veinmind-webshell/scan_image_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/scan_image_1.jpg)
 4. 使用token扫描本地所有镜像
 ```
 ./veinmind-webshell scan image  --token [关山token]
 ```
-![](../../../docs/veinmind-webshell/scan_image_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/scan_image_2.jpg)
 
 5.使用token扫描指定容器
 ```
 ./veinmind-webshell scan container [containerID/containerName] --token [关山token]
 ```
-![](../../../docs/veinmind-webshell/scan_container_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/scan_container_1.jpg)
 
 5.使用token扫描本地所有容器
 ```
 ./veinmind-webshell scan container  --token [关山token]
 ```
 
-![](../../../docs/veinmind-webshell/scan_container_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/scan_container_2.jpg)
 
 6. 指定输出格式
 支持的输出格式：
@@ -98,6 +98,6 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-webshell scan container [containerID/containerName] --token [token] -f html
 ```
 生成的result.html效果如图：
-![](../../../docs/veinmind-webshell/format.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-webshell/format.jpg)
 
 

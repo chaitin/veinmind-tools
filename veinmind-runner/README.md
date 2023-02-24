@@ -139,4 +139,4 @@ alert = true
 ```
 ./veinmind-runner scan image -- veinmind-weakpass:scan/image.serviceName=ssh
 ```
-![](../docs/runner_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/runner_1.jpg)

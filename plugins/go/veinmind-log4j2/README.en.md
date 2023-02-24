@@ -60,31 +60,31 @@ docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagatio
 ```
 ./veinmind-log4j2 scan image [imageID/imageName].
 ```
-![](../../../docs/veinmind-log4j2/log4j2_scan_image_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-log4j2/log4j2_scan_image_1.jpg)
 
 2. Scan all local images.
 
 ```
 ./veinmind-log4j2 scan image.
 ```
-![](../../../docs/veinmind-log4j2/log4j2_scan_image_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-log4j2/log4j2_scan_image_2.jpg)
 
 3. Specify the container name or container ID and scan.
 
 ```
 ./veinmind-log4j2 scan container [containerID/containerName].
 ```
-![](../../../docs/veinmind-log4j2/log4j2_scan_container_1.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-log4j2/log4j2_scan_container_1.jpg)
 4. Scan all local containers.
 
 ```
 ./veinmind-log4j2 scan container.
 ```
-![](../../../docs/veinmind-log4j2/log4j2_scan_container_2.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-log4j2/log4j2_scan_container_2.jpg)
 5. Specify output format
 
 ```
 ./veinmind-log4j2 scan container [containerID/containerName] -f html
 #supported format： html,json,cli（default）
 ```
-![](../../../docs/veinmind-log4j2/log4j2_format.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-log4j2/log4j2_format.jpg)

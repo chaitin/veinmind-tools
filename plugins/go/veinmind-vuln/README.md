@@ -60,19 +60,19 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-vuln scan image [imageID/imageName]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_01.jpg)
 2.扫描所有本地镜像
 
 ```
 ./veinmind-vuln scan image
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_02.jpg)
 3.指定容器名称或容器ID并扫描
 
 ```
 ./veinmind-vuln scan container [containerID/containerName]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_container_01.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_container_01.jpg)
 
 
 4.扫描所有本地容器
@@ -80,7 +80,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-vuln scan container
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_container_02.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_container_02.jpg)
 
 
 5.指定输出格式
@@ -93,21 +93,21 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 生成的result.html效果如图：
 
-![](../../../docs/veinmind-vuln/vuln_scan_image_05.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_05.jpg)
 6.显示详细信息
 ```
 ./veinmind-vuln scan image [imageID/imageName] -v
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_06.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_06.jpg)
 7.显示特定类型的信息
 ```
 ./veinmind-vuln scan image [imageID/imageName] --type [os/python/npm/jar.....]
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_07.jpeg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_07.jpeg)
 
 
 8.仅扫描资产信息
 ```
 ./veinmind-vuln scan image [imageID/imageName] --only-asset
 ```
-![](../../../docs/veinmind-vuln/vuln_scan_image_08.jpg)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-vuln/vuln_scan_image_08.jpg)

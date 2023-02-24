@@ -57,7 +57,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-iac scan iac IACFILE
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_01.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_01.jpg)
 
 
 2. 指定扫描目录下可能存在的IaC文件类型
@@ -65,14 +65,14 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-iac scan iac PATH
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_02.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_02.jpg)
 
 3. 指定扫描特定的IaC文件类型
 
 ```
 ./veinmind-iac scan iac --iac-type kubernetes/dockerfile IACFILE/PATH
 ```
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_03.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_03.jpg)
 
 4. 指定输出格式 
 支持的输出格式：
@@ -83,4 +83,4 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-iac scan iac -f html IACFILE/PATH
 ```
 生成的result.html效果如图：
-![img.png](../../../docs/veinmind-iac/iac_scan_iac_04.jpg)
+![img.png](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/docs/veinmind-iac/iac_scan_iac_04.jpg)
