@@ -18,11 +18,11 @@ FROM registry.veinmind.tech/veinmind/veinmind-iac:latest as iac
 FROM registry.veinmind.tech/veinmind/veinmind-vuln:latest as vuln
 FROM registry.veinmind.tech/veinmind/veinmind-escalate:latest as escalate
 
-FROM veinmind/python3.6:1.5.3-stretch as release
+FROM veinmind/python3.6:1.5.3-slim as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
-RUN apt update && apt-get install -y --no-install-recommends clamav clamav-daemon && \
+RUN apt update && apt-get install -y --no-install-recommends --allow-remove-essential libtinfo5 clamav clamav-daemon && \
     rm -rf /var/lib/apt/lists/* && mkdir plugin && freshclam
 COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 
