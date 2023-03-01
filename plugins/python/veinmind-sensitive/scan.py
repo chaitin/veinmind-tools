@@ -193,6 +193,8 @@ def scan_images(image):
                     f_stat = image.stat(filepath)
                     if not S_ISREG(f_stat.st_mode):
                         continue
+                    if f_stat.st_size > 10 * 1024 * 1024:
+                        continue
 
                     f = image.open(filepath, mode="rb")
                     f_content_byte = f.read()
