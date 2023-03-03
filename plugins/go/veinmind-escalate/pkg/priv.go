@@ -3,62 +3,23 @@ package pkg
 import (
 	"bufio"
 	"fmt"
-	"github.com/chaitin/veinmind-common-go/service/report/event"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/plugin/log"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
 type checkMode int
 
-var CAPStringsList = []string{
-	"CAP_CHOWN",
-	"CAP_DAC_OVERRIDE",
-	"CAP_DAC_READ_SEARCH",
-	"CAP_FOWNER",
-	"CAP_FSETID",
-	"CAP_KILL",
-	"CAP_SETGID",
-	"CAP_SETUID",
-	"CAP_SETPCAP",
-	"CAP_LINUX_IMMUTABLE",
-	"CAP_NET_BIND_SERVICE",
-	"CAP_NET_BROADCAST",
-	"CAP_NET_ADMIN",
-	"CAP_NET_RAW",
-	"CAP_IPC_LOCK",
-	"CAP_IPC_OWNER",
-	"CAP_SYS_MODULE",
-	"CAP_SYS_RAWIO",
-	"CAP_SYS_CHROOT",
-	"CAP_SYS_PTRACE",
-	"CAP_SYS_PACCT",
-	"CAP_SYS_ADMIN",
-	"CAP_SYS_BOOT",
-	"CAP_SYS_NICE",
-	"CAP_SYS_RESOURCE",
-	"CAP_SYS_TIME",
-	"CAP_SYS_TTY_CONFIG",
-	"CAP_MKNOD",
-	"CAP_LEASE",
-	"CAP_AUDIT_WRITE",
-	"CAP_AUDIT_CONTROL",
-	"CAP_SETFCAP",
-	"CAP_MAC_OVERRIDE",
-	"CAP_MAC_ADMIN",
-	"CAP_SYSLOG",
-	"CAP_WAKE_ALARM",
-	"CAP_BLOCK_SUSPEND",
-	"CAP_AUDIT_READ",
-	"CAP_PERFMON",
-	"CAP_BPF",
-	"CAP_CHECKPOINT_RESTORE",
-}
-var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "PRIVILEGED", "CAP_SYS_ADMIN", "CAP_SYS_CHROOT", "CAP_BPF", "CAP_DAC_OVERRIDE"}
+var cap = make([]string, 0)
+var UnSafeCapList = []string{"CAP_DAC_READ_SEARCH", "CAP_SYS_MODULE", "CAP_SYS_PTRACE", "CAP_SYS_ADMIN", "CAP_DAC_OVERRIDE"}
 
 func UnsafePrivCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	var res = make([]*event.EscapeDetail, 0)
@@ -117,38 +78,44 @@ func UnsafeSuidCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 
 func ContainerUnsafeCapCheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	var res = make([]*event.EscapeDetail, 0)
-	file, err := fs.Open("/proc/1/status")
+	container, ok := fs.(api.Container)
+	if ok == false {
+		log.Error(fs, "is not a container")
+		return nil, nil
+	}
+	err := getCapEff(container)
 	if err != nil {
 		log.Error(err)
-		return res, err
+		return nil, err
 	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if strings.HasPrefix(scanner.Text(), "CapEff:") {
-			if strings.HasSuffix(scanner.Text(), "fffffffff") {
-				res = append(res, &event.EscapeDetail{
-					Target: "/proc/1/status",
-					Reason: CAPREASON,
-					Detail: "UnSafeCapability PRIVILEGED",
-				})
-			} else {
-				Cap, err := parseCapEff(scanner.Text())
-				if err != nil {
-					log.Error(err)
-					return res, err
-				}
-				UnSafeCaps := intersect(Cap, UnSafeCapList)
-				for _, UnSafeCap := range UnSafeCaps {
+	if isPrivileged(container) {
+		res = append(res, &event.EscapeDetail{
+			Target: "LINUX CAPABILITY",
+			Reason: CAPREASON,
+			Detail: "UnSafeCapability PRIVILEGED",
+		})
+	} else {
+		UnSafeCap := intersect(cap, UnSafeCapList)
+
+		for _, value := range UnSafeCap {
+			if value == "CAP_SYS_PTRACE" {
+				if isPidEqualHost(container) {
 					res = append(res, &event.EscapeDetail{
-						Target: "/proc/1/status",
+						Target: "LINUX CAPABILITY",
 						Reason: CAPREASON,
-						Detail: "UnSafeCapability " + UnSafeCap,
+						Detail: "UnSafeCapability " + value + " and you start the container with parameter : `pid=host`",
 					})
 				}
+			} else {
+				res = append(res, &event.EscapeDetail{
+					Target: "LINUX CAPABILITY",
+					Reason: CAPREASON,
+					Detail: "UnSafeCapability " + value,
+				})
 			}
 		}
 	}
+
 	return res, nil
 }
 
@@ -192,6 +159,66 @@ func CheckEmptyPasswdRoot(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	}
 
 	return res, nil
+}
+
+func isPrivileged(container api.Container) bool {
+	state, err := container.OCIState()
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	if state.Pid == 0 {
+		return false
+	}
+
+	status, err := ioutil.ReadFile(filepath.Join(func() string {
+		fs := os.Getenv("LIBVEINMIND_HOST_ROOTFS")
+		if fs == "" {
+			return "/"
+		}
+		return fs
+	}(), "proc", strconv.Itoa(state.Pid), "status"))
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	pattern := regexp.MustCompile(`(?i)capeff:\s*?([a-z0-9]+)\s`)
+	matched := pattern.FindStringSubmatch(string(status))
+
+	if len(matched) != 2 {
+		return false
+	}
+
+	if strings.HasSuffix(matched[1], "ffffffff") {
+		return true
+	}
+
+	return false
+}
+
+func isPidEqualHost(container api.Container) bool {
+	spec, err := container.OCISpec()
+	if err != nil {
+		return false
+	}
+	namespaces := spec.Linux.Namespaces
+	for _, value := range namespaces {
+		if value.Type == "pid" {
+			return false
+		}
+	}
+	return true
+}
+
+func getCapEff(container api.Container) error {
+	spec, err := container.OCISpec()
+	if err != nil {
+		return err
+	}
+	cap = append(cap, spec.Process.Capabilities.Effective...)
+	return nil
 }
 
 func intersect(a []string, b []string) []string {
@@ -247,24 +274,6 @@ func isContainSUID(content os.FileInfo) bool {
 		return true
 	}
 	return false
-}
-
-func parseCapEff(capHex string) ([]string, error) {
-	capHex = strings.TrimSpace(strings.TrimPrefix(capHex, "CapEff:"))
-	var capTextList []string
-	numb, err := strconv.ParseUint(capHex, 16, 64)
-	if err != nil {
-		return nil, err
-	}
-	for i := 0; i < len(CAPStringsList); i++ {
-		flag := numb & 0x1
-		if flag == uint64(1) {
-			capTextList = append(capTextList, CAPStringsList[i])
-		}
-		numb = numb >> 1
-	}
-
-	return capTextList, nil
 }
 
 func init() {
