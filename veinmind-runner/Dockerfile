@@ -5,18 +5,18 @@ ARG TARGETARCH
 ENV GOOS=linux GOARCH=${TARGETARCH}
 RUN make build
 
-FROM registry.veinmind.tech/veinmind/veinmind-basic:latest as basic
-FROM registry.veinmind.tech/veinmind/veinmind-malicious:latest as malicious
-FROM registry.veinmind.tech/veinmind/veinmind-weakpass:latest as weakpass
+FROM veinmind/veinmind-basic:latest as basic
+FROM veinmind/veinmind-malicious:latest as malicious
+FROM veinmind/veinmind-weakpass:latest as weakpass
 # update sensitive
-FROM registry.veinmind.tech/veinmind/veinmind-sensitive:latest as sensitive
-FROM registry.veinmind.tech/veinmind/veinmind-history:latest as history
-FROM registry.veinmind.tech/veinmind/veinmind-backdoor:latest as backdoor
-FROM registry.veinmind.tech/veinmind/veinmind-log4j2:latest as log4j2
-FROM registry.veinmind.tech/veinmind/veinmind-unsafe-mount:latest as unsafe-mount
-FROM registry.veinmind.tech/veinmind/veinmind-iac:latest as iac
-FROM registry.veinmind.tech/veinmind/veinmind-vuln:latest as vuln
-FROM registry.veinmind.tech/veinmind/veinmind-escalate:latest as escalate
+FROM veinmind/veinmind-sensitive:latest as sensitive
+FROM veinmind/veinmind-history:latest as history
+FROM veinmind/veinmind-backdoor:latest as backdoor
+FROM veinmind/veinmind-log4j2:latest as log4j2
+FROM veinmind/veinmind-unsafe-mount:latest as unsafe-mount
+FROM veinmind/veinmind-iac:latest as iac
+FROM veinmind/veinmind-vuln:latest as vuln
+FROM veinmind/veinmind-escalate:latest as escalate
 
 FROM veinmind/python3.6:1.5.3-slim as release
 WORKDIR /tool
