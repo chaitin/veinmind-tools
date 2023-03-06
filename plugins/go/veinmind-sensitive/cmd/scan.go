@@ -42,7 +42,7 @@ func Scan(c *cmd.Command, image api.Image) (err error) {
 		if err != nil {
 			return nil
 		}
-		if !info.Type.IsRegular() || info.Size > 3*1024*1024 {
+		if (!info.Type.IsRegular() && !info.Type.IsDir()) || info.Size > 3*1024*1024 {
 			return nil
 		}
 		count += 1
@@ -53,7 +53,6 @@ func Scan(c *cmd.Command, image api.Image) (err error) {
 		return nil
 	})
 	eg.Wait()
-
 	log.Infof("%s scan file count %d", image.ID(), count)
 	return nil
 }
@@ -79,7 +78,6 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 				return nil
 			}
 		}
-
 		for _, r := range conf.Rule {
 			if r.FilePathPattern != "" && vregex.IsMatchString(r.FilePathPattern, info.Path) {
 				cache.PathRule.SetOrAppend(path, r)
@@ -107,7 +105,9 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 	mimeMatch := false
 	fp, err := image.Open(path)
 	if err != nil {
-		log.Error(image.ID(), path, err)
+		if !info.Type.IsDir() {
+			log.Error(image.ID(), path, err)
+		}
 		return nil
 	}
 	defer fp.Close()
