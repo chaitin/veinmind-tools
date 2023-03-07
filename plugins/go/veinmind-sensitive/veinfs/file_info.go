@@ -47,7 +47,11 @@ func Walk(image api.Image, rootPath string, walkFunc WalkFunc) error {
 
 		// skip the dir file
 		if info.IsDir() {
-			return nil
+			return walkFunc(&FileInfo{
+				baseFileInfo: baseFileInfo{
+					Path: path,
+				},
+				Type: info.Mode().Type()}, nil)
 		}
 
 		// skip the non regular file
