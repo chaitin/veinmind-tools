@@ -86,6 +86,10 @@ jobs:
           path: ./
       - uses: actions/download-artifact@v3
         with:
+          name: veinmind-minio-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
           name: veinmind-runner-amd64
           path: ./
       - run: |
@@ -99,11 +103,12 @@ jobs:
           mv veinmind-iac_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-iac 
           mv veinmind-basic_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-basic
           mv veinmind-escalate_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-escalate  
+          mv veinmind-minio_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-minio  
           mv ./plugins/python/veinmind-history ./veinmind-history
           mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
           rm -rf ./veinmind-runner && mv veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner
           chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate 
-          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell \
+          tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-minio \
           veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate \
           ./veinmind-history \
           ./veinmind-backdoor \

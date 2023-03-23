@@ -17,6 +17,7 @@ FROM veinmind/veinmind-unsafe-mount:latest as unsafe-mount
 FROM veinmind/veinmind-iac:latest as iac
 FROM veinmind/veinmind-vuln:latest as vuln
 FROM veinmind/veinmind-escalate:latest as escalate
+FROM veinmind/veinmind-minio:latest as minio
 
 FROM veinmind/python3.6:1.5.3-slim as release
 WORKDIR /tool
@@ -38,6 +39,7 @@ COPY --from=unsafe-mount /tool/veinmind-unsafe-mount ./plugin
 COPY --from=iac /tool/veinmind-iac ./plugin
 COPY --from=vuln /tool/veinmind-vuln ./plugin
 COPY --from=escalate /tool/veinmind-escalate ./plugin
+COPY --from=minio /tool/veinmind-minio ./plugin
 
 RUN pip install -r plugin/veinmind-history/requirements.txt && pip install -r plugin/veinmind-backdoor/requirements.txt && chmod +x plugin/*/scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner

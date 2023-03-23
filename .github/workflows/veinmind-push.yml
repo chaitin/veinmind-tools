@@ -60,6 +60,7 @@ jobs:
           veinmind-vuln,
           veinmind-weakpass,
           veinmind-webshell,
+          veinmind-minio,
         ]
         path: [ ./plugins/go/ ]
     name: ${{ matrix.plugin }}
