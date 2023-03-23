@@ -59,7 +59,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-minio scan image [imageID/imageName]
 ```
-
+![](../../../docs/veinmind-minio/minio_scan_1.png)
 2.扫描所有本地镜像
 
 ```
@@ -71,7 +71,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ```
 ./veinmind-minio scan container [containerID/containerName]
 ```
-
+![](../../../docs/veinmind-minio/minio_scan_2.png)
 4.扫描所有本地容器
 
 ```
@@ -87,4 +87,6 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-minio scan container [containerID/containerName] -f html
 ```
 生成的result.html效果如图：
+
+![](../../../docs/veinmind-minio/minio_scan_3.png)
 
