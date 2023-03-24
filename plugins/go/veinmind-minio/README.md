@@ -1,4 +1,4 @@
-# veinmind-minio  
+<h1 align="center"> veinmind-minio </h1>
 
 <p align="center">
 veinmind-minio  主要用于扫描 CVE-2023-28432 漏洞专项检查。
@@ -17,6 +17,16 @@ veinmind-minio  主要用于扫描 CVE-2023-28432 漏洞专项检查。
 - linux/arm
 
 ## 使用方式
+
+### BinaryStandalone(Beta)
+静态编译版本，无需`libveinmind`依赖，下载即可用。
+
+从[下载仓库](https://download.veinmind.tech/plugins%2Fveinmind-minio)对应系统版本的二进制文件。
+
+执行:
+`chmod +x veinmind-minio-amd64 && ./veinmind-minio-amd64 scan image`
+
+更多详情，可查看：https://stack.chaitin.com/techblog/detail?id=62
 
 ### 基于可执行文件
 
@@ -49,7 +59,7 @@ make build.docker
 ```
 运行容器进行扫描
 ```
-docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-minio scan xxx
+docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' registry.veinmind.tech/veinmind/veinmind-minio scan xxx
 ```
 
 ## 使用参数
