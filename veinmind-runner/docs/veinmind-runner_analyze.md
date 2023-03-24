@@ -1,16 +1,18 @@
-## veinmind-runner authz
+## veinmind-runner analyze
 
-Authz as docker plugin
+Analyze Veinmind Report With OpenAI.
 
 ```
-veinmind-runner authz [flags]
+veinmind-runner analyze [flags]
 ```
 
 ### Options
 
 ```
-  -c, --config string   authz config path
-  -h, --help            help for authz
+  -h, --help            help for analyze
+  -p, --prefix string   training openai limit sentence
+  -r, --report string   report (json) file path (default "report.json")
+  -t, --token string    OpenAI token
 ```
 
 ### Options inherited from parent commands

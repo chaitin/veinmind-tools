@@ -22,6 +22,7 @@ func init() {
 	// with context
 	rootCmd.SetContext(context.Background())
 
+	rootCmd.AddCommand(aiCmd)
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(scanCmd)

@@ -17,6 +17,7 @@ type ModuleKey string
 
 const (
 	CmdModuleKey       ModuleKey = "cmd"
+	AIAnalyzerKey      ModuleKey = "ai-analyzer"
 	ScanModuleKey      ModuleKey = "scan"
 	AuthzModuleKey     ModuleKey = "authz"
 	ContainerModuleKey ModuleKey = "container"
@@ -66,6 +67,7 @@ func init() {
 	// register
 	modules = make(map[string]*Module)
 	_ = RegisterModule(CmdModuleKey.String())
+	_ = RegisterModule(AIAnalyzerKey.String())
 	_ = RegisterModule(ScanModuleKey.String())
 	_ = RegisterModule(AuthzModuleKey.String())
 	_ = RegisterModule(ContainerModuleKey.String())

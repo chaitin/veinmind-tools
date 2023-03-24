@@ -18,6 +18,10 @@
 
 ![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/index.gif)
 
+Veinmind has been connected to openai. You can use openai to conduct a user-friendly analysis of the scan results, allowing you to have a clearer understanding of the risks identified during this scan.
+
+![](https://cdn.dvkunion.cn/veinmind/134168bbeaa2409eaaeb700ec27164d8.png)
+
 ## 🕹️ Quick Start
 
 ### 1. Make sure docker is installed correctly on the machine
@@ -44,6 +48,12 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ./run.sh scan image
 ```
 
+### 5. use ai analyze
+
+```
+./run.sh scan image --analyze -t <your_openai_token>
+```
+
 ## 🔨 Toolset
 
 | Tool                                                                 | Description                                            | 
@@ -52,6 +62,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-malicious](plugins/go/veinmind-malicious/README.en.md)     | Scan containers/images for malicious files             |
 | [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)       | scan containers/images for weak passwords              |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)           | scan containers/images for log4j2(CVE-2021-44228)      |
+| [veinmind-minio](plugins/go/veinmind-minio)                          | scan containers/images for minio(CVE-2023-28432)       |
 | [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md) | scan images for sensitive information                  |
 | [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)   | scan images for backdoors                              |
 | [veinmind-history](plugins/python/veinmind-history/README.en.md)     | scan images for abnormal history commands              |
