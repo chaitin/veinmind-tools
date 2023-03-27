@@ -12,7 +12,10 @@ As a plugin platform, 'veinmind-runner' will automatically scan for compliant pl
 ! [](https://dinfinite.oss-cn-beijing.aliyuncs.com/image/20220321150601.png)
 
 ## 🔥 Features
+<b>2023-3-24 - NEW</b>
+- 🔥🔥🔥 Support access to 'openai' to conduct humanized analysis of scanned security events, allowing you to more clearly understand what risks have been identified during this scan and how to operate them
 
+<b>Basic characteristics</b>
 - Automatically scan and register plugins in the current directory (including subdirectories)
 - Run different language plugins in one way
 - Plugins can communicate with the 'runner' to alert on events, etc
@@ -77,7 +80,28 @@ helm install veinmind .
 ### Basic parameters
 Refer to [veinmind-runner usage parameters documentation](docs/veinmind-runner.md)
 ### Advanced parameters
-1. Support docker image blocking
+1.Support intelligent analysis of results using openai
+> Precondition 1: Need to prepare openai_ Key, please refer to: https://platform.openai.com/account/api-keys
+> Precondition 2: The network can access openai during scanning
+
+Use the `-- analyze` parameter to add the scan to openai result analysis:
+
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key>`
+
+If you feel that the analysis result is not satisfactory, you can customize the query result statement to adjust openai's analysis of the result:
+
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "Please analyze the following security incidents"`
+
+Or：
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "Parse what happened to the following json"`
+
+You can also analyze the resulting file after scanning:
+
+`./veinmind-runner analyze -r <path_to_result.json> -t <your_openai_key>`
+
+This method will parse the `result. json` and also support customized queries with the `-p` parameter.
+
+2. Support docker image blocking
 
 ```bash
 # first

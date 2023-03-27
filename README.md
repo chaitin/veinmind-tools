@@ -19,6 +19,10 @@
 ## 🔥 Demo
 ![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/index.gif)
 
+问脉已接入 openai, 可以使用 openai 对扫描的结果进行人性化分析，让您更加清晰的了解本次扫描发现了哪些风险。
+
+![](https://cdn.dvkunion.cn/veinmind/134168bbeaa2409eaaeb700ec27164d8.png)
+
 ## 🕹️ 快速开始
 ### 1. 确保机器上正确安装 docker
 ```
@@ -36,7 +40,10 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ```
 ./run.sh scan image
 ```
-
+### 5. 使用 openAI 智能分析
+```
+./run.sh scan image --enable-analyze --openai-token  <your_openai_token>
+```
 
 ## 🔨 工具列表
 
@@ -46,6 +53,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-malicious](plugins/go/veinmind-malicious)       | 扫描容器/镜像中的恶意文件     |
 | [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描容器/镜像中的弱口令      |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2)             | 扫描容器/镜像中的log4j2漏洞 |
+| [veinmind-minio](plugins/go/veinmind-minio)               | 扫描容器/镜像中的minio漏洞  |
 | [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息        |
 | [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门          |
 | [veinmind-history](plugins/python/veinmind-history)       | 扫描镜像中的异常历史命令      |
