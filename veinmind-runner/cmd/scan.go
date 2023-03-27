@@ -53,10 +53,10 @@ veinmind-runner scan image registry-image:library/ubuntu
 veinmind-runner scan image -c auth.toml registry-image:example.com/app/market:v1.11.2
 
 5. use openai analyze result
-veinmind-runner scan image --analyze -t <your_openai_token> nginx:latest
+veinmind-runner scan image --enable-analyze --openai-token  <your_openai_token> nginx:latest
 
 6. use openai analyze result with yourself questions
-veinmind-runner scan image --analyze -t <your_openai_token> -p "explain what happened at this json" nginx:latest
+veinmind-runner scan image --enable-analyze --openai-token  <your_openai_token> -p "explain what happened at this json" nginx:latest
 
 7. scan private registry example.com （need admin privilege)
 veinmind-runner scan image -c auth.toml registry:example.com
@@ -88,10 +88,10 @@ veinmind-runner scan container dockerd:d29e2ca5b3a8
 veinmind-runner scan container containerd:webapp
 
 4. use openai analyze result
-veinmind-runner scan container --analyze -t <your_openai_token> containerd:webapp
+veinmind-runner scan container --enable-analyze --openai-token <your_openai_token> containerd:webapp
 
 5. use openai analyze result with yourself questions
-veinmind-runner scan container --analyze -t <your_openai_token> -p "explain what happened at this json" containerd:webapp
+veinmind-runner scan container --enable-analyze --openai-token <your_openai_token> -p "explain what happened at this json" containerd:webapp
 `,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,
@@ -111,10 +111,10 @@ veinmind-runner scan iac git:https://github.com/kubernetes-sigs/kustomize.git
 veinmind-runner scan iac --kubeconfig admin.yaml kubernetes:pod
 
 4. use openai analyze result
-veinmind-runner scan iac --kubeconfig admin.yaml --analyze -t <your_openai_token> kubernetes:pod
+veinmind-runner scan iac --kubeconfig admin.yaml --enable-analyze --openai-token  <your_openai_token> kubernetes:pod
 
 5. use openai analyze result with yourself questions
-veinmind-runner scan iac --kubeconfig admin.yaml --analyze -t <your_openai_token> -p "explain what happened at this json" kubernetes:pod
+veinmind-runner scan iac --kubeconfig admin.yaml --enable-analyze --openai-token  <your_openai_token> -p "explain what happened at this json" kubernetes:pod
 `,
 		PreRunE:  scanPreRun,
 		PostRunE: scanPostRun,
@@ -252,10 +252,10 @@ func scanPostRun(c *cmd.Command, _ []string) error {
 	// Stop reporter listen
 	reportService.Close()
 	// AI analyze
-	analyze, err := c.Flags().GetBool("analyze")
+	analyze, err := c.Flags().GetBool("enable-analyze")
 	if analyze {
 		log.GetModule(log.ScanModuleKey).Infof("enbale ai analyzer, prepare use openai to analyze results......")
-		token, _ := c.Flags().GetString("token")
+		token, _ := c.Flags().GetString("openai-token")
 		if token != "" {
 			prefix, _ := c.Flags().GetString("prefix")
 			err := AnalyzeReport(ctx, token, prefix, reportService.EventPool.Events)
@@ -295,8 +295,8 @@ func init() {
 
 	scanCmd.PersistentFlags().StringP("format", "", "cli", "output format: html/json/cli")
 	scanCmd.PersistentFlags().BoolP("verbose", "v", false, "output verbose detail")
-	scanCmd.PersistentFlags().Bool("analyze", false, "auto use openai analyze result")
-	scanCmd.PersistentFlags().StringP("token", "t", "", "auto openai analyze openai_key")
+	scanCmd.PersistentFlags().Bool("enable-analyze", false, "auto use openai analyze result")
+	scanCmd.PersistentFlags().StringP("openai-token", "", "", "auto openai analyze openai_key")
 	scanCmd.PersistentFlags().StringP("prefix", "p", "", "training openai limit sentence")
 	scanCmd.PersistentFlags().BoolP("insecure-skip", "", false, "skip tls config")
 	// Scan Flags

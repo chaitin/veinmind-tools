@@ -42,7 +42,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 ```
 ### 5. 使用 openAI 智能分析
 ```
-./run.sh scan image --analyze -t <your_openai_token>
+./run.sh scan image --enable-analyze --openai-token  <your_openai_token>
 ```
 
 ## 🔨 工具列表

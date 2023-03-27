@@ -22,7 +22,7 @@ var aiCmd = &cmd.Command{
 
 func AnalyzeAI(cmd *cmd.Command, args []string) error {
 	log.GetModule(log.AIAnalyzerKey).Info("Initializing AI environment......")
-	token, err := cmd.Flags().GetString("token")
+	token, err := cmd.Flags().GetString("openai-token")
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func AnalyzeReport(ctx context.Context, token string, prefix string, events []*e
 }
 
 func init() {
-	aiCmd.Flags().StringP("token", "t", "", "OpenAI token")
+	aiCmd.Flags().StringP("openai-token", "", "", "OpenAI token")
 	aiCmd.Flags().StringP("report", "r", "report.json", "report (json) file path")
 	aiCmd.Flags().StringP("prefix", "p", "", "training openai limit sentence")
 }

@@ -86,14 +86,14 @@ Refer to [veinmind-runner usage parameters documentation](docs/veinmind-runner.m
 
 Use the `-- analyze` parameter to add the scan to openai result analysis:
 
-`./veinmind-runner scan image --analyzer -t <your_openai_key>`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key>`
 
 If you feel that the analysis result is not satisfactory, you can customize the query result statement to adjust openai's analysis of the result:
 
-`./veinmind-runner scan image --analyzer -t <your_openai_key> -p "Please analyze the following security incidents"`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "Please analyze the following security incidents"`
 
 Or：
-`./veinmind-runner scan image --analyzer -t <your_openai_key> -p "Parse what happened to the following json"`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "Parse what happened to the following json"`
 
 You can also analyze the resulting file after scanning:
 

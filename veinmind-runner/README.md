@@ -87,18 +87,18 @@ helm install veinmind .
 
 使用`--analyze`参数，将扫描加入openai结果分析:
 
-`./veinmind-runner scan image --analyzer -t <your_openai_key>`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key>`
 
 如果觉得分析的结果不满意，可以自定义查询结果的语句，来调整openai对结果的分析：
 
-`./veinmind-runner scan image --analyzer -t <your_openai_key> -p "请对下面的安全事件进行剖析"`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "请对下面的安全事件进行剖析"`
 
 或：
-`./veinmind-runner scan image --analyzer -t <your_openai_key> -p "解析下面的json发生了什么"`
+`./veinmind-runner scan image --enable-analyze --openai-token <your_openai_key> -p "解析下面的json发生了什么"`
 
 也可以在扫描后对结果文件进行分析:
 
-`./veinmind-runner analyze -r <path_to_result.json> -t <your_openai_key>`
+`./veinmind-runner analyze -r <path_to_result.json> --openai-token <your_openai_key>`
 
 这种方式将对`result.json`进行解析， 同样支持`-p`参数自定义查询。
 
