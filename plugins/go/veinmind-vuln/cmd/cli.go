@@ -101,7 +101,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 				})
 			}
 			assetPackageDetailsList = append(assetPackageDetailsList, event.AssetPackageDetails{
-				Type:     "ok-pkg",
+				Type:     "os-pkg",
 				FilePath: pkgInfo.FilePath,
 				Packages: assetPackageDetailList,
 			})
@@ -183,7 +183,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 
 	if res.CveTotal > 0 {
 		for _, pkgInfo := range res.PackageInfos {
-			if filterType != "all" && !isIn("ok-pkg", filterTypeList) {
+			if filterType != "all" && !isIn("os-pkg", filterTypeList) {
 				break
 			}
 			for _, pkg := range pkgInfo.Packages {
@@ -366,7 +366,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 				})
 			}
 			assetPackageDetailsList = append(assetPackageDetailsList, event.AssetPackageDetails{
-				Type:     "ok-pkg",
+				Type:     "os-pkg",
 				FilePath: pkgInfo.FilePath,
 				Packages: assetPackageDetailList,
 			})
