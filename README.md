@@ -21,7 +21,7 @@
 
 问脉已接入 openai, 可以使用 openai 对扫描的结果进行人性化分析，让您更加清晰的了解本次扫描发现了哪些风险。
 
-![](https://cdn.dvkunion.cn/veinmind/134168bbeaa2409eaaeb700ec27164d8.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/ai.png)
 
 ## 🕹️ 快速开始
 ### 1. 确保机器上正确安装 docker
@@ -36,14 +36,16 @@ docker pull registry.veinmind.tech/veinmind/veinmind-runner:latest
 ```
 wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-container-run.sh -O run.sh && chmod +x run.sh
 ```
-### 4. 快速扫描本地镜像
+### 4. 快速扫描本地镜像/容器
 ```
-./run.sh scan image
+./run.sh scan [image/container]
 ```
 ### 5. 使用 openAI 智能分析
 ```
-./run.sh scan image --enable-analyze --openai-token  <your_openai_token>
+./run.sh scan [image/container] --enable-analyze --openai-token  <your_openai_token>
 ```
+> 注: 使用 openAI 时，请确保当前网络能够访问openAI
+> 平行容器启动时，需要手动通过 docker run -e http_proxy=xxxx -e https_proxy=xxxx 设置代理（非全局代理的场景下）
 
 ## 🔨 工具列表
 

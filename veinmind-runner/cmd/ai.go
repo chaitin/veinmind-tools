@@ -55,9 +55,21 @@ func AnalyzeAI(cmd *cmd.Command, args []string) error {
 }
 
 func AnalyzeReport(ctx context.Context, token string, prefix string, events []*event.Event) error {
-	total := len(events)
+	total := func() int {
+		cnt := 0
+		for _, e := range events {
+			if e.EventType == event.Info {
+				continue
+			}
+			cnt += 1
+		}
+		return cnt
+	}()
 	log.GetModule(log.AIAnalyzerKey).Infof("Totally %d events, starting analyze......", total)
 	for i, e := range events {
+		if e.EventType == event.Info {
+			continue
+		}
 		content, _ := json.Marshal(e)
 		stream, err := sdk.DialogueStream(ctx, token, prefix, string(content))
 		if err != nil {
@@ -69,6 +81,7 @@ func AnalyzeReport(ctx context.Context, token string, prefix string, events []*e
 			return nil
 		}
 		log.GetModule(log.AIAnalyzerKey).Infof("[%d/%d] Analyzing report events: %s ......", i+1, total, e.ID)
+		log.GetModule(log.AIAnalyzerKey).Info("")
 		err = sdk.Read(stream)
 		if err != nil {
 			return err

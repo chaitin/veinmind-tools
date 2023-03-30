@@ -21,7 +21,7 @@ cloudwalker team incubation，a container security toolset based on <a href="htt
 
 Veinmind has been connected to openai. You can use openai to conduct a user-friendly analysis of the scan results, allowing you to have a clearer understanding of the risks identified during this scan.
 
-![](https://cdn.dvkunion.cn/veinmind/134168bbeaa2409eaaeb700ec27164d8.png)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/ai.png)
 
 ## 🕹️ Quick Start
 
@@ -43,17 +43,20 @@ docker pull registry.veinmind.tech/veinmind/veinmind-runner:latest
 wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-container-run.sh -O run.sh && chmod +x run.sh
 ```
 
-### 4. Quick scan local images
+### 4. Quick scan local images/containers
 
 ```
-./run.sh scan image
+./run.sh scan [image/container]
 ```
 
 ### 5. use ai analyze
 
 ```
-./run.sh scan image --enable-analyze --openai-token  <your_openai_token>
+./run.sh scan [image/container] --enable-analyze --openai-token  <your_openai_token>
 ```
+
+> Note: When using openAI, please ensure that the current network can access openAI
+> When starting a parallel container, you need to manually use docker run -e http_proxy=xxxx -e https_proxy=xxxx Set proxy (in non global proxy scenarios)
 
 ## 🔨 Toolset
 
