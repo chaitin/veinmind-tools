@@ -15,6 +15,10 @@ As a plugin platform, 'veinmind-runner' will automatically scan for compliant pl
 <b>2023-3-24 - NEW</b>
 - 🔥🔥🔥 Support access to 'openai' to conduct humanized analysis of scanned security events, allowing you to more clearly understand what risks have been identified during this scan and how to operate them
 
+> Note: When using openAI, please ensure that the current network can access openAI
+> When starting a parallel container, you need to manually use docker run -e http_proxy=xxxx -e https_proxy=xxxx Set proxy (in non global proxy scenarios)
+
+
 <b>Basic characteristics</b>
 - Automatically scan and register plugins in the current directory (including subdirectories)
 - Run different language plugins in one way
