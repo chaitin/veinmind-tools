@@ -17,7 +17,7 @@
 <p align="center"> 中文文档 | <a href="README.en.md">English</a> </p>
 
 ## 🔥 Demo
-![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/index.gif)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/scan.gif)
 
 问脉已接入 openai, 可以使用 openai 对扫描的结果进行人性化分析，让您更加清晰的了解本次扫描发现了哪些风险。
 
@@ -92,6 +92,11 @@ PS: 目前所有工具均已支持平行容器的方式运行
 2. 扫描下方二维码可以通过添加问脉小助手，以加入问脉用户讨论群进行详细讨论
 
 ![](docs/veinmind-group-qrcode.jpg)
+
+## ✨ CTStack
+<img src="https://ctstack-oss.oss-cn-beijing.aliyuncs.com/CT%20Stack-2.png" width="30%" />
+
+veinmind-tools 现已加入 [CTStack](https://stack.chaitin.com/tool/detail?id=3) 社区
 
 ## ✨ 404星链计划
 <img src="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">
