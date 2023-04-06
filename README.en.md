@@ -17,7 +17,7 @@ cloudwalker team incubation，a container security toolset based on <a href="htt
 
 ## 🔥 Demo
 
-![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/index.gif)
+![](https://veinmind-cache.oss-cn-hangzhou.aliyuncs.com/img/scan.gif)
 
 Veinmind has been connected to openai. You can use openai to conduct a user-friendly analysis of the scan results, allowing you to have a clearer understanding of the risks identified during this scan.
 
@@ -106,6 +106,11 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
    discussions by adding the veinmind assistant.
 
 ![](docs/veinmind-group-qrcode.jpg)
+
+## ✨ CTStack
+<img src="https://ctstack-oss.oss-cn-beijing.aliyuncs.com/CT%20Stack-2.png" width="30%" />
+
+veinmind-tools was already joined [CTStack](https://stack.chaitin.com/tool/detail?id=3) community
 
 ## ✨ 404 starlink project
 
