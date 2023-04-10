@@ -105,7 +105,7 @@ all: ## 			build all plugins
 	$(MAKE) $(shell ls plugins/go/)
 
 veinmind-%: ##			build go plugins. e.g. `make veinmind-basic`
-	$(MAKE) -C plugins/go/$@ build
+	$(MAKE) -C plugins/go/$@ CGO_ENABLED=1 build
 
 platform.veinmind-runner:
 	$(MAKE) -C veinmind-runner build.platform CI_GOOS=${CI_GOOS} CI_GOARCH=${CI_GOARCH} TAGS=${TAGS}
