@@ -14,7 +14,10 @@ CI_GOARCH=$(shell uname -m)
 ##@ Init
 .PHONY: deps
 deps: 	## Install Dependencies.
-	go env -w GOPROXY=https://goproxy.cn,direct && go mod tidy
+ifeq ($(strip $(GITHUB_ACTIONS)),)
+		go env -w GOPROXY=https://goproxy.cn,direct
+endif
+	go mod tidy
 
 ##@ Build
 .PHONY: build
