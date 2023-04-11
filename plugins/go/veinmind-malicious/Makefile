@@ -14,7 +14,10 @@ TAGS = community
 ##@ Init
 .PHONY: deps
 deps: 	## Install Dependencies.
-	go env -w GOPROXY=https://goproxy.cn,direct && go mod tidy
+ifeq ($(strip $(GITHUB_ACTIONS)),)
+		go env -w GOPROXY=https://goproxy.cn,direct
+endif
+	go mod tidy
 
 clamav: ## Install Clamav.
 	apt-get update && apt-get install -y clamav clamav-daemon && freshclam

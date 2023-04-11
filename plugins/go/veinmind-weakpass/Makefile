@@ -14,7 +14,10 @@ TAGS = dynamic
 ##@ Init
 .PHONY: deps
 deps: 	## Install Dependencies.
-	go env -w GOPROXY=https://goproxy.cn,direct && go mod tidy
+ifeq ($(strip $(GITHUB_ACTIONS)),)
+		go env -w GOPROXY=https://goproxy.cn,direct
+endif
+	go mod tidy
 
 .PHONY: arm
 arm: ## Install arm build dependency.
