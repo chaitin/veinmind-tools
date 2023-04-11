@@ -96,7 +96,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 目前已经支持的服务
 
 | serverName | version |
-        |:----------:|:-------:|
+|:----------:|:-------:|
 |     ssh    |   all   |
 |    mysql   |   8.X   |
 |    redis   |   all   |

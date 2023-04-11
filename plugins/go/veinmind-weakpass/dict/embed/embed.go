@@ -9,7 +9,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
-//go:embed pass.dict redis.dict tomcat.dict ssh.dict
+//go:embed pass.dict redis.dict tomcat.dict ssh.dict ftp.dict
 var EmbedFS embed.FS
 
 func ExtractAll() {
@@ -26,6 +26,10 @@ func ExtractAll() {
 		log.Error(err)
 	}
 	err = extract("ssh.dict")
+	if err != nil {
+		log.Error(err)
+	}
+	err = extract("ftp.dict")
 	if err != nil {
 		log.Error(err)
 	}
