@@ -101,6 +101,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 |    mysql   |   8.X   |
 |    redis   |   all   |
 |   tomcat   |   all   |
+|     ftp    |   all   |
 ![](../../../docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
 
 8.解压默认字典到本地磁盘
