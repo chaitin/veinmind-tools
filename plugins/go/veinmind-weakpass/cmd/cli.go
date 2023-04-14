@@ -138,7 +138,7 @@ func init() {
 	scanCmd.PersistentFlags().IntVarP(&threads, "threads", "t", 10, "password brute threads")
 	scanCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "username e.g. root")
 	scanCmd.PersistentFlags().StringVarP(&dictpath, "dictpath", "d", "", "dict path e.g. ./mypass.dict")
-	scanCmd.PersistentFlags().StringSliceVarP(&serviceName, "serviceName", "s", []string{"mysql", "tomcat", "redis", "ssh", "ftp"}, "find weakpass in these service e.g. ssh")
+	scanCmd.PersistentFlags().StringSliceVarP(&serviceName, "serviceName", "s", []string{"mysql", "tomcat", "redis", "ssh", "vsftpd", "proftpd"}, "find weakpass in these service e.g. ssh")
 	scanCmd.AddCommand(report.MapReportCmd(cmd.MapImageCommand(scanImageCmd, scanImage), reportService))
 	scanCmd.AddCommand(report.MapReportCmd(cmd.MapContainerCommand(scanContainerCmd, scanContainer), reportService))
 }
