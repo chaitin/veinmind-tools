@@ -29,7 +29,6 @@ func (i *SshService) GetRecords(file io.Reader) (records []model.Record, err err
 			log.Error("service: shadow format error")
 			continue
 		}
-
 		s := model.Record{}
 		s.Username = userinfo[0]
 		s.Password = userinfo[1]
@@ -44,5 +43,5 @@ func init() {
 	ServiceMatcherMap["ssh"] = "shadow"
 	mod.name = "ssh"
 	mod.filepath = []string{"/etc/shadow"}
-	Register(mod)
+	Register("ssh", mod)
 }

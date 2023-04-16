@@ -16,7 +16,7 @@ type ScanImageResult struct {
 	WeakpassResults []WeakpassResult
 }
 
-// 弱密码相关信息
+// WeakpassResult 弱密码相关信息
 type WeakpassResult struct {
 	Username    string
 	Password    string
@@ -24,7 +24,7 @@ type WeakpassResult struct {
 	ServiceType event.WeakpassService
 }
 
-// 从文件中解析出来的相关信息
+// Record 从文件中解析出来的相关信息
 type Record struct {
 	Username string
 	Password string
@@ -33,14 +33,14 @@ type Record struct {
 	Attributes map[string]string
 }
 
-// cli命令中与爆破相关的配置信息
+// Config cli命令中与爆破相关的配置信息
 type Config struct {
 	Thread   int
 	Username string
 	Dictpath string
 }
 
-// tunny 需要的密码爆破相关的信息
+// BruteOption tunny 需要的密码爆破相关的信息
 // Guess 碰撞的密码
 // Records 模块配置文件中提取的密码信息
 type BruteOption struct {

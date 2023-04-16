@@ -2,7 +2,6 @@ package embed
 
 import (
 	"embed"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -49,7 +48,7 @@ func extract(epath string) error {
 			return err
 		}
 	}
-	err = ioutil.WriteFile(epath, composeYamlBytes, 0755)
+	err = os.WriteFile(epath, composeYamlBytes, 0755)
 	if err != nil {
 		return err
 	}

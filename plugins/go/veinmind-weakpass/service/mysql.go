@@ -45,5 +45,5 @@ func init() {
 	ServiceMatcherMap["mysql"] = "mysql_native_password"
 	mod.name = "mysql"
 	mod.filepath = []string{"/var/lib/mysql/mysql.ibd", "/var/lib/mysql/mysql2.ibd"}
-	Register(mod)
+	Register("mysql", mod)
 }

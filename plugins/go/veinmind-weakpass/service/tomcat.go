@@ -49,5 +49,5 @@ func init() {
 	ServiceMatcherMap["tomcat"] = "plain"
 	mod.name = "tomcat"
 	mod.filepath = []string{"/usr/local/tomcat/conf/tomcat-users.xml", "/etc/redis/tomcat-users.xml"}
-	Register(mod)
+	Register("tomcat", mod)
 }

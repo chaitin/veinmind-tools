@@ -55,5 +55,5 @@ func init() {
 	ServiceMatcherMap["vsftpd"] = "plain"
 	mod.name = "vsftpd"
 	mod.filepath = []string{"/etc/vsftpd/virtual_users.db"}
-	Register(mod)
+	Register("ftp", mod)
 }

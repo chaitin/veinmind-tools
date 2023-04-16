@@ -45,5 +45,5 @@ func init() {
 	ServiceMatcherMap["proftpd"] = "shadow"
 	mod.name = "proftpd"
 	mod.filepath = []string{"/etc/proftpd/passwd", "/etc/proftpd/ftppasswd", "/etc/proftpd/ftpd.passwd"}
-	Register(mod)
+	Register("ftp", mod)
 }

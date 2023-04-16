@@ -9,9 +9,7 @@ import (
 )
 
 func TestTomcatParse(t *testing.T) {
-	tomcat, err := GetModuleByName("tomcat")
-	assert.Nil(t, err)
-
+	tomcat := &tomcatService{}
 	tomcatfile, err := os.Open("../test/tomcat-users.xml")
 	assert.Nil(t, err)
 
@@ -29,9 +27,7 @@ func TestTomcatParse(t *testing.T) {
 }
 
 func TestRedisParse(t *testing.T) {
-	redis, err := GetModuleByName("redis")
-	assert.Nil(t, err)
-
+	redis := &redisService{}
 	redisFile, err := os.Open("../test/redis.conf")
 	assert.Nil(t, err)
 
@@ -51,11 +47,9 @@ func TestRedisParse(t *testing.T) {
 
 }
 
-func TestShadowParse(t *testing.T) {
-	shadow, err := GetModuleByName("ssh")
-	assert.Nil(t, err)
-
-	shadowFile, err := os.Open("../test/shadow")
+func TestSshParse(t *testing.T) {
+	Ssh := &SshService{}
+	sshFile, err := os.Open("../test/shadow")
 	assert.Nil(t, err)
 
 	expectRecords := []model.Record{}
@@ -65,15 +59,14 @@ func TestShadowParse(t *testing.T) {
 	expectRecords = append(expectRecords, model.Record{Username: "redis",
 		Password:   "*",
 		Attributes: nil})
-	records, err := shadow.GetRecords(shadowFile)
+	records, err := Ssh.GetRecords(sshFile)
 	assert.Nil(t, err)
 	assert.Equal(t, expectRecords, records)
 
 }
 
 func TestMysqlParse(t *testing.T) {
-	mysql, err := GetModuleByName("mysql")
-	assert.Nil(t, err)
+	mysql := &mysqlService{}
 
 	mysqlIbd, err := os.Open("../test/mysql.ibd")
 	assert.Nil(t, err)
@@ -93,5 +86,4 @@ func TestMysqlParse(t *testing.T) {
 		assert.Equal(t, expectRecords[i].Username, item.Username)
 		assert.Contains(t, item.Password, expectRecords[i].Password)
 	}
-
 }
