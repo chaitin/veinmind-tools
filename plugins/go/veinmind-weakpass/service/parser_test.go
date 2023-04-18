@@ -87,3 +87,49 @@ func TestMysqlParse(t *testing.T) {
 		assert.Contains(t, item.Password, expectRecords[i].Password)
 	}
 }
+
+func TestVsftpdParse(t *testing.T) {
+	vsftpd := &vsftpdService{}
+	vsftpdFile, err := os.Open("../test/virtual_users.db")
+	assert.Nil(t, err)
+
+	expectRecords := []model.Record{}
+	expectRecords = append(expectRecords, model.Record{
+		Username:   "myuser",
+		Password:   "mypass",
+		Attributes: nil,
+	})
+
+	records, err := vsftpd.GetRecords(vsftpdFile)
+	assert.Nil(t, err)
+	assert.Equal(t, len(expectRecords), len(records))
+
+	for i, item := range records {
+		assert.Nil(t, item.Attributes)
+		assert.Equal(t, expectRecords[i].Username, item.Username)
+		assert.Contains(t, item.Password, expectRecords[i].Password)
+	}
+}
+
+func TestProftpdParse(t *testing.T) {
+	vsftpd := &proftpdService{}
+	vsftpdFile, err := os.Open("../test/ftpd.passwd")
+	assert.Nil(t, err)
+
+	expectRecords := []model.Record{}
+	expectRecords = append(expectRecords, model.Record{
+		Username:   "user",
+		Password:   "$1$U2Y3FMHr$NMXF3I.9Ym.lXkBBwGhLl",
+		Attributes: nil,
+	})
+
+	records, err := vsftpd.GetRecords(vsftpdFile)
+	assert.Nil(t, err)
+	assert.Equal(t, len(expectRecords), len(records))
+
+	for i, item := range records {
+		assert.Nil(t, item.Attributes)
+		assert.Equal(t, expectRecords[i].Username, item.Username)
+		assert.Contains(t, item.Password, expectRecords[i].Password)
+	}
+}
