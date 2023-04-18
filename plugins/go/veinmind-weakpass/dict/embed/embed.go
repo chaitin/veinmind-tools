@@ -2,14 +2,13 @@ package embed
 
 import (
 	"embed"
-	"io/ioutil"
 	"os"
 	"path"
 
 	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
-//go:embed pass.dict redis.dict tomcat.dict ssh.dict
+//go:embed pass.dict redis.dict tomcat.dict ssh.dict ftp.dict
 var EmbedFS embed.FS
 
 func ExtractAll() {
@@ -29,6 +28,10 @@ func ExtractAll() {
 	if err != nil {
 		log.Error(err)
 	}
+	err = extract("ftp.dict")
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 // extract
@@ -45,7 +48,7 @@ func extract(epath string) error {
 			return err
 		}
 	}
-	err = ioutil.WriteFile(epath, composeYamlBytes, 0755)
+	err = os.WriteFile(epath, composeYamlBytes, 0755)
 	if err != nil {
 		return err
 	}

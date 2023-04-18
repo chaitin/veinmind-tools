@@ -28,4 +28,5 @@ func init() {
 	DictMap["tomcat"] = Newdict("tomcat.dict")
 	DictMap["ssh"] = Newdict("ssh.dict")
 	DictMap["redis"] = Newdict("redis.dict")
+	DictMap["ftp"] = Newdict("ftp.dict")
 }

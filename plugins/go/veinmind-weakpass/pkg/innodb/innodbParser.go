@@ -13,16 +13,16 @@ import (
 
 const (
 	PageSize = 0x4000
-	// 用于没有修改过密码的 user page
+	// EmptyPasswordPlaceholder 用于没有修改过密码的 user page
 	EmptyPasswordPlaceholder = "THISISACOMBINATIONOFINVALIDSALTANDPASSWORDTHATMUSTNEVERBRBEUSED"
-	// 用于mysql 8.0.11 版本定位 user page
+	// PluginNameNative 用于mysql 8.0.11 版本定位 user page
 	PluginNameNative = "mysql_native_password"
-	// 用于mysql 8.0.13 - 19 版本的 user page
+	// PluginNameCaching 用于mysql 8.0.13 - 19 版本的 user page
 	PluginNameCaching = "caching_sha2_password"
 	MysqlSYS          = "mysql.sys"
-	// mysql 8.0.29 之前的 host 字段的长度
+	// HostLengthBefore29 mysql 8.0.29 之前的 host 字段的长度
 	HostLengthBefore29 int16 = 60
-	// mysql 8.0.11 - 19 版本的 host 字段的长度
+	// HostLengthAfter29 mysql 8.0.11 - 19 版本的 host 字段的长度
 	HostLengthAfter29 int16 = 255
 	FileHeaderSize          = 0x38
 	PageHeaderSize          = 0x58
@@ -83,7 +83,7 @@ type Page struct {
 	Pagetail   PageTail
 }
 
-// 通过用户名和加密方式的组合判断是否是 user 页面
+// IsUserPage 通过用户名和加密方式的组合判断是否是 user 页面
 func IsUserPage(buf []byte) bool {
 	if bytes.Contains(buf, []byte(MysqlSYS)) {
 		if bytes.Contains(buf, []byte(PluginNameCaching)) || bytes.Contains(buf, []byte(PluginNameNative)) {
@@ -93,7 +93,7 @@ func IsUserPage(buf []byte) bool {
 	return false
 }
 
-// 从 mysql.ibd 中定位到 user 表的页面,并返回 user.ibd
+// FindUserPage 从 mysql.ibd 中定位到 user 表的页面,并返回 user.ibd
 func FindUserPage(f io.Reader) (page Page, err error) {
 	r := bufio.NewReader(f)
 	buf := make([]byte, 0, PageSize)
@@ -148,7 +148,7 @@ type MysqlInfo struct {
 	Password string
 }
 
-// 从 user.ibd 中提取 user、host、plugin 和 password []bytes
+// ParseUserPage 从 user.ibd 中提取 user、host、plugin 和 password []bytes
 func ParseUserPage(pagedata PageData) (infos []MysqlInfo, err error) {
 	buf := &bytes.Buffer{}
 	err = binary.Write(buf, binary.BigEndian, &pagedata)

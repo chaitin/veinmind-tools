@@ -14,6 +14,10 @@ func GetType(service IService) event.WeakpassService {
 		return event.Mysql
 	case *tomcatService:
 		return event.Tomcat
+	case *vsftpdService:
+		return event.FTP
+	case *proftpdService:
+		return event.FTP
 	default:
 		return 0
 	}

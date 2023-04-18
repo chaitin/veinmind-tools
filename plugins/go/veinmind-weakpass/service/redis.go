@@ -45,5 +45,5 @@ func init() {
 	ServiceMatcherMap["redis"] = "plain"
 	mod.name = "redis"
 	mod.filepath = []string{"/etc/redis/redis.conf", "/etc/redisc.conf"}
-	Register(mod)
+	Register("redis", mod)
 }

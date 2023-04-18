@@ -102,6 +102,7 @@ Currently supported services
 |    mysql   |   8.X   |
 |    redis   |   all   |
 |   tomcat   |   all   |
+|     ftp    |   all   |
 ![](../../../docs/veinmind-weakpass/weakpass_scan_image_7.jpeg)
 
 8. Unzip the default dictionary to local disk
