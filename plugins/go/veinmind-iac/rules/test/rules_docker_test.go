@@ -24,7 +24,7 @@ func Test_DockerfileRules(t *testing.T) {
 	}
 
 	index := 1
-	for ; index <= DockerfileTestNum; index++ {
+	for index <= DockerfileTestNum {
 		var n string
 		switch {
 		case index < 10:
@@ -43,6 +43,8 @@ func Test_DockerfileRules(t *testing.T) {
 		if res[0].Rule.Id == "DF-"+n {
 			t.Logf("DF-%s test pass", n)
 		}
+
+		index++
 	}
 
 }
