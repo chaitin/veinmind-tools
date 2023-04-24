@@ -3,7 +3,7 @@ package brightMirror.dockerfile
 import data.common
 
 get_apk[output] {
-	run:=input[_]
+	run := input[_]
     run.Cmd=="run"
 	arg := run.Value[0]
 	regex.match("apk (-[a-zA-Z]+\\s*)*add", arg)
