@@ -46,6 +46,10 @@ func (bs *Scanner) Scan(ctx context.Context, iacFile api.IAC) ([]Result, error) 
 
 	// parse
 	input, err := parseHandle(file, iacFile.Path)
+	//jsonBytes, _ := json.Marshal(input)
+	//jsonString := string(jsonBytes)
+	//
+	//fmt.Println(jsonString)
 	if err != nil {
 		return nil, err
 	}

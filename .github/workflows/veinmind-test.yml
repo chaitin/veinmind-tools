@@ -18,3 +18,19 @@ jobs:
           cd ./plugins/go/veinmind-weakpass && go mod tidy 
           cd hash && go test -tags dynamic
           cd ../service && go test -tags dynamic
+
+  test-veinmind-iac:
+    runs-on: ubuntu-20.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: |
+          sudo make install
+          cd ./plugins/go/veinmind-iac && go mod tidy 
+          cd ./rules/test && go test
+

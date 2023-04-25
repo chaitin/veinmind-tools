@@ -2,7 +2,6 @@ package brightMirror.dockerfile
 
 import data.common
 
-
 get_health[inner] {
 	inner := input[_]
     inner.Cmd == "healthcheck"
