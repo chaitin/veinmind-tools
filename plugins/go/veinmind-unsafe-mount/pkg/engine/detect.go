@@ -24,9 +24,6 @@ func DetectContainerUnsafeMount(container api.Container) (events []event.Event, 
 			}
 
 			if matched {
-				if err != nil {
-					continue
-				}
 				events = append(events, event.Event{
 					BasicInfo: &event.BasicInfo{
 						ID:         container.ID(),
