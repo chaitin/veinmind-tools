@@ -2,6 +2,9 @@ package main
 
 import (
 	"os"
+	"strings"
+
+	"github.com/opencontainers/runc/libcontainer"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -35,7 +38,12 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	log.Infof("start scan container unsafe mount: %s", container.ID())
 	evts, err := engine.DetectContainerUnsafeMount(container)
 	if err != nil {
-		return err
+		if !strings.Contains(err.Error(), libcontainer.ErrNotRunning.Error()) { //当扫描所有容器时，会因为有停止的容器而被终止
+			log.Error(err.Error())
+			return err
+		} else {
+			log.Infof("skip scanning for containers that are not running for unsafe mount: %s", container.ID())
+		}
 	}
 
 	for _, evt := range evts {
