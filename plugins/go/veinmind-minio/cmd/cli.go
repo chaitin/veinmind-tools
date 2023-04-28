@@ -9,6 +9,7 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
+
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-minio/pkg/scanner"
 )
 
@@ -39,10 +40,7 @@ var ReferencesURLList = []string{
 // you can write your plugin scan code here
 func scanImage(c *cmd.Command, image api.Image) error {
 	// do something here
-	res, err := scanner.ScanImage(image)
-	if err != nil {
-		return err
-	}
+	res := scanner.ScanImage(image)
 
 	if res.Version != "" {
 		// if you want display at runner report, you should send your result to report event
@@ -87,10 +85,7 @@ func scanImage(c *cmd.Command, image api.Image) error {
 // you can write your plugin scan code here
 func scanContainer(c *cmd.Command, container api.Container) error {
 	// do something here
-	res, err := scanner.ScanContainer(container)
-	if err != nil {
-		return err
-	}
+	res := scanner.ScanContainer(container)
 
 	if res.Version != "" {
 		reportEvent := &event.Event{
