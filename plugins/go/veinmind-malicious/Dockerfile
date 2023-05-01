@@ -15,7 +15,7 @@ WORKDIR /tool
 
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
-RUN apt update && apt-get install -y --no-install-recommends --allow-remove-essential libtinfo5 clamav clamav-daemon &&     rm -rf /var/lib/apt/lists/* && freshclam
+RUN apt update && apt-get install -y --no-install-recommends --allow-remove-essential libtinfo5 clamav clamav-daemon && rm -rf /var/lib/apt/lists/* && freshclam
 COPY dockerfiles/clamd.conf /etc/clamav/clamd.conf
 COPY --from=compresser /build/veinmind-malicious ./veinmind-malicious
 RUN echo "#!/bin/bash\n\n/bin/bash -c /usr/sbin/clamd -F --config-file=/etc/clamav/clamd.conf\n\n./veinmind-malicious \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-malicious

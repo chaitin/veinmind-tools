@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"debug/elf"
 	"encoding/hex"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net"
 	"os"
 	"strings"
@@ -122,7 +122,7 @@ func Scan(image api.Image) (scanReport model.ReportImage, err error) {
 						return nil
 					}
 
-					results := []av.ScanResult{}
+					var results []av.ScanResult
 
 					// 使用 ClamAV 进行扫描
 					if clamav.Active() {
@@ -138,7 +138,7 @@ func Scan(image api.Image) (scanReport model.ReportImage, err error) {
 					}
 
 					// 使用 Virustotal 进行扫描
-					fileByte, err := ioutil.ReadAll(f)
+					fileByte, err := io.ReadAll(f)
 					hash := sha256.New()
 					fileSha256 := hex.EncodeToString(hash.Sum(fileByte))
 
