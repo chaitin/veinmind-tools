@@ -32,7 +32,6 @@ annotations[annotation] {
 
 # container_securityContext
 securityContexts[sec] {
-    is_controller
     sec := containers[_].securityContext
 }
 
