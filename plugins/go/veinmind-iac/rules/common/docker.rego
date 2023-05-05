@@ -83,7 +83,7 @@ meta_data["DF-008"] := {
 
 meta_data["DF-009"] := {
     "id": "DF-009",
-    "name": "chwon flag in COPY",
+    "name": "chown flag in COPY",
     "type": "dockerfile",
     "severity": "Low",
     "description": "Make sure not to use the --chown parameter when the user only needs enforcement rights",
@@ -166,7 +166,7 @@ meta_data["DF-017"] := {
     "name": "Multiple entrypoint commands are used",
     "type": "dockerfile",
     "severity": "CRITICAL",
-    "description": "There can only be one entrypont command in a Docker file. If you list multiple entrypoints, only the last one will take effect.",
+    "description": "There can only be one entrypoint command in a Docker file. If you list multiple entrypoints, only the last one will take effect.",
     "solution": "Delete other entrypoint commands and use only one entrypoint command",
     "reference": "https://docs.docker.com/engine/reference/builder/#entrypoint",
 }

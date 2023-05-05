@@ -32,7 +32,7 @@ meta_data["KN-003"] = {
 
 meta_data["KN-004"] = {
     "id": "KN-004",
-    "name": "SElinux set custom options",
+    "name": "SELinux set custom options",
     "type": "kubernetes",
     "severity": "Medium",
     "description": "Setting custom SELinux user or role options should be disallowed.",
