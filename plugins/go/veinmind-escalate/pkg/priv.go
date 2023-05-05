@@ -3,7 +3,6 @@ package pkg
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -172,7 +171,7 @@ func isPrivileged(container api.Container) bool {
 		return false
 	}
 
-	status, err := ioutil.ReadFile(filepath.Join(func() string {
+	status, err := os.ReadFile(filepath.Join(func() string {
 		fs := os.Getenv("LIBVEINMIND_HOST_ROOTFS")
 		if fs == "" {
 			return "/"

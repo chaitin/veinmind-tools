@@ -10,16 +10,14 @@ import (
 )
 
 type mysql5Service struct {
-	name     string
-	filepath []string
 }
 
 func (i *mysql5Service) Name() string {
-	return i.name
+	return "mysql5"
 }
 
 func (i *mysql5Service) FilePath() (paths []string) {
-	return i.filepath
+	return []string{"/var/lib/mysql/mysql/user.MYD"}
 }
 func (i *mysql5Service) GetRecords(file io.Reader) (records []model.Record, err error) {
 	mysqlInfos, err := myisam.ParseUserFile(file)
@@ -28,6 +26,9 @@ func (i *mysql5Service) GetRecords(file io.Reader) (records []model.Record, err 
 	}
 	tmp := model.Record{}
 	for _, info := range mysqlInfos {
+		if info.Password == myisam.EmptyPasswordPlaceholder || info.Host == myisam.LocalHost || info.Host == "127.0.0.1" {
+			continue
+		}
 		tmp.Username = info.Name
 		tmp.Password = strings.ToLower(info.Password)
 		records = append(records, tmp)
@@ -37,8 +38,6 @@ func (i *mysql5Service) GetRecords(file io.Reader) (records []model.Record, err 
 
 func init() {
 	mod := &mysql5Service{}
-	ServiceMatcherMap["mysql5"] = "mysql_native_password"
-	mod.name = "mysql5"
-	mod.filepath = []string{"/var/lib/mysql/mysql/user.MYD"}
+	ServiceMatcherMap[mod.Name()] = "mysql"
 	Register("mysql", mod)
 }

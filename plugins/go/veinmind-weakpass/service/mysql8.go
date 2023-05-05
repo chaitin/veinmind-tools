@@ -9,18 +9,19 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
+var _ IService = (*mysql8Service)(nil)
+
 type mysql8Service struct {
-	name     string
-	filepath []string
 }
 
 func (i *mysql8Service) Name() string {
-	return i.name
+	return "mysql8"
 }
 
 func (i *mysql8Service) FilePath() (paths []string) {
-	return i.filepath
+	return []string{"/var/lib/mysql/mysql.ibd", "/var/lib/mysql/mysql2.ibd"}
 }
+
 func (i *mysql8Service) GetRecords(file io.Reader) (records []model.Record, err error) {
 	page, err := innodb.FindUserPage(file)
 	if err != nil {
@@ -41,10 +42,7 @@ func (i *mysql8Service) GetRecords(file io.Reader) (records []model.Record, err 
 }
 
 func init() {
-	// TODO： Mysql8
 	mod := &mysql8Service{}
-	ServiceMatcherMap["mysql8"] = "mysql_native_password"
-	mod.name = "mysql8"
-	mod.filepath = []string{"/var/lib/mysql/mysql.ibd"}
+	ServiceMatcherMap[mod.Name()] = "mysql"
 	Register("mysql", mod)
 }
