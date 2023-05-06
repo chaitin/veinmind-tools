@@ -81,13 +81,13 @@ type ServiceInfo struct {
 type SizeLimitReachedError struct {
 }
 
-func (self *SizeLimitReachedError) Error() string {
+func (s *SizeLimitReachedError) Error() string {
 	return "File Size Limit Reached"
 }
 
 type ResultParseError struct {
 }
 
-func (self *ResultParseError) Error() string {
+func (r *ResultParseError) Error() string {
 	return "Clamav Result Parse Error"
 }

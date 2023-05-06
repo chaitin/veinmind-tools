@@ -39,7 +39,7 @@ func Active() bool {
 }
 
 func ScanSHA256(ctx context.Context, sha256 string) ([]av.ScanResult, error) {
-	retCommon := []av.ScanResult{}
+	var retCommon []av.ScanResult
 	done := make(chan struct{})
 
 	if client == nil {

@@ -25,7 +25,6 @@ var (
 	reportService = &report.Service{}
 
 	results   []scanner.Result
-	scanStart = time.Now()
 	scanTotal = 0
 
 	reportLevelMap = map[string]event.Level{
