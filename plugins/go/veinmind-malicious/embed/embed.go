@@ -2,11 +2,11 @@ package embed
 
 import (
 	"embed"
-	"github.com/chaitin/libveinmind/go/plugin/log"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/chaitin/libveinmind/go/plugin/log"
 )
 
 //go:embed scripts/.env
@@ -26,7 +26,7 @@ func ReadFile(name string) ([]byte, error) {
 	if _, err := os.Stat(name); os.IsNotExist(err) {
 		return EmbedFile.ReadFile(name)
 	} else {
-		return ioutil.ReadFile(name)
+		return os.ReadFile(name)
 	}
 }
 
@@ -49,7 +49,7 @@ func extract(epath string) {
 			log.Fatal(err)
 		}
 	}
-	err = ioutil.WriteFile(epath, composeYamlBytes, 0755)
+	err = os.WriteFile(epath, composeYamlBytes, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}

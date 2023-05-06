@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -80,6 +79,9 @@ func ScanFile(file api.File, path string, depth int) (*Result, error) {
 	}
 
 	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
 	f, err := zip.NewReader(file, stat.Size())
 	if err != nil {
 		return nil, err
@@ -130,7 +132,7 @@ func ScanFile(file api.File, path string, depth int) (*Result, error) {
 				continue
 			}
 
-			tmpFile, err := ioutil.TempFile("", "extract_*.jar")
+			tmpFile, err := os.CreateTemp("", "extract_*.jar")
 			if err != nil {
 				log.Warnf("failed to create temp file, err: %v", err)
 				continue
@@ -147,7 +149,7 @@ func ScanFile(file api.File, path string, depth int) (*Result, error) {
 			if err != nil {
 				log.Warnf("failed to scan nested jar %s in %s, err: %v", ff.Name, file, err)
 				_ = tmpFile.Close()
-				err = os.Remove(tmpFile.Name())
+				_ = os.Remove(tmpFile.Name())
 				continue
 			}
 
