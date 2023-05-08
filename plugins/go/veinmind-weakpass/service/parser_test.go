@@ -71,10 +71,10 @@ func TestMyISAMParse(t *testing.T) {
 	mysqlMyd, err := os.Open("../test/user.MYD")
 	assert.Nil(t, err)
 
-	expectRecords := []model.Record{}
+	var expectRecords []model.Record
 	expectRecords = append(expectRecords, model.Record{
 		Username:   "root",
-		Password:   "81f5e21e35407d884a6cd4a731aebfb6af209e1b",
+		Password:   "*81f5e21e35407d884a6cd4a731aebfb6af209e1b",
 		Attributes: nil,
 	})
 

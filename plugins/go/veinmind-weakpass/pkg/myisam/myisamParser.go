@@ -19,7 +19,16 @@ type MysqlInfo struct {
 	Password string
 }
 
+type Record struct {
+	RecType   uint8
+	BlockLen  int
+	DataLen   int
+	NextRec   *Record
+	DataBegin int
+}
+
 // ParseUserFile 从文件中解析用户名和密码
+// TODO: 目前仅支持MYSQL5默认使用的mysql_native_password插件，后续需要支持其他插件的解析。
 func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
 	content, err := io.ReadAll(f)
 	if err != nil {
@@ -29,23 +38,19 @@ func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
 	idx := 0
 	for idx < contentLen {
 		record := dispatchRecord(content, idx)
-		recType := record["rec_type"].(uint8)
+		recType := record.RecType
 		if 0 < recType && recType <= 6 {
 			info := MysqlInfo{}
 			res := parseRecord(content, record)
 			info.Host = res["host"].(string)
-			if res["native"] == true {
-				info.Plugin = "mysql_native_password"
-			} else {
-				info.Plugin = "caching_sha2_password"
-			}
+			info.Plugin = "mysql_native_password"
 			info.Name = res["user"].(string)
 			info.Password = res["password"].(string)
 			if info.Password != EmptyPasswordPlaceholder && info.Host != LocalHost {
 				infos = append(infos, info)
 			}
 		}
-		idx += record["block_len"].(int)
+		idx += record.BlockLen
 	}
 
 	return infos, nil
@@ -72,7 +77,7 @@ func pad(dataLen int) int {
 	return (byteLen + ((dataLen - (byteLen << 2)) & 1)) << 2
 }
 
-func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int, nextPos int, unusedLen int) (record map[string]interface{}) {
+func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int, nextPos int, unusedLen int) (record Record) {
 	recType := content[idx]
 	dataLenValue := readLen(content, idx+dataPos, dataLen)
 	unusedLenValue := unusedLen
@@ -80,21 +85,23 @@ func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int
 		unusedLenValue = int(content[idx+unusedLen])
 	}
 	blockLen := pad(headerLen + dataLenValue + unusedLenValue)
-	nextRec := make(map[string]interface{})
+	nextRec := Record{}
 	if nextPos > 0 {
 		nextRec = dispatchRecord(content, readLen(content, idx+nextPos, 8))
 	}
-	record = map[string]interface{}{
-		"rec_type":   recType,
-		"block_len":  blockLen,
-		"data_len":   dataLenValue,
-		"next_rec":   nextRec,
-		"data_begin": idx + headerLen,
+
+	record = Record{
+		RecType:   recType,
+		BlockLen:  blockLen,
+		DataLen:   dataLenValue,
+		NextRec:   &nextRec,
+		DataBegin: idx + headerLen,
 	}
+
 	return
 }
 
-func dispatchRecord(content []byte, idx int) (record map[string]interface{}) {
+func dispatchRecord(content []byte, idx int) (record Record) {
 	recType := content[idx]
 	switch recType {
 	case 0:
@@ -126,13 +133,13 @@ func dispatchRecord(content []byte, idx int) (record map[string]interface{}) {
 	case 13:
 		record = readRecord(content, idx, 16, 5, 3, 9, 0)
 	default:
-		record = make(map[string]interface{})
+		record = Record{}
 	}
 	return
 }
 
-func parseRecord(content []byte, rec map[string]interface{}) (result map[string]interface{}) {
-	first := rec["data_begin"].(int) + 3
+func parseRecord(content []byte, rec Record) (result map[string]interface{}) {
+	first := rec.DataBegin + 3
 	hostLen := int(content[first])
 	host := string(content[first+1 : first+1+hostLen])
 
@@ -144,7 +151,7 @@ func parseRecord(content []byte, rec map[string]interface{}) (result map[string]
 	var password []byte
 	idx := first + hostLen + 1 + 1 + userLen
 	for {
-		last := rec["data_begin"].(int) + rec["data_len"].(int)
+		last := rec.DataBegin + rec.DataLen
 		passwordLen := len(password)
 		if passwordLen == 0 {
 			for idx < last {
@@ -159,14 +166,14 @@ func parseRecord(content []byte, rec map[string]interface{}) (result map[string]
 		}
 
 		if idx+1 <= min(last, passwordMaxLen-passwordLen+idx+1) {
-			password = append(password, content[idx+1:min(last, passwordMaxLen-passwordLen+idx+1)]...)
+			password = append(password, content[idx:min(last, passwordMaxLen-passwordLen+idx+1)]...)
 		}
 
-		if len(rec["next_rec"].(map[string]interface{})) == 0 {
+		if rec.NextRec != nil {
 			break
 		} else {
-			rec = rec["next_rec"].(map[string]interface{})
-			idx = rec["data_begin"].(int)
+			rec = *rec.NextRec
+			idx = rec.DataBegin
 		}
 	}
 	result = map[string]interface{}{
