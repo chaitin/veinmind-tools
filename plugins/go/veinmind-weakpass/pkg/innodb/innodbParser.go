@@ -193,7 +193,6 @@ func ParseUserPage(pagedata PageData) (infos []MysqlInfo, err error) {
 		info.Plugin = Plugin
 		info.Password = Password
 		infos = append(infos, info)
-		//tmp := string(data[i:i+480])
 		i += next
 	}
 	return infos, nil

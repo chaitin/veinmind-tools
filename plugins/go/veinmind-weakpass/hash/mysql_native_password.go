@@ -21,7 +21,6 @@ func (i *MysqlNative) Match(hash, guess string) (flag bool, err error) {
 		s := fmt.Sprintf("%x", r)
 		if strings.Contains(hash, s) {
 			return true, nil
-
 		}
 	}
 	return false, errors.New("mysql_passwd: malformed entry ")

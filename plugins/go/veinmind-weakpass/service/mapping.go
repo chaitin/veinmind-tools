@@ -10,7 +10,9 @@ func GetType(service IService) event.WeakpassService {
 		return event.SSH
 	case *redisService:
 		return event.Redis
-	case *mysqlService:
+	case *mysql5Service:
+		return event.Mysql
+	case *mysql8Service:
 		return event.Mysql
 	case *tomcatService:
 		return event.Tomcat
