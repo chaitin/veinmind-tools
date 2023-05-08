@@ -27,6 +27,13 @@ type Record struct {
 	DataBegin int
 }
 
+type Result struct {
+	Host     string
+	User     string
+	Password string
+	Native   bool
+}
+
 // ParseUserFile 从文件中解析用户名和密码
 // TODO: 目前仅支持MYSQL5默认使用的mysql_native_password插件，后续需要支持其他插件的解析。
 func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
@@ -42,10 +49,10 @@ func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
 		if 0 < recType && recType <= 6 {
 			info := MysqlInfo{}
 			res := parseRecord(content, record)
-			info.Host = res["host"].(string)
+			info.Host = res.Host
 			info.Plugin = "mysql_native_password"
-			info.Name = res["user"].(string)
-			info.Password = res["password"].(string)
+			info.Name = res.User
+			info.Password = res.Password
 			if info.Password != EmptyPasswordPlaceholder && info.Host != LocalHost {
 				infos = append(infos, info)
 			}
@@ -138,7 +145,7 @@ func dispatchRecord(content []byte, idx int) (record Record) {
 	return
 }
 
-func parseRecord(content []byte, rec Record) (result map[string]interface{}) {
+func parseRecord(content []byte, rec Record) (result Result) {
 	first := rec.DataBegin + 3
 	hostLen := int(content[first])
 	host := string(content[first+1 : first+1+hostLen])
@@ -176,11 +183,12 @@ func parseRecord(content []byte, rec Record) (result map[string]interface{}) {
 			idx = rec.DataBegin
 		}
 	}
-	result = map[string]interface{}{
-		"host":     host,
-		"user":     user,
-		"password": string(password),
-		"native":   native,
+	result = Result{
+		Host:     host,
+		User:     user,
+		Password: string(password),
+		Native:   native,
 	}
+
 	return
 }
