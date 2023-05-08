@@ -9,8 +9,8 @@ import (
 func TestHashMysqlNativePassword_Hash(t *testing.T) {
 	mysqlNative := &MysqlNative{}
 	// password which got from file mysql.ibd in docker image
-	stringGotFromFile := "81f5e21e35407d884a6cd4a731aebfb6af209e1b"
-	stringInDict := "root"
+	stringGotFromFile := "*6bb4837eb74329105ee4568dda7dc67ed2ca2ad9"
+	stringInDict := "123456"
 	find, _ := mysqlNative.Match(stringGotFromFile, stringInDict)
 	assert.True(t, find)
 }
