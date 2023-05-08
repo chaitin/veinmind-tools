@@ -65,15 +65,39 @@ func TestSshParse(t *testing.T) {
 
 }
 
-func TestMysqlParse(t *testing.T) {
-	mysql := &mysqlService{}
+func TestMyISAMParse(t *testing.T) {
+	mysql := &mysql5Service{}
 
-	mysqlIbd, err := os.Open("../test/mysql.ibd")
+	mysqlMyd, err := os.Open("../test/user.MYD")
 	assert.Nil(t, err)
 
 	expectRecords := []model.Record{}
 	expectRecords = append(expectRecords, model.Record{
-		Username:   "root@localhost",
+		Username:   "root",
+		Password:   "81f5e21e35407d884a6cd4a731aebfb6af209e1b",
+		Attributes: nil,
+	})
+
+	records, err := mysql.GetRecords(mysqlMyd)
+	assert.Nil(t, err)
+	assert.Equal(t, len(expectRecords), len(records))
+
+	for i, item := range records {
+		assert.Nil(t, item.Attributes)
+		assert.Equal(t, expectRecords[i].Username, item.Username)
+		assert.Contains(t, item.Password, expectRecords[i].Password)
+	}
+}
+
+func TestInnoDBParse(t *testing.T) {
+	mysql := &mysql8Service{}
+
+	mysqlIbd, err := os.Open("../test/mysql.ibd")
+	assert.Nil(t, err)
+
+	var expectRecords []model.Record
+	expectRecords = append(expectRecords, model.Record{
+		Username:   "root",
 		Password:   "*6a7a490fb9dc8c33c2b025a91737077a7e9cc5e5",
 		Attributes: nil,
 	})

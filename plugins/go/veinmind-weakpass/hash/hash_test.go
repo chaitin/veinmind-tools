@@ -6,19 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHashMysqlNative(t *testing.T) {
+func TestHashMysqlNativePassword_Hash(t *testing.T) {
 	mysqlNative := &MysqlNative{}
 	// password which got from file mysql.ibd in docker image
-	stringGotFromFile := "*6bb4837eb74329105ee4568dda7dc67ed2ca2ad9"
-	stringInDict := "123456"
+	stringGotFromFile := "81f5e21e35407d884a6cd4a731aebfb6af209e1b"
+	stringInDict := "root"
 	find, _ := mysqlNative.Match(stringGotFromFile, stringInDict)
 	assert.True(t, find)
-
-	stringGotFromFile = "6bb4837eb74329105ee4568dda7dc67ed2ca2ad9"
-	find, _ = mysqlNative.Match(stringGotFromFile, stringInDict)
-	assert.False(t, find)
-
 }
+
+//func TestCachingSha2Password_Hash(t *testing.T) {
+//	cachingSha2Password := &CachingSha2Password{}
+//	stringGotFromFile := "*$A$005$HC\bC\u0001<#_C\u0013\u0005Q_<\u0004?)\n&H/bvMXxd/ONQWooqN.3KA5dkamfcRom2Hf/jyT9whmU7"
+//	stringInDict := "root"
+//	find, _ := cachingSha2Password.Match(stringGotFromFile, stringInDict)
+//	assert.True(t, find)
+//}
 
 func TestHashShadow(t *testing.T) {
 	shadow := &Shadow{}

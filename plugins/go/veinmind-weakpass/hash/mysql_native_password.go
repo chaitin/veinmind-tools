@@ -15,14 +15,11 @@ func (i *MysqlNative) ID() string {
 }
 
 func (i *MysqlNative) Match(hash, guess string) (flag bool, err error) {
-	if strings.Contains(hash, "*") {
-		r := sha1.Sum([]byte(guess))
-		r = sha1.Sum(r[:])
-		s := fmt.Sprintf("%x", r)
-		if strings.Contains(hash, s) {
-			return true, nil
-
-		}
+	r := sha1.Sum([]byte(guess))
+	r = sha1.Sum(r[:])
+	s := fmt.Sprintf("%x", r)
+	if strings.Contains(hash, s) {
+		return true, nil
 	}
 	return false, errors.New("mysql_passwd: malformed entry ")
 }

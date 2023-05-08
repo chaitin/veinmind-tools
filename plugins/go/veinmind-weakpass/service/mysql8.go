@@ -9,19 +9,19 @@ import (
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
 )
 
-type mysqlService struct {
+type mysql8Service struct {
 	name     string
 	filepath []string
 }
 
-func (i *mysqlService) Name() string {
+func (i *mysql8Service) Name() string {
 	return i.name
 }
 
-func (i *mysqlService) FilePath() (paths []string) {
+func (i *mysql8Service) FilePath() (paths []string) {
 	return i.filepath
 }
-func (i *mysqlService) GetRecords(file io.Reader) (records []model.Record, err error) {
+func (i *mysql8Service) GetRecords(file io.Reader) (records []model.Record, err error) {
 	page, err := innodb.FindUserPage(file)
 	if err != nil {
 		return records, err
@@ -33,7 +33,7 @@ func (i *mysqlService) GetRecords(file io.Reader) (records []model.Record, err e
 	}
 	tmp := model.Record{}
 	for _, info := range mysqlInfos {
-		tmp.Username = info.Name + "@" + info.Host
+		tmp.Username = info.Name
 		tmp.Password = strings.ToLower(info.Password)
 		records = append(records, tmp)
 	}
@@ -41,9 +41,10 @@ func (i *mysqlService) GetRecords(file io.Reader) (records []model.Record, err e
 }
 
 func init() {
-	mod := &mysqlService{}
-	ServiceMatcherMap["mysql"] = "mysql_native_password"
-	mod.name = "mysql"
-	mod.filepath = []string{"/var/lib/mysql/mysql.ibd", "/var/lib/mysql/mysql2.ibd"}
+	// TODO： Mysql8
+	mod := &mysql8Service{}
+	ServiceMatcherMap["mysql8"] = "mysql_native_password"
+	mod.name = "mysql8"
+	mod.filepath = []string{"/var/lib/mysql/mysql.ibd"}
 	Register("mysql", mod)
 }
