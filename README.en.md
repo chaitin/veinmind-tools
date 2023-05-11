@@ -110,10 +110,16 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 ## ✨ CTStack
 <img src="https://ctstack-oss.oss-cn-beijing.aliyuncs.com/CT%20Stack-2.png" width="30%" />
 
-veinmind-tools was already joined [CTStack](https://stack.chaitin.com/tool/detail?id=3) community
+veinmind-tools has already joined [CTStack](https://stack.chaitin.com/tool/detail?id=3) community
 
 ## ✨ 404 starlink project
 
 <img src="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">
 
 veinmind-tools now joined 404 starlink project (https://github.com/knownsec/404StarLink)
+
+## Star History <a name="star-history"></a>
+
+<a href="https://github.com/chaitin/veinmind-tools/stargazers">
+    <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=chaitin/veinmind-tools&type=Date">
+</a>
