@@ -102,3 +102,9 @@ veinmind-tools 现已加入 [CTStack](https://stack.chaitin.com/tool/detail?id=3
 <img src="https://github.com/knownsec/404StarLink-Project/raw/master/logo.png" width="30%">
 
 veinmind-tools 现已加入 [404星链计划](https://github.com/knownsec/404StarLink)
+
+## Star History <a name="star-history"></a>
+
+<a href="https://github.com/chaitin/veinmind-tools/stargazers">
+    <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=chaitin/veinmind-tools&type=Date">
+</a>
