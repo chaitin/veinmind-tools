@@ -9,7 +9,7 @@ import future.keywords.if
 
 risks[res]{
     input.spec.containers[i].command[i]=="etcd"
-	every val in input.spec.containers[i].command{
+	every val in input.spec.containers[i].args{
     not contains(val,"--peer-client-cert-auth=true")
     }
     res := common.result({"original":"UnSafeSettings:`spec.containers.command missing --peer-client-cert-auth=true", "Path": input.Path}, "KN-010")

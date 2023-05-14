@@ -9,7 +9,8 @@ risks[res]{
     input.spec.containers[i].command[i]=="kube-apiserver"
     version:=input.spec.containers[i].image
     contains(version,"v1.1")
-	inner:=input.spec.containers[i].command
+    not contains(version,"v1.19")
+	inner:=input.spec.containers[i].args
     some val in inner
         contains(val,"insecure-port")
         not contains(val,"insecure-port=0")

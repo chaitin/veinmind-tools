@@ -101,6 +101,7 @@ type KubernetesInput struct {
 	Spec            interface{}       `yaml:"spec" json:"spec"`
 	RoleRef         interface{}       `yaml:"roleRef" json:"roleRef"`
 	Status          interface{}       `yaml:"status" json:"status"`
+	Subjects        interface{}       `yaml:"subjects" json:"subjects"`
 	Authentication  interface{}       `yaml:"authentication" json:"authentication"`
 	Authorization   interface{}       `yaml:"authorization" json:"authorization"`
 	Template        interface{}       `yaml:"template" json:"template"`

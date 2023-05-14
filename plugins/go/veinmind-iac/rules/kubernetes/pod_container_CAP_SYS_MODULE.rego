@@ -3,7 +3,6 @@ package brightMirror.kubernetes
 import data.common
 import future.keywords.in
 
-
 risks[res]{
         inner := input.spec.containers[i].securityContext.capabilities.add
         some val in inner

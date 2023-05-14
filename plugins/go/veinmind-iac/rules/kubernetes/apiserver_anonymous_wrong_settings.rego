@@ -1,12 +1,10 @@
 package brightMirror.kubernetes
 
 import data.common
-import future.keywords.in
-import future.keywords.contains
-import future.keywords.if
 
 risks[res]{
-    input.metadata.name=="system:anonymous"
+    input.kind=="ClusterRoleBinding"
     input.roleRef.name=="cluster-admin"
+    input.subjects[i].name=="system:anonymous"
     res := common.result({"original":"UnSafeSettings:`metadata.name`,`roleRef.name`", "Path": input.Path}, "KN-006")
 }

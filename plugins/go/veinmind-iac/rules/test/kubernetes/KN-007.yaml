@@ -1,0 +1,11 @@
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+authentication:
+  anonymous:
+    enabled: true
+  webhook:
+    enabled: false
+  x509:
+    clientCAFile: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+authorization:
+  mode: AlwaysAllow

@@ -13,5 +13,4 @@ risks[res]{
         b=[d]
         c:=array.concat(a,b)
         res := common.result({"original":concat(":",c), "Path": input.Path}, "KN-011")
-
 }

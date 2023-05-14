@@ -3,9 +3,8 @@ package brightMirror.kubernetes
 import data.common
 import future.keywords.in
 
-
 risks[res]{
-         input.spec.hostPID==true
+        input.spec.hostPID==true
         inner := input.spec.containers[i].securityContext.capabilities.add
         some val in inner
         upper(val) == "SYS_PTRACE"

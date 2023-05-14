@@ -1,9 +1,6 @@
 package brightMirror.kubernetes
 
 import data.common
-import future.keywords.in
-import future.keywords.contains
-import future.keywords.if
 
 risks[res]{
 	input.authentication.anonymous.enabled==true

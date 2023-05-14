@@ -1,8 +1,17 @@
 package brightMirror.kubernetes
 
 import data.common
+import future.keywords.every
 
-#risks[res] {
-#    securityContexts
-#    res := kubernetes.result(securityContexts, "KN-004")
-#}
+default allow=false
+
+allowValuesSeLinuxOptionsType:=["container_t","container_init_t","container_kvm_t"]
+
+risks[res]{
+    inner := input.spec.containers[i]
+    type := inner.securityContext.seLinuxOptions.type
+    every val in allowValuesSeLinuxOptionsType {
+        val != type
+    }
+    res:= common.result({"original":"UnSafeSettings:`spec.containers.securityContext.seLinuxOptions.type`", "Path": input.Path},"KN-004")
+}
