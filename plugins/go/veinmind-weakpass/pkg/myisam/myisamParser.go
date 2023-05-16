@@ -1,18 +1,19 @@
 package myisam
 
 import (
+	"errors"
 	"io"
 )
 
 const (
 	// EmptyPasswordPlaceholder 用于没有修改过密码的 user page
-	EmptyPasswordPlaceholder = "THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE"
+	EmptyPasswordPlaceholder = "*THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE"
 
 	// LocalHost 用于识别Host是否为仅限本地登陆
 	LocalHost = "localhost"
 )
 
-type MysqlInfo struct {
+type UserInfo struct {
 	Host     string
 	Name     string
 	Plugin   string
@@ -27,16 +28,8 @@ type Record struct {
 	DataBegin int
 }
 
-type Result struct {
-	Host     string
-	User     string
-	Password string
-	Native   bool
-}
-
 // ParseUserFile 从文件中解析用户名和密码
-// TODO: 目前仅支持MYSQL5默认使用的mysql_native_password插件，后续需要支持其他插件的解析。
-func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
+func ParseUserFile(f io.Reader) (infos []*UserInfo, err error) {
 	content, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
@@ -47,13 +40,9 @@ func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
 		record := dispatchRecord(content, idx)
 		recType := record.RecType
 		if 0 < recType && recType <= 6 {
-			info := MysqlInfo{}
-			res := parseRecord(content, record)
-			info.Host = res.Host
-			info.Plugin = "mysql_native_password"
-			info.Name = res.User
-			info.Password = res.Password
-			if info.Password != EmptyPasswordPlaceholder && info.Host != LocalHost {
+			if info, err := parseRecord(content, record); err != nil {
+				return infos, err
+			} else {
 				infos = append(infos, info)
 			}
 		}
@@ -61,13 +50,6 @@ func ParseUserFile(f io.Reader) (infos []MysqlInfo, err error) {
 	}
 
 	return infos, nil
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func readLen(content []byte, begin int, l int) int {
@@ -84,7 +66,7 @@ func pad(dataLen int) int {
 	return (byteLen + ((dataLen - (byteLen << 2)) & 1)) << 2
 }
 
-func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int, nextPos int, unusedLen int) (record Record) {
+func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int, nextPos int, unusedLen int) (record *Record) {
 	recType := content[idx]
 	dataLenValue := readLen(content, idx+dataPos, dataLen)
 	unusedLenValue := unusedLen
@@ -92,27 +74,28 @@ func readRecord(content []byte, idx int, headerLen int, dataPos int, dataLen int
 		unusedLenValue = int(content[idx+unusedLen])
 	}
 	blockLen := pad(headerLen + dataLenValue + unusedLenValue)
-	nextRec := Record{}
+	var nextRec *Record
 	if nextPos > 0 {
 		nextRec = dispatchRecord(content, readLen(content, idx+nextPos, 8))
 	}
 
-	record = Record{
+	record = &Record{
 		RecType:   recType,
 		BlockLen:  blockLen,
 		DataLen:   dataLenValue,
-		NextRec:   &nextRec,
+		NextRec:   nextRec,
 		DataBegin: idx + headerLen,
 	}
 
 	return
 }
 
-func dispatchRecord(content []byte, idx int) (record Record) {
+// Related info: https://github.com/twitter-forks/mysql/blob/865aae5f23e2091e1316ca0e6c6651d57f786c76/storage/myisam/mi_dynrec.c#LL1890C1-L1890C1
+func dispatchRecord(content []byte, idx int) (record *Record) {
 	recType := content[idx]
 	switch recType {
 	case 0:
-		record = readRecord(content, idx, 20, 1, 3, -1, 0)
+		record = readRecord(content, idx, 0, 1, 3, -1, 0)
 	case 1:
 		record = readRecord(content, idx, 3, 1, 2, -1, 0)
 	case 2:
@@ -138,57 +121,72 @@ func dispatchRecord(content []byte, idx int) (record Record) {
 	case 12:
 		record = readRecord(content, idx, 12, 1, 3, 4, 0)
 	case 13:
-		record = readRecord(content, idx, 16, 5, 3, 9, 0)
+		record = readRecord(content, idx, 16, 5, 3, 8, 0)
 	default:
-		record = Record{}
+		record = nil
 	}
 	return
 }
 
-func parseRecord(content []byte, rec Record) (result Result) {
-	first := rec.DataBegin + 3
-	hostLen := int(content[first])
-	host := string(content[first+1 : first+1+hostLen])
+var RecordDataBrokenErr = errors.New("record data broken")
 
-	userLen := int(content[first+hostLen+1])
-	user := string(content[first+hostLen+1+1 : first+hostLen+1+1+userLen])
+// parseRecord parse user.MYD, return nil if error happened
+func parseRecord(content []byte, rec *Record) (result *UserInfo, err error) {
+	var trueContent []byte
+	for rec != nil {
+		// 这里应该根据rec还原数据 content的内容是不能直接使用的
+		// Related info: https://github.com/twitter-forks/mysql/blob/865aae5f23e2091e1316ca0e6c6651d57f786c76/storage/myisam/mi_dynrec.c#LL1890C1-L1890C1
+		trueContent = append(trueContent, content[rec.DataBegin:rec.DataBegin+rec.DataLen]...)
+		rec = rec.NextRec
+	}
 
-	native := false
-	passwordMaxLen := 40
-	var password []byte
-	idx := first + hostLen + 1 + 1 + userLen
-	for {
-		last := rec.DataBegin + rec.DataLen
-		passwordLen := len(password)
-		if passwordLen == 0 {
-			for idx < last {
-				if content[idx] == 21 {
-					native = true
-				}
-				if content[idx] == 42 {
+	hostLenPos := 3
+	if len(trueContent) <= hostLenPos {
+		return nil, RecordDataBrokenErr
+	}
+	hostLen := int(trueContent[hostLenPos])
+
+	userLenPos := hostLenPos + hostLen + 1 // 可以简化 但是这么写便于阅读
+	if len(trueContent) <= userLenPos {
+		return nil, RecordDataBrokenErr
+	}
+	userLen := int(trueContent[userLenPos])
+
+	if len(trueContent) <= userLenPos+1+userLen {
+		return nil, RecordDataBrokenErr
+	}
+	host := string(trueContent[hostLenPos+1 : hostLenPos+1+hostLen])
+	user := string(trueContent[userLenPos+1 : userLenPos+1+userLen])
+
+	// caching_sha2_password在>=5.6版本被支持 也就是自5.6版开始 user表结构有所变化，加入authentication_string列
+	// authentication_string列有一个固定特征是长度为21 且跟在user列后面（user数据结束后会有很长一段2）
+	// 如果是<5.6版本的表，user列后面直接紧跟着就是42了（*）
+	plugin := "mysql_native_password"
+	passwdLenPos := userLenPos + userLen + 1 // 先当作是<5.6的版本提取
+	var password string
+	if passwdLen := int(trueContent[passwdLenPos]); passwdLen == 42 { // 判断出来不是>=5.6的版本
+		password = string(trueContent[passwdLenPos : passwdLenPos+41])
+	} else { // >=5.6版本 authentication_string列在前 password列在后
+		passwdLenPos++
+		for {
+			if passwdLenPos < len(trueContent) {
+				if trueContent[passwdLenPos] == 21 { // 读到了authentication_string列
+					plugin = string(trueContent[passwdLenPos+1 : passwdLenPos+1+21])
+					passwdLenPos += 1 + 21
+					passwdLen = int(trueContent[passwdLenPos]) // TEXT类型 这里认为长度密码字段长度不会超过256 不计算第二位 https://dev.mysql.com/doc/refman/8.0/en/storage-requirements.html
+					password = string(trueContent[passwdLenPos+2 : passwdLenPos+2+passwdLen])
 					break
 				}
-				idx++
+				passwdLenPos++
+			} else {
+				return nil, RecordDataBrokenErr
 			}
 		}
-
-		if idx+1 <= min(last, passwordMaxLen-passwordLen+idx+1) {
-			password = append(password, content[idx:min(last, passwordMaxLen-passwordLen+idx+1)]...)
-		}
-
-		if rec.NextRec != nil {
-			break
-		} else {
-			rec = *rec.NextRec
-			idx = rec.DataBegin
-		}
 	}
-	result = Result{
+	return &UserInfo{
 		Host:     host,
-		User:     user,
-		Password: string(password),
-		Native:   native,
-	}
-
-	return
+		Name:     user,
+		Password: password,
+		Plugin:   plugin,
+	}, nil
 }

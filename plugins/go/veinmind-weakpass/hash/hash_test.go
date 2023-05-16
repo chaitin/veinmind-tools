@@ -1,18 +1,38 @@
 package hash
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHashMysqlNativePassword_Hash(t *testing.T) {
+func TestHashMysqlNative(t *testing.T) {
 	mysqlNative := &MysqlNative{}
 	// password which got from file mysql.ibd in docker image
 	stringGotFromFile := "*6bb4837eb74329105ee4568dda7dc67ed2ca2ad9"
 	stringInDict := "123456"
 	find, _ := mysqlNative.Match(stringGotFromFile, stringInDict)
 	assert.True(t, find)
+
+	stringGotFromFile = "6bb4837eb74329105ee4568dda7dc67ed2ca2ad9"
+	find, _ = mysqlNative.Match(stringGotFromFile, stringInDict)
+	assert.False(t, find)
+}
+
+func TestHashCachingSha2Password(t *testing.T) {
+	cachingSha2Password := &CachingSha2Password{}
+	// password which got from file mysql.ibd in docker image
+	b64PwdFromFile := "JEEkMDA1JFodUGBzOkJlVwx/bwRYfwg8f3hoV3ZxRUN3c3JGa3pwa0kuVWxXbEpSeEM1ZkVYVUhscU42WFVuaGpHTS5zNwFixZPBAQICRkAAAAAgfAAAOPokJQ=="
+	stringInDict := "123456"
+	pwd, err := base64.StdEncoding.DecodeString(b64PwdFromFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	find, _ := cachingSha2Password.Match(string(pwd), stringInDict)
+	assert.True(t, find)
+	find, _ = cachingSha2Password.Match(string(pwd), "12345678")
+	assert.False(t, find)
 }
 
 func TestHashShadow(t *testing.T) {
