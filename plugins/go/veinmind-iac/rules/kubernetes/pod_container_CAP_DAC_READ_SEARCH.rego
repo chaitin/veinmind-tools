@@ -4,13 +4,13 @@ import data.common
 import future.keywords.in
 
 risks[res]{
-        inner := input.spec.containers[i].securityContext.capabilities.add
+        inner := securityContexts[_].capabilities.add
         some val in inner
         upper(val) == "DAC_READ_SEARCH"
-        Name:=input.spec.containers[i].name
+        Name:=containers[i].name
         Hints=["UnsafeContainers"]
         Names=[Name]
         Combine:=array.concat(Hints,Names)
-        res := common.result({"original":concat(":",Combine), "Path": input.Path}, "KN-013")
+        res := common.result({"original":concat(":",Combine), "Path": input[_].Path}, "KN-013")
 
 }

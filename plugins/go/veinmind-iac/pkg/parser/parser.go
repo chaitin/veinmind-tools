@@ -153,5 +153,5 @@ func kubernetes(file *os.File, path string) (interface{}, error) {
 		res = append(res, kubernetesInput)
 	}
 
-	return kubernetesInput, nil
+	return res, nil
 }

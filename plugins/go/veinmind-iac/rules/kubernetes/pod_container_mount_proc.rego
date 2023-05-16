@@ -6,12 +6,12 @@ import future.keywords.in
 
 
 risks[res]{
-        inner := input.spec.volumes[i].hostPath
+        inner := volumes[_].hostPath
         some val in inner
-        contains(val,"/proc")
-        Name:=input.spec.volumes[i].name
+            contains(val,"/proc")
+        Name:=volumes[_].name
         Names:=[Name]
         Hints:=["UnSafeVolumeName"]
         Combine:=array.concat(Hints,Names)
-        res := common.result({"original":concat(":",Combine), "Path": input.Path}, "KN-019")
+        res := common.result({"original":concat(":",Combine), "Path": input[_].Path}, "KN-019")
 }

@@ -8,10 +8,9 @@ default allow=false
 allowValuesSeLinuxOptionsType:=["container_t","container_init_t","container_kvm_t"]
 
 risks[res]{
-    inner := input.spec.containers[i]
-    type := inner.securityContext.seLinuxOptions.type
+    type := securityContexts[_].seLinuxOptions.type
     every val in allowValuesSeLinuxOptionsType {
         val != type
     }
-    res:= common.result({"original":"UnSafeSettings:`spec.containers.securityContext.seLinuxOptions.type`", "Path": input.Path},"KN-004")
+    res:= common.result({"original":"UnSafeSettings:`spec.containers.securityContext.seLinuxOptions.type`", "Path": input[_].Path},"KN-004")
 }

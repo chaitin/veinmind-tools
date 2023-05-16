@@ -25,6 +25,11 @@ containers[container] {
 	container = all_containers[_]
 }
 
+volumes[volume] {
+    is_pod
+    volume = input[_].spec.volumes[_]
+}
+
 annotations[annotation] {
     pods[pod]
 	annotation := pod.metadata.annotations
@@ -41,7 +46,7 @@ securityContexts[sec] {
 }
 
 allowPrivilegeEscalations[allow] {
-    allow := securityContexts[_].allowPrivilegeEscalation
+    allow := securityContexts[_].allowPrivilegeEscalations
 }
 
 is_pod {
@@ -51,7 +56,6 @@ is_pod {
 is_cronjob {
 	input[_].kind = "CronJob"
 }
-
 
 default is_controller = false
 

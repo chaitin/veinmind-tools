@@ -3,14 +3,14 @@ package brightMirror.kubernetes
 import data.common
 
 risks[res] {
-	image := input.spec.containers[_].image
+	image := containers[_].image
 	contains(image, "latest")
-    res := common.result({"original":input.spec.containers[_].image, "Path": input.Path}, "KN-001")
+    res := common.result({"original":containers[_].image, "Path": input[_].Path}, "KN-001")
 }
 
 risks[res] {
-    image := input.spec.containers[_].image
+    image := containers[_].image
     not contains(image, ":")
     not equal(image, "scratch")
-    res := common.result({"original":input.spec.containers[_].image, "Path": input.Path}, "KN-001")
+    res := common.result({"original":containers[_].image, "Path": input[_].Path}, "KN-001")
 }
