@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: etcd
+  namespace: kube-system
+spec:
+  containers:
+    - name: etcd
+      image: quay.io/coreos/etcd:v3.4.15
+      command:
+        - etcd
+      args:
+        - --name=etcd-node
+        - --listen-client-urls=http://0.0.0.0:2379
+        - --advertise-client-urls=http://localhost:2379
+        - --listen-peer-urls=http://0.0.0.0:2380
+        - --initial-advertise-peer-urls=http://localhost:2380
+        - --initial-cluster=etcd-node=http://localhost:2380
+        - --initial-cluster-token=etcd-cluster
+        - --initial-cluster-state=new
+        - --client-cert-auth=true
+      ports:
+        - containerPort: 2379
+          name: client
+        - containerPort: 2380
+          name: peer

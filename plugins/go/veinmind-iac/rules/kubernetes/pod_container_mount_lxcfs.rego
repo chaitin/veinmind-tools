@@ -5,12 +5,12 @@ import future.keywords.if
 import future.keywords.in
 
 risks[res]{
-    inner := input.spec.volumes[i].hostPath
+    inner := volumes[_].hostPath
     some val in inner
     contains(val,"lxcfs")
-    Name:=input.spec.volumes[i].name
+    Name:=volumes[_].name
     Names:=[Name]
     Hints:=["UnSafeVolumeName"]
     Combine:=array.concat(Hints,Names)
-    res := common.result({"original":concat(":",Combine), "Path": input.Path}, "KN-017")
+    res := common.result({"original":concat(":",Combine), "Path": input[_].Path}, "KN-017")
 }

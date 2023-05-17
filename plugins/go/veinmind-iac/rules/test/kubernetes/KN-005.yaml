@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+spec:
+  containers:
+    - name: kube-apiserver
+      image: k8s.gcr.io/kube-apiserver:v1.17.0
+      command:
+        - kube-apiserver
+      args:
+        - --insecure-port=8080
+        - --insecure-bind-address=0.0.0.0

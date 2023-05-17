@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-add-capabilities
+spec:
+  containers:
+    - command:
+        - sh
+        - "-c"
+        - echo 'Hello' && sleep 1h
+      image: busybox:v1.26.0
+      name: hello
+      securityContext:
+        seccompProfile:
+          type: Localhost
+        runAsNonRoot: true
+        capabilities:
+          add:
+            - SYS_ADMIN

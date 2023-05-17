@@ -7,11 +7,10 @@ import future.keywords.contains
 import future.keywords.if
 
 risks[res]{
-    input.spec.containers[i].securityContext.privileged==true
-        d := input.spec.containers[i].name
+    securityContexts[_].privileged==true
+        d := containers[i].name
         a=["UnsafeContainers"]
         b=[d]
         c:=array.concat(a,b)
-        res := common.result({"original":concat(":",c), "Path": input.Path}, "KN-011")
-
+        res := common.result({"original":concat(":",c), "Path": input[_].Path}, "KN-011")
 }

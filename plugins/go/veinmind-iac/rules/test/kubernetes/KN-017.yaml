@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: host-mount-pod
+spec:
+  containers:
+    - name: host-mount-container
+      image: busybox:v1.26.0
+      volumeMounts:
+        - name: host-mount-volume
+          mountPath: /host
+  volumes:
+    - name: host-mount-volume
+      hostPath:
+        path: /lxcfs
