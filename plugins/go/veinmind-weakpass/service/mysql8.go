@@ -4,9 +4,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/pkg/innodb"
-
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/pkg/innodb"
 )
 
 var _ IService = (*mysql8Service)(nil)
@@ -34,8 +33,15 @@ func (i *mysql8Service) GetRecords(file io.Reader) (records []model.Record, err 
 	}
 	tmp := model.Record{}
 	for _, info := range mysqlInfos {
+		if strings.Contains(info.Password, innodb.EmptyPasswordPlaceholder) {
+			continue
+		}
+		if info.Plugin != innodb.PluginNameNative {
+			tmp.Password = info.Password
+		} else {
+			tmp.Password = strings.ToLower(info.Password)
+		}
 		tmp.Username = info.Name
-		tmp.Password = strings.ToLower(info.Password)
 		records = append(records, tmp)
 	}
 	return records, nil

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/model"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-weakpass/pkg/innodb"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +48,7 @@ func TestRedisParse(t *testing.T) {
 
 }
 
-func TestSshParse(t *testing.T) {
+func TestSSHParse(t *testing.T) {
 	Ssh := &SshService{}
 	sshFile, err := os.Open("../test/shadow")
 	assert.Nil(t, err)
@@ -65,10 +66,34 @@ func TestSshParse(t *testing.T) {
 
 }
 
-func TestMyISAMParse(t *testing.T) {
+func TestMyISAM55Parse(t *testing.T) {
 	mysql := &mysql5Service{}
 
-	mysqlMyd, err := os.Open("../test/user.MYD")
+	mysqlMyd, err := os.Open("../test/mysql5_5.MYD")
+	assert.Nil(t, err)
+
+	var expectRecords []model.Record
+	expectRecords = append(expectRecords, model.Record{
+		Username:   "root",
+		Password:   "*6bb4837eb74329105ee4568dda7dc67ed2ca2ad9",
+		Attributes: nil,
+	})
+
+	records, err := mysql.GetRecords(mysqlMyd)
+	assert.Nil(t, err)
+	assert.Equal(t, len(expectRecords), len(records))
+
+	for i, item := range records {
+		assert.Nil(t, item.Attributes)
+		assert.Equal(t, expectRecords[i].Username, item.Username)
+		assert.Contains(t, item.Password, expectRecords[i].Password)
+	}
+}
+
+func TestMyISAM57Parse(t *testing.T) {
+	mysql := &mysql5Service{}
+
+	mysqlMyd, err := os.Open("../test/mysql5_7.MYD")
 	assert.Nil(t, err)
 
 	var expectRecords []model.Record
@@ -89,29 +114,49 @@ func TestMyISAMParse(t *testing.T) {
 	}
 }
 
-func TestInnoDBParse(t *testing.T) {
-	mysql := &mysql8Service{}
+func TestInnoDBParseForMysqlNativePlugin(t *testing.T) {
+	f, err := os.Open("../test/mysql8_mysql_native_plugin.ibd")
+	if err != nil {
+		return
+	}
+	defer f.Close()
 
-	mysqlIbd, err := os.Open("../test/mysql.ibd")
-	assert.Nil(t, err)
-
-	var expectRecords []model.Record
-	expectRecords = append(expectRecords, model.Record{
-		Username:   "root",
-		Password:   "*6a7a490fb9dc8c33c2b025a91737077a7e9cc5e5",
-		Attributes: nil,
-	})
-	records, err := mysql.GetRecords(mysqlIbd)
-	assert.Nil(t, err)
-	assert.Equal(t, len(expectRecords), len(records))
-
-	for i, item := range records {
-		assert.Nil(t, item.Attributes)
-		assert.Equal(t, expectRecords[i].Username, item.Username)
-		assert.Contains(t, item.Password, expectRecords[i].Password)
+	page, err := innodb.FindUserPage(f)
+	infos, err := innodb.ParseUserPage(page.Pagedata)
+	if err != nil {
+		return
+	}
+	for _, info := range infos {
+		if info.Password[:3] == "$A$" {
+			t.Log("caching_sha2_password")
+		} else {
+			t.Log("mysql_native_password")
+		}
+		t.Log(info)
 	}
 }
 
+func TestInnoDBParseForCachingSha2Plugin(t *testing.T) {
+	f, err := os.Open("../test/mysql8_caching_sha2_plugin.ibd")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	page, err := innodb.FindUserPage(f)
+	infos, err := innodb.ParseUserPage(page.Pagedata)
+	if err != nil {
+		return
+	}
+	for _, info := range infos {
+		if info.Password[:3] == "$A$" {
+			t.Log("caching_sha2_password")
+		} else {
+			t.Log("mysql_native_password")
+		}
+		t.Log(info)
+	}
+}
 func TestVsftpdParse(t *testing.T) {
 	vsftpd := &vsftpdService{}
 	vsftpdFile, err := os.Open("../test/virtual_users.db")
