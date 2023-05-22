@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"runtime"
+	"strings"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -37,6 +38,22 @@ func Scan(c *cmd.Command, image api.Image) (err error) {
 	eg.SetLimit(defaultLimit)
 
 	count := uint64(0)
+
+	// scan env
+	log.Infof("%s scan env start", image.ID())
+	err = scanEnv(image, conf)
+	if err != nil {
+		return err
+	}
+
+	// scan history
+	log.Infof("%s scan docker history start", image.ID())
+	err = scanDockerHistory(image, conf)
+	if err != nil {
+		return err
+	}
+
+	// scan filesystem
 	log.Infof("%s scan file start", image.ID())
 	veinfs.Walk(image, "/", func(info *veinfs.FileInfo, err error) error {
 		if err != nil {
@@ -47,17 +64,57 @@ func Scan(c *cmd.Command, image api.Image) (err error) {
 		}
 		count += 1
 		eg.Go(func() error {
-			return scan(image, info.Path, info, conf)
+			return scanFS(image, info.Path, info, conf)
 		})
 
 		return nil
 	})
-	eg.Wait()
+	err = eg.Wait()
+	if err != nil {
+		return err
+	}
 	log.Infof("%s scan file count %d", image.ID(), count)
 	return nil
 }
 
-func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config) error {
+// scanEnv 扫描环境变量中的敏感信息
+func scanEnv(image api.Image, conf *rule.Config) error {
+	ocispec, err := image.OCISpecV1()
+	if err != nil {
+		return err
+	}
+	for _, env := range ocispec.Config.Env {
+		for _, r := range conf.Rule {
+			if r.Env != "" && vregex.IsMatchString(r.Env, env) {
+				envArr := strings.Split(env, "=")
+				if len(envArr) == 2 {
+					reportEvent("env", image, r, envArr[0], envArr[1], "", "", nil, "", nil)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// scanHistory 扫描镜像历史命令中的敏感信息
+func scanDockerHistory(image api.Image, conf *rule.Config) error {
+	ocispec, err := image.OCISpecV1()
+	if err != nil {
+		return err
+	}
+
+	for _, history := range ocispec.History {
+		for _, r := range conf.Rule {
+			if r.MatchPattern != "" && vregex.IsMatchString(r.MatchPattern, history.CreatedBy) {
+				reportEvent("history", image, r, "", "", history.CreatedBy, "", nil, "", nil)
+			}
+		}
+	}
+	return nil
+}
+
+// scanFS 扫描镜像文件系统中的敏感信息
+func scanFS(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config) error {
 	// check white path cache
 	if cache.WhitePath.Contains(path) {
 		return nil
@@ -68,7 +125,7 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 	if ok {
 		if len(rules) > 0 {
 			for _, r := range rules {
-				reportEvent(info.Path, r, info, image, "", nil)
+				reportEvent("file", image, r, "", "", "", info.Path, info, "", nil)
 			}
 		}
 	} else {
@@ -81,7 +138,7 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 		for _, r := range conf.Rule {
 			if r.FilePathPattern != "" && vregex.IsMatchString(r.FilePathPattern, info.Path) {
 				cache.PathRule.SetOrAppend(path, r)
-				reportEvent(info.Path, r, info, image, "", nil)
+				reportEvent("file", image, r, "", "", "", info.Path, info, "", nil)
 			}
 		}
 	}
@@ -90,7 +147,7 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 	rules, ok = cache.HashRule.Get(info.Sha256)
 	if ok {
 		for _, r := range rules {
-			reportEvent(info.Path, r, info, image, "", nil)
+			reportEvent("file", image, r, "", "", "", info.Path, info, "", nil)
 		}
 		return nil
 	}
@@ -155,22 +212,44 @@ func scan(image api.Image, path string, info *veinfs.FileInfo, conf *rule.Config
 		}
 
 		cache.HashRule.SetOrAppend(info.Sha256, r)
-		reportEvent(path, r, info, image, string(content), []int64{int64(loc[0]), int64(loc[1])})
+		reportEvent("file", image, r, "", "", "", path, info, string(content), []int64{int64(loc[0]), int64(loc[1])})
 	}
 
 	cache.HashRule.Set(info.Sha256, make(map[int64]rule.Rule))
 	return nil
 }
 
-func reportEvent(path string, r rule.Rule, info *veinfs.FileInfo, image api.Image, contextContent string, contextContentHighlightLocation []int64) {
-	evt, err := report.GenerateSensitiveFileEvent(path, r, info, image, contextContent, contextContentHighlightLocation)
-	if err != nil {
-		log.Error(image.ID(), path, err)
-		return
-	}
-
-	err = reportService.Client.Report(evt)
-	if err != nil {
-		log.Error(image.ID(), path, err)
+func reportEvent(eventType string, image api.Image, r rule.Rule, envKey string, envValue string, history string, path string, info *veinfs.FileInfo, contextContent string, contextContentHighlightLocation []int64) {
+	switch eventType {
+	case "env":
+		evt, err := report.GenerateSensitiveEnvEvent(image, r, envKey, envValue)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+			return
+		}
+		err = reportService.Client.Report(evt)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+		}
+	case "history":
+		evt, err := report.GenerateSensitiveDockerHistoryEvent(image, r, history)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+			return
+		}
+		err = reportService.Client.Report(evt)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+		}
+	case "file":
+		evt, err := report.GenerateSensitiveFileEvent(image, r, path, info, contextContent, contextContentHighlightLocation)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+			return
+		}
+		err = reportService.Client.Report(evt)
+		if err != nil {
+			log.Error(image.ID(), path, err)
+		}
 	}
 }
