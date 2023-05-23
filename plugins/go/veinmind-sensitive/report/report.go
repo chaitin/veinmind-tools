@@ -41,7 +41,58 @@ func file2FileDetail(info *veinfs.FileInfo, path string) (event.FileDetail, erro
 	}, nil
 }
 
-func GenerateSensitiveFileEvent(path string, rule rule.Rule, info *veinfs.FileInfo, image api.Image, contextContent string, contextContentHighlightLocation []int64) (*event.Event, error) {
+func GenerateSensitiveEnvEvent(image api.Image, rule rule.Rule, envKey string, envValue string) (*event.Event, error) {
+	r := &event.Event{
+		BasicInfo: &event.BasicInfo{
+			ID:         image.ID(),
+			Object:     event.NewObject(image),
+			Source:     "veinmind-sensitive",
+			Time:       time.Now(),
+			Level:      localRuleLevel2EventLevel(rule.Level),
+			DetectType: event.Image,
+			EventType:  event.Risk,
+			AlertType:  event.SensitiveFile,
+		},
+		DetailInfo: &event.DetailInfo{
+			AlertDetail: &event.SensitiveEnvDetail{
+				SensitiveDetail: event.SensitiveDetail{},
+				Key:             envKey,
+				Value:           envValue,
+				RuleID:          rule.Id,
+				RuleName:        rule.Name,
+				RuleDescription: rule.Description,
+			},
+		},
+	}
+	return r, nil
+}
+
+func GenerateSensitiveDockerHistoryEvent(image api.Image, rule rule.Rule, history string) (*event.Event, error) {
+	r := &event.Event{
+		BasicInfo: &event.BasicInfo{
+			ID:         image.ID(),
+			Object:     event.NewObject(image),
+			Source:     "veinmind-sensitive",
+			Time:       time.Now(),
+			Level:      localRuleLevel2EventLevel(rule.Level),
+			DetectType: event.Image,
+			EventType:  event.Risk,
+			AlertType:  event.SensitiveFile,
+		},
+		DetailInfo: &event.DetailInfo{
+			AlertDetail: &event.SensitiveDockerHistoryDetail{
+				SensitiveDetail: event.SensitiveDetail{},
+				Value:           history,
+				RuleID:          rule.Id,
+				RuleName:        rule.Name,
+				RuleDescription: rule.Description,
+			},
+		},
+	}
+	return r, nil
+}
+
+func GenerateSensitiveFileEvent(image api.Image, rule rule.Rule, path string, info *veinfs.FileInfo, contextContent string, contextContentHighlightLocation []int64) (*event.Event, error) {
 	fDetail, err := file2FileDetail(info, path)
 	if err != nil {
 		return nil, err

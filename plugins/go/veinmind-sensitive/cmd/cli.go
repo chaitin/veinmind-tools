@@ -14,8 +14,8 @@ var (
 	PluginInfo = plugin.Manifest{
 		Name:        "veinmind-sensitive",
 		Author:      "veinmind-team",
-		Description: "veinmind-sensitive-file scan image sensitive data",
-		Version:     "v1.1.4",
+		Description: "veinmind-sensitive scan image sensitive data",
+		Version:     "v1.1.5",
 	}
 
 	reportService = &report.Service{}
