@@ -126,6 +126,9 @@ func FindUserPage(f io.Reader) (page Page, err error) {
 
 func File2Page(file string) (page Page, err error) {
 	buf, err := os.Open(file)
+	if err != nil {
+		return
+	}
 	defer buf.Close()
 	if err != nil {
 		return page, err
