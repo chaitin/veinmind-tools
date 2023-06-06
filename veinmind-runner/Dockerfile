@@ -1,4 +1,4 @@
-FROM veinmind/go1.18:1.9.15-bullseye as builder
+FROM veinmind/go1.18:1.9.21-bullseye as builder
 WORKDIR /build
 COPY . .
 ARG TARGETARCH
@@ -19,7 +19,7 @@ FROM veinmind/veinmind-vuln:latest as vuln
 FROM veinmind/veinmind-escalate:latest as escalate
 FROM veinmind/veinmind-minio:latest as minio
 
-FROM veinmind/python3.6:1.9.15-bullseye as release
+FROM veinmind/python3.6:1.9.21-bullseye as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
