@@ -35,7 +35,7 @@ jobs:
     name: ${{ matrix.plugin }}
     runs-on: ubuntu-20.04
     container:
-      image: veinmind/go1.18:1.9.15-bullseye
+      image: veinmind/go1.18:1.9.21-bullseye
     env:
       CI_GOOS: linux
       CI_GOARCH: amd64

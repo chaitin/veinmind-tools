@@ -13,8 +13,3 @@ version=["4.4<=ver<=4.13"]
 [[cve]]
 cveNumber="CVE-2021-22555"
 version=["2.6.19<=ver<4.4.267","4.4.267<ver<4.9.267","4.9.267<ver<4.14.231","4.14.231<ver<4.19.188","4.19.188<ver<5.4.113","5.4.113<ver<5.10.31","5.10.31<ver<5.12","ver>5.12"]
-[[escalate]]
-name="7z"
-description=""
-tag=["File read","Sudo"]
-exp=["LFILE=file_to_read\n7z a -ttar -an -so $LFILE | 7z e -ttar -si -so","LFILE=file_to_read\nsudo 7z a -ttar -an -so $LFILE | 7z e -ttar -si -so"]

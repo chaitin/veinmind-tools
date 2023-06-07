@@ -2,10 +2,11 @@ package service
 
 import (
 	"bufio"
-	api "github.com/chaitin/libveinmind/go"
 	"os"
 	"regexp"
 	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
 )
 
 func SudoCheck(fs api.FileSystem, fi os.FileInfo, filename string) (bool, error) {

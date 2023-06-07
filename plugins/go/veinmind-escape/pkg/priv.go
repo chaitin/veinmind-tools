@@ -269,7 +269,8 @@ func isBelongToRoot(content os.FileInfo) bool {
 
 func isContainSUID(content os.FileInfo) bool {
 	res := fmt.Sprintf("%o", uint32(content.Mode()))
-	if strings.HasPrefix(res, "40000") {
+	// 4000 is SUID, 6000 is SUID and SGID
+	if strings.HasPrefix(res, "4000") || strings.HasPrefix(res, "6000") {
 		return true
 	}
 	return false

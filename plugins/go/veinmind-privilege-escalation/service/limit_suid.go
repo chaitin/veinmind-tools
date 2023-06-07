@@ -1,8 +1,9 @@
 package service
 
 import (
-	api "github.com/chaitin/libveinmind/go"
 	"os"
+
+	api "github.com/chaitin/libveinmind/go"
 )
 
 func LimitedSuidCheck(fs api.FileSystem, content os.FileInfo, filename string) (bool, error) {

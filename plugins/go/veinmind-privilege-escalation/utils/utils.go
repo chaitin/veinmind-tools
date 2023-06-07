@@ -1,13 +1,16 @@
 package utils
 
 import (
+	"reflect"
+	"strings"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-privilege-escalation/rules"
 	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-privilege-escalation/service"
-	"reflect"
-	"strings"
 )
+
+var binPath = []string{"/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/usr/local/sbin"}
 
 func ImagesScanRun(fs api.Image) []*event.EscalationDetail {
 	var result = make([]*event.EscalationDetail, 0)
@@ -17,7 +20,6 @@ func ImagesScanRun(fs api.Image) []*event.EscalationDetail {
 		return nil
 	}
 	// 获取文件系统中可能存在提权等风险的二进制文件
-	var binPath = []string{"/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/usr/local/sbin"}
 	for _, rule := range Config.Rules {
 		for _, path := range binPath {
 			content, err := fs.Stat(path + "/" + rule.Name)
@@ -63,7 +65,6 @@ func ContainersScanRun(fs api.Container) []*event.EscalationDetail {
 		return nil
 	}
 	// 获取文件系统中可能存在提权等风险的二进制文件
-	var binPath = []string{"/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/usr/local/sbin"}
 	for _, rule := range Config.Rules {
 		for _, path := range binPath {
 			content, err := fs.Stat(path + "/" + rule.Name)

@@ -1,4 +1,4 @@
-FROM veinmind/go1.18:1.9.15-bullseye as builder
+FROM veinmind/go1.18:1.9.21-bullseye as builder
 WORKDIR /build
 COPY . .
 ARG TARGETARCH
@@ -16,10 +16,11 @@ FROM veinmind/veinmind-log4j2:latest as log4j2
 FROM veinmind/veinmind-unsafe-mount:latest as unsafe-mount
 FROM veinmind/veinmind-iac:latest as iac
 FROM veinmind/veinmind-vuln:latest as vuln
-FROM veinmind/veinmind-escape:latest as escalate
+FROM veinmind/veinmind-escape:latest as escape
+FROM veinmind/veinmind-privilege-escalation:latest as privilege-escalation
 FROM veinmind/veinmind-minio:latest as minio
 
-FROM veinmind/python3.6:1.9.15-bullseye as release
+FROM veinmind/python3.6:1.9.21-bullseye as release
 WORKDIR /tool
 
 COPY dockerfiles/sources.list /etc/apt/sources.list
@@ -38,7 +39,8 @@ COPY --from=log4j2 /tool/veinmind-log4j2  ./plugin/
 COPY --from=unsafe-mount /tool/veinmind-unsafe-mount ./plugin
 COPY --from=iac /tool/veinmind-iac ./plugin
 COPY --from=vuln /tool/veinmind-vuln ./plugin
-COPY --from=escalate /tool/veinmind-escape ./plugin
+COPY --from=escape /tool/veinmind-escape ./plugin
+COPY --from=privilege-escalation /tool/veinmind-privilege-escalation ./plugin
 COPY --from=minio /tool/veinmind-minio ./plugin
 
 RUN pip install -r plugin/veinmind-history/requirements.txt && pip install -r plugin/veinmind-backdoor/requirements.txt && chmod +x plugin/*/scan.py

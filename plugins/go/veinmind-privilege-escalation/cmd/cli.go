@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-privilege-escalation/utils"
 	"os"
 	"time"
+
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-privilege-escalation/utils"
 
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/libveinmind/go/cmd"
@@ -36,8 +37,8 @@ var (
 )
 
 func scanImage(c *cmd.Command, image api.Image) error {
-	result := utils.ImagesScanRun(image)
-	for _, result := range result {
+	results := utils.ImagesScanRun(image)
+	for _, result := range results {
 		ReportEvent := &event.Event{
 			BasicInfo: &event.BasicInfo{
 				ID:         image.ID(),
@@ -72,8 +73,8 @@ func scanImage(c *cmd.Command, image api.Image) error {
 // scanContainer is func that used to do some action with container
 // you can write your plugin scan code here
 func scanContainer(c *cmd.Command, container api.Container) error {
-	result := utils.ContainersScanRun(container)
-	for _, result := range result {
+	results := utils.ContainersScanRun(container)
+	for _, result := range results {
 		ReportEvent := &event.Event{
 			BasicInfo: &event.BasicInfo{
 				ID:         container.ID(),

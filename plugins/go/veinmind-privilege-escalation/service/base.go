@@ -1,8 +1,9 @@
 package service
 
 import (
-	api "github.com/chaitin/libveinmind/go"
 	"os"
+
+	api "github.com/chaitin/libveinmind/go"
 )
 
 type CheckFunc func(fs api.FileSystem, content os.FileInfo, filename string) (bool, error)
@@ -13,5 +14,5 @@ var (
 )
 
 const (
-	SUDOREGEX string = "(\\w{1,})\\s\\w{1,}=\\(.*\\)\\s(.*)"
+	SUDOREGEX string = `(\w{1,})\s\w{1,}=\(.*\)\s(.*)`
 )

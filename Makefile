@@ -78,9 +78,9 @@ libveinmind-docker:  ##  		upgrade libVeinMind in Dockerfile
 ifeq ($(VERSION), "")
 	@echo "VERSION is empty, use 'make update.libveinmind-docker VERSION=x.x.x'"
 else
-	$(call update, "s/veinmind\/python3[0-9\.]*:[0-9]\.[0-9]\.[0-9]/veinmind\/python3.6:$(VERSION)/g", "veinmind\/python3[0-9\.]*:[0-9]\.[0-9]\.[0-9]")
-	$(call update, "s/veinmind\/go1.*:[0-9]\.[0-9]\.[0-9]/veinmind\/go1.18:$(VERSION)/g", "veinmind\/go1.*:[0-9]\.[0-9]\.[0-9]")
-	$(call update, "s/veinmind\/base:[0-9]\.[0-9]\.[0-9]/veinmind\/base:$(VERSION)/g", "veinmind\/base:[0-9]\.[0-9]\.[0-9]")
+	$(call update, "s/veinmind\/python3[0-9\.]*:[0-9]\.[0-9]\.[0-9]*/veinmind\/python3.6:$(VERSION)/g", "veinmind\/python3[0-9\.]*:[0-9]\.[0-9]\.[0-9]")
+	$(call update, "s/veinmind\/go1.*:[0-9]\.[0-9]\.[0-9]*/veinmind\/go1.18:$(VERSION)/g", "veinmind\/go1.*:[0-9]\.[0-9]\.[0-9]")
+	$(call update, "s/veinmind\/base:[0-9]\.[0-9]\.[0-9]*/veinmind\/base:$(VERSION)/g", "veinmind\/base:[0-9]\.[0-9]\.[0-9]")
 endif
 
 .PHONY: veinmind-common-go

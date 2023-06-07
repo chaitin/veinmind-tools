@@ -3,8 +3,9 @@ package service
 import "C"
 
 import (
-	api "github.com/chaitin/libveinmind/go"
 	"os"
+
+	api "github.com/chaitin/libveinmind/go"
 )
 
 // CapCheck 检测二进制文件是否有`CAP_SETUID`权限

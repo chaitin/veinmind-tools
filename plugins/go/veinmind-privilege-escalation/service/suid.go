@@ -2,10 +2,11 @@ package service
 
 import (
 	"fmt"
-	api "github.com/chaitin/libveinmind/go"
 	"os"
 	"strings"
 	"syscall"
+
+	api "github.com/chaitin/libveinmind/go"
 )
 
 func SuidCheck(fs api.FileSystem, content os.FileInfo, filename string) (bool, error) {
@@ -22,7 +23,8 @@ func isBelongToRoot(content os.FileInfo) bool {
 
 func isContainSUID(content os.FileInfo) bool {
 	res := fmt.Sprintf("%o", uint32(content.Mode()))
-	if strings.HasPrefix(res, "40000") {
+	// 4000 is SUID, 6000 is SUID and SGID
+	if strings.HasPrefix(res, "4000") || strings.HasPrefix(res, "6000") {
 		return true
 	}
 	return false
