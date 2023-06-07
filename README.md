@@ -49,22 +49,22 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 
 ## 🔨 工具列表
 
-| 工具                                                        | 功能                | 
-|-----------------------------------------------------------|-------------------|
-| [veinmind-runner](veinmind-runner/README.md)              | 扫描工具运行宿主          |
-| [veinmind-malicious](plugins/go/veinmind-malicious)       | 扫描容器/镜像中的恶意文件     |
-| [veinmind-weakpass](plugins/go/veinmind-weakpass)         | 扫描容器/镜像中的弱口令      |
-| [veinmind-log4j2](plugins/go/veinmind-log4j2)             | 扫描容器/镜像中的log4j2漏洞 |
-| [veinmind-minio](plugins/go/veinmind-minio)               | 扫描容器/镜像中的minio漏洞  |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive)   | 扫描镜像中的敏感信息        |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor)     | 扫描镜像中的后门          |
-| [veinmind-history](plugins/python/veinmind-history)       | 扫描镜像中的异常历史命令      |
-| [veinmind-vuln](plugins/go/veinmind-vuln)                 | 扫描容器/镜像中的资产信息和漏洞  |
-| [veinmind-webshell](plugins/go/veinmind-webshell)         | 扫描镜像中的 Webshell   |
-| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount) | 扫描容器中的不安全挂载目录     |
-| [veinmind-iac](plugins/go/veinmind-iac)                   | 扫描IaC文件           |
-| [veinmind-escalate](plugins/go/veinmind-escalate)         | 扫描容器/镜像中的逃逸风险     |
-    
+| 工具                                                                        | 功能                | 
+|---------------------------------------------------------------------------|-------------------|
+| [veinmind-runner](veinmind-runner/README.md)                              | 扫描工具运行宿主          |
+| [veinmind-malicious](plugins/go/veinmind-malicious)                       | 扫描容器/镜像中的恶意文件     |
+| [veinmind-weakpass](plugins/go/veinmind-weakpass)                         | 扫描容器/镜像中的弱口令      |
+| [veinmind-log4j2](plugins/go/veinmind-log4j2)                             | 扫描容器/镜像中的log4j2漏洞 |
+| [veinmind-minio](plugins/go/veinmind-minio)                               | 扫描容器/镜像中的minio漏洞  |
+| [veinmind-sensitive](plugins/python/veinmind-sensitive)                   | 扫描镜像中的敏感信息        |
+| [veinmind-backdoor](plugins/python/veinmind-backdoor)                     | 扫描镜像中的后门          |
+| [veinmind-history](plugins/python/veinmind-history)                       | 扫描镜像中的异常历史命令      |
+| [veinmind-vuln](plugins/go/veinmind-vuln)                                 | 扫描容器/镜像中的资产信息和漏洞  |
+| [veinmind-webshell](plugins/go/veinmind-webshell)                         | 扫描镜像中的 Webshell   |
+| [veinmind-unsafe-mount](plugins/go/veinmind-unsafe-mount)                 | 扫描容器中的不安全挂载目录     |
+| [veinmind-iac](plugins/go/veinmind-iac)                                   | 扫描IaC文件           |
+| [veinmind-escape](plugins/go/veinmind-escape)                             | 扫描容器/镜像中的逃逸风险     |
+| [veinmind-privilege-escalation](plugins/go/veinmind-privilege-escalation) | 扫描容器/镜像中的提权风险     |
 PS: 目前所有工具均已支持平行容器的方式运行
 
 ## 🧑‍💻 编写插件
@@ -103,7 +103,7 @@ veinmind-tools 现已加入 [CTStack](https://stack.chaitin.com/tool/detail?id=3
 
 veinmind-tools 现已加入 [404星链计划](https://github.com/knownsec/404StarLink)
 
-## Star History <a name="star-history"></a>
+## ✨ Star History <a name="star-history"></a>
 
 <a href="https://github.com/chaitin/veinmind-tools/stargazers">
     <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=chaitin/veinmind-tools&type=Date">

@@ -1,8 +1,8 @@
 
-<h1 align="center"> veinmind-escalate </h1>
+<h1 align="center"> veinmind-escape </h1>
 
 <p align="center">
-Veinmind-escalate is an escape risk scanning tool developed by Changting Technology.
+veinmind-escape is an escape risk scanning tool developed by Changting Technology.
 </p>
 
 ## Features
@@ -36,7 +36,7 @@ Make build.
 ```
 Run the executable file to scan.
 ```
-Chmod + x veinmind-escalate & &. / veinmind-escalate scan xxx.
+Chmod + x veinmind-escape & &. / veinmind-escape scan xxx.
 ```
 ### Based on parallel container mode.
 Make sure `docker` and `docker` and `dockere` are installed on the machine.
@@ -51,7 +51,7 @@ Make build.docker.
 ```
 Run the container to scan.
 ```
-Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-escalate scan xxx.
+Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagation=rslave' veinmind-escape scan xxx.
 ```
 
 ## Using parameters.
@@ -59,36 +59,36 @@ Docker run-rm-it-mount 'type=bind,source=/,target=/host,readonly,bind-propagatio
 1. Specify the image name or image ID and scan (the corresponding image needs to exist locally).
 
 ```
-. / veinmind-escalate scan image [imageID/imageName].
+. / veinmind-escape scan image [imageID/imageName].
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_01.jpg)
+![](../../../docs/veinmind-escape/veinmind-escape_scan_image_01.jpg)
 
 2. Scan all local images.
 
 ```
-. / veinmind-escalate scan image.
+. / veinmind-escape scan image.
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_image_02.jpg)
+![](../../../docs/veinmind-escape/veinmind-escape_scan_image_02.jpg)
 
 3. Specify the container name or container ID and scan.
 
 ```
-. / veinmind-escalate scan container [containerID/containerName].
+. / veinmind-escape scan container [containerID/containerName].
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_01.jpg)
+![](../../../docs/veinmind-escape/veinmind-escape_scan_container_01.jpg)
 
 
 4. Scan all local containers.
 
 ```
-. / veinmind-escalate scan container.
+. / veinmind-escape scan container.
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_scan_container_02)
+![](../../../docs/veinmind-escape/veinmind-escape_scan_container_02)
 
 5. Specify output format
 
 ```
-./veinmind-escalate scan container [containerID/containerName] -f html
+./veinmind-escape scan container [containerID/containerName] -f html
 #supported format： html,json,cli（default）
 ```
-![](../../../docs/veinmind-escalate/veinmind-escalate_format.jpg)
+![](../../../docs/veinmind-escape/veinmind-escape_format.jpg)

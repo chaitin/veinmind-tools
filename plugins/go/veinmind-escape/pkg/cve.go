@@ -3,7 +3,7 @@ package pkg
 import (
 	"bufio"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escalate/rules"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escape/rules"
 	"os"
 	"regexp"
 	"strconv"
@@ -37,7 +37,7 @@ type tasks struct {
 }
 
 // 需要自定义函数进行检测时可以使用该函数获取*CVE对象，再使用setFunc设置自定义检测函数
-func getCVEobject(name string) *CVE {
+func getCVEObject(name string) *CVE {
 	for _, value := range cveList {
 		if value.CVENumber == name {
 			return &value
@@ -296,7 +296,7 @@ func lessthan(cveVersion []int, inputVersion []int, equal bool) bool {
 	return false
 }
 
-// 此处传入fs api.FileSystem只是为了和其他检测函数统一格式，实际并无作用
+// ContainerCVECheck 此处传入fs api.FileSystem只是为了和其他检测函数统一格式，实际并无作用
 func ContainerCVECheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 	var res = make([]*event.EscapeDetail, 0)
 	for _, task := range taskList {
@@ -309,7 +309,10 @@ func ContainerCVECheck(fs api.FileSystem) ([]*event.EscapeDetail, error) {
 }
 
 func init() {
-	getCVEFromFile()
+	err := getCVEFromFile()
+	if err != nil {
+		return
+	}
 	for _, value := range cveList {
 		para, err := getVersion()
 		if err != nil {

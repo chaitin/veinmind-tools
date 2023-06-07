@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-privilege-escalation/utils"
 	"os"
 	"time"
 
@@ -10,16 +11,14 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
-
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escalate/utils"
 )
 
 var (
-	ReportService = &report.Service{}
+	reportService = &report.Service{}
 	pluginInfo    = plugin.Manifest{
-		Name:        "veinmind-escalate",
+		Name:        "veinmind-privilege-escalation",
 		Author:      "veinmind-team",
-		Description: "detect escalation risk for image&container",
+		Description: "detect escalate risk for image&container",
 	}
 	rootCmd = &cmd.Command{}
 	scanCmd = &cmd.Command{
@@ -28,11 +27,11 @@ var (
 	}
 	scanImageCmd = &cmd.Command{
 		Use:   "image",
-		Short: "scan image escalate",
+		Short: "scan image privilege escalation risk",
 	}
 	scanContainerCmd = &cmd.Command{
 		Use:   "container",
-		Short: "scan container escalate",
+		Short: "scan container privilege escalation risk",
 	}
 )
 
@@ -51,14 +50,16 @@ func scanImage(c *cmd.Command, image api.Image) error {
 				AlertType:  event.Escape,
 			},
 			DetailInfo: &event.DetailInfo{
-				AlertDetail: &event.EscapeDetail{
-					Target: result.Target,
-					Reason: result.Reason,
-					Detail: result.Detail,
+				AlertDetail: &event.EscalationDetail{
+					BinName:     result.BinName,
+					Description: result.Description,
+					FilePath:    result.FilePath,
+					Mod:         result.Mod,
+					Exp:         result.Exp,
 				},
 			},
 		}
-		err := ReportService.Client.Report(ReportEvent)
+		err := reportService.Client.Report(ReportEvent)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -68,6 +69,8 @@ func scanImage(c *cmd.Command, image api.Image) error {
 	return nil
 }
 
+// scanContainer is func that used to do some action with container
+// you can write your plugin scan code here
 func scanContainer(c *cmd.Command, container api.Container) error {
 	result := utils.ContainersScanRun(container)
 	for _, result := range result {
@@ -83,14 +86,16 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 				AlertType:  event.Escape,
 			},
 			DetailInfo: &event.DetailInfo{
-				AlertDetail: &event.EscapeDetail{
-					Target: result.Target,
-					Reason: result.Reason,
-					Detail: result.Detail,
+				AlertDetail: &event.EscalationDetail{
+					BinName:     result.BinName,
+					Description: result.Description,
+					FilePath:    result.FilePath,
+					Mod:         result.Mod,
+					Exp:         result.Exp,
 				},
 			},
 		}
-		err := ReportService.Client.Report(ReportEvent)
+		err := reportService.Client.Report(ReportEvent)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -102,8 +107,8 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
-	scanCmd.AddCommand(report.MapReportCmd(cmd.MapImageCommand(scanImageCmd, scanImage), ReportService))
-	scanCmd.AddCommand(report.MapReportCmd(cmd.MapContainerCommand(scanContainerCmd, scanContainer), ReportService))
+	scanCmd.AddCommand(report.MapReportCmd(cmd.MapImageCommand(scanImageCmd, scanImage), reportService))
+	scanCmd.AddCommand(report.MapReportCmd(cmd.MapContainerCommand(scanContainerCmd, scanContainer), reportService))
 	rootCmd.AddCommand(cmd.NewInfoCommand(pluginInfo))
 }
 

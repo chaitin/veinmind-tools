@@ -3,7 +3,7 @@ package utils
 import (
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escalate/pkg"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escape/pkg"
 )
 
 func ImagesScanRun(fs api.Image) []*event.EscapeDetail {

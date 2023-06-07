@@ -51,7 +51,8 @@ jobs:
       matrix:
         plugin: [
           veinmind-basic,
-          veinmind-escalate,
+          veinmind-escape,
+          veinmind-privilege-escalation,
           veinmind-iac,
           veinmind-log4j2,
           veinmind-malicious,
