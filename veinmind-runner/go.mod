@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/chaitin/libveinmind v1.5.6
-	github.com/chaitin/veinmind-common-go v1.4.2
+	github.com/chaitin/veinmind-common-go v1.4.4
 	github.com/distribution/distribution v2.8.1+incompatible
 	github.com/docker/docker v23.0.0+incompatible
 	github.com/gin-gonic/gin v1.8.1

@@ -15,8 +15,8 @@ var (
 const (
 	WRITE             checkMode = 2
 	READ              checkMode = 4
-	KERNELPATTERN     string    = "([0-9]{1,})\\.([0-9]{1,})\\.([0-9]{1,})-[0-9]{1,}-[a-zA-Z]{1,}"
-	SUDOREGEX         string    = "(\\w{1,})\\s\\w{1,}=\\(.*\\)\\s(.*)"
+	KERNELPATTERN     string    = `([0-9]{1,})\.([0-9]{1,})\.([0-9]{1,})-[0-9]{1,}-[a-zA-Z]{1,}`
+	SUDOREGEX         string    = `(\w{1,})\s\w{1,}=\(.*\)\s(.*)`
 	CVEREASON         string    = "Your system has an insecure kernel version that is affected by a CVE vulnerability:"
 	DOCKERAPIREASON   string    = "Docker remote API is opened which is can be used for escalating"
 	SUDOREASON        string    = "This file is granted sudo privileges and can be used for escalating,you can check it in /etc/sudoers"

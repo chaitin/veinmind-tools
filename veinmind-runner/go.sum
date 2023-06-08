@@ -177,8 +177,8 @@ github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/chaitin/libveinmind v1.5.2/go.mod h1:TXLYL6GeSAQ7pQ5IxPG4Tp0DuB1QvPPFhqdOjyiWxVU=
 github.com/chaitin/libveinmind v1.5.6 h1:fyNq142a+uOfYZ68GTzElFXVB0dtEXvs+ffwk24+Vfg=
 github.com/chaitin/libveinmind v1.5.6/go.mod h1:TXLYL6GeSAQ7pQ5IxPG4Tp0DuB1QvPPFhqdOjyiWxVU=
-github.com/chaitin/veinmind-common-go v1.4.2 h1:+AK2lt/OI7/kGQpt3rkp1gVJvoxfosnxxFaBfi6nbGw=
-github.com/chaitin/veinmind-common-go v1.4.2/go.mod h1:+dshrlmHiBtRV7ATyObBIg3SZoffpNCr1PdahT1LUQo=
+github.com/chaitin/veinmind-common-go v1.4.4 h1:3oAXapZCH2nbNHjBuxX5zNChK4v4r+/SrbxCCTyCkL0=
+github.com/chaitin/veinmind-common-go v1.4.4/go.mod h1:+dshrlmHiBtRV7ATyObBIg3SZoffpNCr1PdahT1LUQo=
 github.com/checkpoint-restore/go-criu/v4 v4.1.0/go.mod h1:xUQBLp4RLc5zJtWY++yjOoMoB5lihDt7fai+75m+rGw=
 github.com/checkpoint-restore/go-criu/v5 v5.0.0/go.mod h1:cfwC0EG7HMUenopBsUf9d89JlCLQIfgVcNsNN0t6T2M=
 github.com/checkpoint-restore/go-criu/v5 v5.3.0/go.mod h1:E/eQpaFtUKGOOSEBZgmKAcn+zUUwWxqcaKZlF54wK8E=

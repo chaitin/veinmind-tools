@@ -74,7 +74,11 @@ jobs:
           path: ./
       - uses: actions/download-artifact@v3
         with:
-          name: veinmind-escalate-amd64
+          name: veinmind-escape-amd64
+          path: ./
+      - uses: actions/download-artifact@v3
+        with:
+          name: veinmind-privilege-escalation-amd64
           path: ./
       - uses: actions/download-artifact@v3
         with:
@@ -102,14 +106,15 @@ jobs:
           mv veinmind-weakpass_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-weakpass 
           mv veinmind-iac_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-iac 
           mv veinmind-basic_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-basic
-          mv veinmind-escalate_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-escalate  
+          mv veinmind-escape_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-escape  
+          mv veinmind-privilege-escalation_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-privilege-escalation 
           mv veinmind-minio_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-minio  
           mv ./plugins/python/veinmind-history ./veinmind-history
           mv ./plugins/python/veinmind-backdoor ./veinmind-backdoor
           rm -rf ./veinmind-runner && mv veinmind-runner_${{env.CI_GOOS}}_${{env.CI_GOARCH}} veinmind-runner
-          chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate 
+          chmod +x veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escape veinmind-privilege-escalation
           tar cvzf veinmind-runner.tar.gz veinmind-runner veinmind-malicious veinmind-vuln veinmind-webshell veinmind-minio \
-          veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escalate \
+          veinmind-unsafe-mount veinmind-log4j2 veinmind-weakpass veinmind-iac veinmind-sensitive  veinmind-basic veinmind-escape veinmind-privilege-escalation \
           ./veinmind-history \
           ./veinmind-backdoor \
       - uses: actions/upload-artifact@v3

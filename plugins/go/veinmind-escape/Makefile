@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 SHELL = /bin/bash
-APP = veinmind-escalate
+APP = veinmind-escape
 CMD = cmd/cli.go
 ARG = ""
 

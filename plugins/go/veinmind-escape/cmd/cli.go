@@ -11,15 +11,15 @@ import (
 	"github.com/chaitin/veinmind-common-go/service/report"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
 
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escalate/utils"
+	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-escape/utils"
 )
 
 var (
 	ReportService = &report.Service{}
 	pluginInfo    = plugin.Manifest{
-		Name:        "veinmind-escalate",
+		Name:        "veinmind-escape",
 		Author:      "veinmind-team",
-		Description: "detect escalation risk for image&container",
+		Description: "detect escape risk for image&container",
 	}
 	rootCmd = &cmd.Command{}
 	scanCmd = &cmd.Command{
@@ -28,17 +28,17 @@ var (
 	}
 	scanImageCmd = &cmd.Command{
 		Use:   "image",
-		Short: "scan image escalate",
+		Short: "scan image escape risk",
 	}
 	scanContainerCmd = &cmd.Command{
 		Use:   "container",
-		Short: "scan container escalate",
+		Short: "scan container escape risk",
 	}
 )
 
 func scanImage(c *cmd.Command, image api.Image) error {
-	result := utils.ImagesScanRun(image)
-	for _, result := range result {
+	results := utils.ImagesScanRun(image)
+	for _, result := range results {
 		ReportEvent := &event.Event{
 			BasicInfo: &event.BasicInfo{
 				ID:         image.ID(),
@@ -69,8 +69,8 @@ func scanImage(c *cmd.Command, image api.Image) error {
 }
 
 func scanContainer(c *cmd.Command, container api.Container) error {
-	result := utils.ContainersScanRun(container)
-	for _, result := range result {
+	results := utils.ContainersScanRun(container)
+	for _, result := range results {
 		ReportEvent := &event.Event{
 			BasicInfo: &event.BasicInfo{
 				ID:         container.ID(),
