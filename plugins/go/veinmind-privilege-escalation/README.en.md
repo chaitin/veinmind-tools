@@ -67,24 +67,28 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-privilege-escalation scan image [imageID/imageName]
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_image.png)
+
 2. Scan all local mirrors
 
 ```
 ./veinmind-privilege-escalation scan image
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_all_image.png)
+
 3. Specify the container name or container ID and scan
 
 ```
 ./veinmind-privilege-escalation scan container [containerID/containerName]
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_container.png)
+
 4. Scan all local containers
 
 ```
 ./veinmind-privilege-escalation scan container
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_all_container.png)
+
 5. Specify the output format
    Supported output formats:
 - html
