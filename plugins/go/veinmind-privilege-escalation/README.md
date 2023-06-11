@@ -68,24 +68,28 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 ./veinmind-privilege-escalation scan image [imageID/imageName]
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_image.png)
+
 2.扫描所有本地镜像
 
 ```
 ./veinmind-privilege-escalation scan image
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_all_image.png)
+
 3.指定容器名称或容器ID并扫描
 
 ```
 ./veinmind-privilege-escalation scan container [containerID/containerName]
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_container.png)
+
 4.扫描所有本地容器
 
 ```
 ./veinmind-privilege-escalation scan container
 ```
 ![](../../../docs/veinmind-privilege-escalation/scan_all_container.png)
+
 5.指定输出格式
 支持的输出格式：
 - html
