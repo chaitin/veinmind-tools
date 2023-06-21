@@ -8,7 +8,7 @@ import (
 	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
-type CheckFunc func(fs api.FileSystem) (bool, *event.BackdoorDetail)
+type CheckFunc func(fs api.FileSystem) (bool, []*event.BackdoorDetail)
 
 var (
 	ImageCheckFuncMap     = make(map[string]CheckFunc)

@@ -13,7 +13,7 @@ func ImagesScanRun(fs api.Image) []*event.BackdoorDetail {
 		risk, detail := checkFunc(fs)
 		// 如果有风险，将风险信息添加到result中
 		if risk {
-			result = append(result, detail)
+			result = append(result, detail...)
 		}
 	}
 	return result
@@ -26,7 +26,7 @@ func ContainersScanRun(fs api.Container) []*event.BackdoorDetail {
 		risk, detail := checkFunc(fs)
 		// 如果有风险，将风险信息添加到result中
 		if risk {
-			result = append(result, detail)
+			result = append(result, detail...)
 		}
 	}
 	return result
