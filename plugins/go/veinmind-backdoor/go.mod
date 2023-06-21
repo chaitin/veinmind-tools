@@ -4,7 +4,5 @@ go 1.16
 
 require (
 	github.com/chaitin/libveinmind v1.5.6
-	github.com/chaitin/veinmind-common-go v1.4.4
+	github.com/chaitin/veinmind-common-go v1.4.5
 )
-
-replace github.com/chaitin/veinmind-common-go v1.4.4 => /home/ek1ng/Workspace/Job/Chaitin/veinmind-common-go

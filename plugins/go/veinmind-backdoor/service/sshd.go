@@ -33,6 +33,7 @@ func sshdBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDet
 				}
 				res = append(res, &event.BackdoorDetail{
 					FileDetail:  fileDetail,
+					Content:     fLink,
 					Description: "sshd backdoor",
 				})
 			}
