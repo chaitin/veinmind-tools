@@ -7,8 +7,8 @@ import (
 	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
-func inetdBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDetail) {
-	filePath := "/etc/inetd.conf"
+func ldsopreloadBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDetail) {
+	filePath := "/etc/ld.so.preload"
 	check := false
 	var res []*event.BackdoorDetail
 
@@ -31,13 +31,13 @@ func inetdBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDe
 		res = append(res, &event.BackdoorDetail{
 			FileDetail:  fileDetail,
 			Content:     content,
-			Description: "inetd conf backdoor",
+			Description: "ldsopreload conf backdoor",
 		})
 	}
 	return check, res
 }
 
 func init() {
-	ImageCheckFuncMap["inetd"] = inetdBackdoorCheck
-	ContainerCheckFuncMap["inetd"] = inetdBackdoorCheck
+	ImageCheckFuncMap["ldsopreload"] = ldsopreloadBackdoorCheck
+	ContainerCheckFuncMap["ldsopreload"] = ldsopreloadBackdoorCheck
 }

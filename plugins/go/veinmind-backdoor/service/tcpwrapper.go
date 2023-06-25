@@ -1,12 +1,13 @@
 package service
 
 import (
+	"io"
+
 	api "github.com/chaitin/libveinmind/go"
 	"github.com/chaitin/veinmind-common-go/service/report/event"
-	"io"
 )
 
-func tcpWrapperBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDetail) { // TODO
+func tcpWrapperBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDetail) {
 	filePaths := []string{"/etc/hosts.allow", "/etc/hosts.deny"}
 	check := false
 	var res []*event.BackdoorDetail

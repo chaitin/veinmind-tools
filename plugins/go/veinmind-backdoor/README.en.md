@@ -14,15 +14,16 @@ veinmind-backdoor is a container/image backdoor scanning tool developed by Chait
 
 - Quickly scan images for backdoors
 
-| Modules | Functions |
-|------------|----------------------|
-| bashrc | scan bash startup scripts for backdoors |
-| cron | Scan for backdoors in scheduled tasks |
-| inetd | Scan inetd for backdoors |
-| xinetd | Scan xinetd for backdoors |
-| sshd | Scan sshd soft link backdoor |
-| startup | Scan system startup items for backdoors |
-| tcpwrapper | scan for tcpwrapper backdoors |
+| Modules     | Functions                               |
+|-------------|-----------------------------------------|
+| bashrc      | scan bash startup scripts for backdoors |
+| cron        | Scan for backdoors in scheduled tasks   |
+| ldsopreload | Scan ld.so.preload for backdoors        |
+| inetd       | Scan inetd for backdoors                |
+| xinetd      | Scan xinetd for backdoors               |
+| sshd        | Scan sshd soft link backdoor            |
+| startup     | Scan system startup items for backdoors |
+| tcpwrapper  | scan for tcpwrapper backdoors           |
 
 ## Compatibility
 

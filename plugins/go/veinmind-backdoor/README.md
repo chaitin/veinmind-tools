@@ -15,15 +15,16 @@ veinmind-backdoor 是由长亭科技自研的一款容器/镜像后门扫描工�
 
 - 快速扫描镜像中的后门
 
-| 模块         | 功能                   | 
-|------------|----------------------|
-| bashrc     | 扫描 bash 启动脚本是否包含后门   |
-| cron       | 扫描定时任务中是否包含后门        |
-| inetd      | 扫描inetd中是否包含后门       |
-| xinetd     | 扫描xinetd中是否包含后门      |
-| sshd       | 扫描 sshd 软链接后门        |
-| startup    | 扫描系统启动项中是否包含后门       |
-| tcpwrapper | 扫描 tcpwrapper 后门     |
+| 模块               | 功能                       | 
+|------------------|--------------------------|
+| bashrc           | 扫描 bash 启动脚本是否包含后门       |
+| cron             | 扫描定时任务中是否包含后门            |
+| ldsopreload      | 扫描 ld.so.preload 中是否包含后门 |
+| inetd            | 扫描 inetd 中是否包含后门         |
+| xinetd           | 扫描 xinetd 中是否包含后门        |
+| sshd             | 扫描 sshd 软链接后门            |
+| startup          | 扫描系统启动项中是否包含后门           |
+| tcpwrapper       | 扫描 tcpwrapper 后门         |
 
 ## 兼容性
 

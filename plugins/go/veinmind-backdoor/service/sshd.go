@@ -1,10 +1,11 @@
 package service
 
 import (
-	api "github.com/chaitin/libveinmind/go"
-	"github.com/chaitin/veinmind-common-go/service/report/event"
 	"io/fs"
 	"strings"
+
+	api "github.com/chaitin/libveinmind/go"
+	"github.com/chaitin/veinmind-common-go/service/report/event"
 )
 
 // sshdBackdoorCheck sshd 软连接后门检测

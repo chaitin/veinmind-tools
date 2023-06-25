@@ -15,15 +15,9 @@ func analysisStrings(fileContents string) (bool, string) {
 		if len(str) == 0 || str[0] == '#' {
 			continue
 		}
-		if checkShell(str) {
+		if checkShell(str) || checkUser(str) || checkPreload(str) {
 			risk = true
 			riskContent += str + "\n"
-			continue
-		}
-		if checkUser(str) {
-			risk = true
-			riskContent += str + "\n"
-			continue
 		}
 	}
 	return risk, riskContent
@@ -58,6 +52,19 @@ func checkShell(content string) bool {
 func checkUser(content string) bool {
 	if strings.Contains(content, "useradd ") || strings.Contains(content, "usermod ") || strings.Contains(content, "userdel ") {
 		return true
+	}
+	return false
+}
+
+// checkExport 检测环境变量修改行为,包括修改动态链接库相关环境变量和PROMPT_COMMAND
+func checkPreload(content string) bool {
+	exportBlackList := []string{"LD_PRELOAD", "LD_AOUT_PRELOAD", "LD_ELF_PRELOAD", "LD_LIBRARY_PATH", "PROMPT_COMMAND"}
+	if strings.Contains(content, "export") {
+		for _, v := range exportBlackList {
+			if strings.Contains(content, v) {
+				return true
+			}
+		}
 	}
 	return false
 }
