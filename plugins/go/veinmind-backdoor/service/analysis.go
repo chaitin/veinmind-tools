@@ -36,6 +36,7 @@ func checkShell(content string) bool {
 	} else if strings.Contains(content, "exec ") && (strings.Contains(content, "socket.") || strings.Contains(content, ".decode('base64')")) {
 		return true
 	}
+
 	// 下载执行类
 	if (strings.Contains(content, "wget ") || strings.Contains(content, "curl ")) &&
 		(strings.Contains(content, " -O ") || strings.Contains(content, " -s ")) &&
