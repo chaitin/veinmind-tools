@@ -17,5 +17,10 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  sync:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ push ]
+    uses: ./.github/workflows/veinmind-sync.yml
+    secrets:
       HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
       HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}

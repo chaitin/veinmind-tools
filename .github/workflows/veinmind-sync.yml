@@ -1,0 +1,37 @@
+name: veinmind-tools-sync
+on:
+  workflow_call:
+    secrets:
+      HARBOR_USERNAME:
+        required: true
+      HARBOR_PASSWORD:
+        required: true
+jobs:
+  sync_harbor:
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [
+          veinmind-backdoor,
+          veinmind-history,
+          veinmind-basic,
+          veinmind-escape,
+          veinmind-privilege-escalation,
+          veinmind-iac,
+          veinmind-log4j2,
+          veinmind-malicious,
+          veinmind-sensitive,
+          veinmind-unsafe-mount,
+          veinmind-vuln,
+          veinmind-weakpass,
+          veinmind-webshell,
+          veinmind-minio,
+          veinmind-runner
+        ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: skopeo-copy
+        run: |
+          skopeo sync --src docker --dest docker --dest-creds ${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }} veinmind/${{ matrix.plugin }}:${{github.ref_name}} registry.veinmind.tech/veinmind/
+          skopeo sync --src docker --dest docker --dest-creds ${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }} veinmind/${{ matrix.plugin }}:latest registry.veinmind.tech/veinmind/
