@@ -1,10 +1,11 @@
-package file
+package security
 
 import (
 	"io/fs"
+	"regexp"
 )
 
-var sensitiveDirPerm = map[string]Perm{
+var SensitiveDirPerm = map[string]Perm{
 	"/etc/shadow":                   {0, 0640},
 	"/etc/passwd":                   {0, 0644},
 	"/etc/group":                    {0, 0644},
@@ -28,6 +29,27 @@ var sensitiveDirPerm = map[string]Perm{
 }
 
 type Perm struct {
-	uid  uint32
-	mode fs.FileMode
+	Uid  uint32
+	Mode fs.FileMode
+}
+
+var CDKTrace = []*regexp.Regexp{
+	// exp/mount_device.go
+	regexp.MustCompile(`/tmp/cdk_.*?`),
+	// exp/mount_cgroup.go
+
+	regexp.MustCompile(`/tmp/cgrp/cdk/notify_on_release`),
+	regexp.MustCompile(`/cdk_cgres_.*?`),
+	// exp/rewrite_cgroup_devices.go
+	regexp.MustCompile(`/tmp/cdk_dcgroup.*?`),
+
+	// exp/mount-procfs.go
+	regexp.MustCompile(`/mnt/host_proc`),
+	// containerd_shim_pwn.go
+
+	// exp/abuse_unpriv_userns.go
+	regexp.MustCompile(`/mnt/cgrp1`),
+
+	// exp/lxcfs_rw_cgroup.go
+	regexp.MustCompile(`/cdk_cgexp_.*?\.sh`),
 }

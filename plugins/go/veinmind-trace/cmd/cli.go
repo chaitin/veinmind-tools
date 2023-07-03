@@ -8,8 +8,6 @@ import (
 	"github.com/chaitin/libveinmind/go/plugin"
 	"github.com/chaitin/libveinmind/go/plugin/log"
 	"github.com/chaitin/veinmind-common-go/service/report"
-
-	"github.com/chaitin/veinmind-tools/plugins/go/veinmind-trace/pkg/process"
 )
 
 var reportService = &report.Service{}
@@ -37,7 +35,7 @@ func scanContainer(c *cmd.Command, container api.Container) error {
 	// 1
 
 	// 2. check process
-	process.ScanProcesses(container)
+	//analyzer.ScanProcesses(container)
 
 	// if you want display at runner report, you should send your result to report event
 	//reportEvent := &event.Event{

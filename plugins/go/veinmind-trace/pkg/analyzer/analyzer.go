@@ -1,4 +1,4 @@
-package process
+package analyzer
 
 type Analyzer interface {
 	Scan()

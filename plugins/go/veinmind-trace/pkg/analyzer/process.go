@@ -1,4 +1,4 @@
-package process
+package analyzer
 
 import (
 	api "github.com/chaitin/libveinmind/go"
