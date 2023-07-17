@@ -28,6 +28,7 @@ veinmind-backdoor 是由长亭科技自研的一款容器/镜像后门扫描工�
 | startup        | 扫描系统启动项中是否包含后门           |
 | tcpWrapper     | 扫描 tcpWrapper 后门         |
 | sshWrapper     | 扫描 sshWrapper 后门         |
+| rootkit        | 扫描 rootkit 后门         |
 ## 兼容性
 
 - linux/amd64
@@ -108,3 +109,9 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 生成的result.html效果如图：
 
 ![](../../../docs/veinmind-backdoor/format.png)
+
+## 运行结果
+
+rootkit检测（部分功能仅能对privilege container进行检测）效果如图：
+
+![](../../../docs/veinmind-backdoor/rootkit_scan.png)

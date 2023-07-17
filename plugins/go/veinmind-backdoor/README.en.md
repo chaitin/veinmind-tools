@@ -27,6 +27,7 @@ veinmind-backdoor is a container/image backdoor scanning tool developed by Chait
 | startup        | Scan system startup items for backdoors       |
 | tcpWrapper     | Scan for tcpWrapper backdoors                 |
 | sshWrapper     | Scan for sshWrapper backdoors                 |
+| rootkit        | Scan for rootkit backdoors                 |
 ## Compatibility
 
 - linux/amd64
@@ -107,3 +108,9 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 The generated result.html effect is as shown in the figure:
 
 ![](../../../docs/veinmind-backdoor/format.png)
+
+## Execution result
+
+Rootkit detection (some features can only detect privilege containers) effect as shown in the figure:
+
+![](../../../docs/veinmind-backdoor/rootkit_scan.png)
