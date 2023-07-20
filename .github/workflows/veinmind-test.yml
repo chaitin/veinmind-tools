@@ -34,3 +34,17 @@ jobs:
           cd ./plugins/go/veinmind-iac && go mod tidy 
           cd ./rules/test && go test
 
+  test-veinmind-backdoor:
+    runs-on: ubuntu-20.04
+    env:
+      CI_GOOS: linux
+      CI_GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: |
+          sudo make install
+          cd ./plugins/go/veinmind-backdoor && go mod tidy 
+          cd kernel && go test
