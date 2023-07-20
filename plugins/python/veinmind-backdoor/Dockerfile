@@ -1,4 +1,4 @@
-FROM veinmind/python3.6:1.9.21-bullseye
+FROM veinmind/python3.6:1.9.42-bullseye
 WORKDIR /tool
 ADD . .
 RUN pip install -r requirements.txt
