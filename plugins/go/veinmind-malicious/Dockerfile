@@ -1,4 +1,4 @@
-FROM veinmind/go1.18:1.9.21-bullseye as builder
+FROM veinmind/go1.18:1.9.42-bullseye as builder
 WORKDIR /build
 COPY . .
 ARG TARGETARCH
@@ -10,7 +10,7 @@ WORKDIR /build
 COPY --from=builder /build/veinmind-malicious .
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk add upx && upx -9 veinmind-malicious
 
-FROM veinmind/base:1.9.21-bullseye as release
+FROM veinmind/base:1.9.42-bullseye as release
 WORKDIR /tool
 COPY dockerfiles/sources.list /etc/apt/sources.list
 RUN apt update && apt-get install -y --no-install-recommends --allow-remove-essential libtinfo5 clamav clamav-daemon && rm -rf /var/lib/apt/lists/* && freshclam
