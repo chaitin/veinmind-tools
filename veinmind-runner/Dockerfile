@@ -34,7 +34,7 @@ COPY --from=weakpass /tool/veinmind-weakpass ./plugin/
 COPY --from=malicious /tool/veinmind-malicious ./plugin/
 COPY --from=sensitive /tool/veinmind-sensitive ./plugin/
 COPY --from=history /tool /tool/plugin/veinmind-history
-COPY --from=backdoor /tool /tool/plugin/veinmind-backdoor
+COPY --from=backdoor /tool /tool/veinmind-backdoor
 COPY --from=log4j2 /tool/veinmind-log4j2  ./plugin/
 COPY --from=unsafe-mount /tool/veinmind-unsafe-mount ./plugin
 COPY --from=iac /tool/veinmind-iac ./plugin
@@ -43,7 +43,7 @@ COPY --from=escape /tool/veinmind-escape ./plugin
 COPY --from=privilege-escalation /tool/veinmind-privilege-escalation ./plugin
 COPY --from=minio /tool/veinmind-minio ./plugin
 
-RUN pip install -r plugin/veinmind-history/requirements.txt && pip install -r plugin/veinmind-backdoor/requirements.txt && chmod +x plugin/*/scan.py
+RUN pip install -r plugin/veinmind-history/requirements.txt && chmod +x plugin/*/scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner
 ENTRYPOINT ["/tool/entrypoint.sh"]
 

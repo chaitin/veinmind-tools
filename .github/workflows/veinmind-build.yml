@@ -9,6 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         plugin: [
+          veinmind-backdoor,
           veinmind-basic,
           veinmind-escape,
           veinmind-privilege-escalation,
