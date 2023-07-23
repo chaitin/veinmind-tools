@@ -11,8 +11,10 @@ func TestHideMount(t *testing.T) {
 proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0`
 	content2 := `sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
 proc /proc/1 proc rw,nosuid,nodev,noexec,relatime 0 0`
-	assert.Equal(t, false, hasMount(content1))
-	assert.Equal(t, true, hasMount(content2))
+	a, _ := hasMount(content1)
+	b, _ := hasMount(content2)
+	assert.Equal(t, false, a)
+	assert.Equal(t, true, b)
 }
 
 func TestHasPtraceProcess(t *testing.T) {

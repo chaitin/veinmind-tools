@@ -16,7 +16,7 @@ var (
 	hackList = []string{"minerd", "r00t", "sqlmap", "nmap", "hydra", "fscan", "cdk"}
 )
 
-func IsHideProcess(fs api.FileSystem) bool {
+func IsHideProcess(fs api.FileSystem) (bool, string) {
 	// 隐藏进程检测
 	// 隐藏进程的几种方法：
 	// 1. 劫持readdir系统调用
@@ -30,15 +30,15 @@ func IsHideProcess(fs api.FileSystem) bool {
 	if _, err := fs.Stat(path); err == nil {
 		file, err := fs.Open(path)
 		if err != nil {
-			return false
+			return false, ""
 		}
 		content, err := io.ReadAll(file)
 		if err != nil {
-			return false
+			return false, ""
 		}
 		return hasMount(string(content))
 	}
-	return false
+	return false, ""
 }
 
 func IsReverseShell(fs api.FileSystem, pid int32, cmdline string) bool {
@@ -78,24 +78,25 @@ func IsEval(cmdline string) bool {
 }
 
 func HasPtraceProcess(content string) bool {
-	if ok, err := regexp.MatchString(`TracerPid:\s+0`, content); !ok && err == nil {
+	if ok, err := regexp.MatchString(`TracerPid:\s+0`, content); !ok && err == nil && strings.Contains(content, "TracerPid") {
+		fmt.Println(content)
 		return true
 	}
 	return false
 }
 
-func hasMount(content string) bool {
+func hasMount(content string) (bool, string) {
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
 		row := strings.Split(line, " ")
 
 		if len(row) > 2 {
 			if ok, err := regexp.MatchString(`/proc/\d+`, row[1]); ok && err == nil {
-				return true
+				return true, row[1]
 			}
 		}
 	}
-	return false
+	return false, ""
 }
 
 func isSocket(fs api.FileSystem, pid int32) (bool, error) {

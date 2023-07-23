@@ -19,6 +19,7 @@ FROM veinmind/veinmind-vuln:latest as vuln
 FROM veinmind/veinmind-escape:latest as escape
 FROM veinmind/veinmind-privilege-escalation:latest as privilege-escalation
 FROM veinmind/veinmind-minio:latest as minio
+FROM veinmind/veinmind-trace:latest as trace
 
 FROM veinmind/python3.6:1.9.42-bullseye as release
 WORKDIR /tool
@@ -42,6 +43,7 @@ COPY --from=vuln /tool/veinmind-vuln ./plugin
 COPY --from=escape /tool/veinmind-escape ./plugin
 COPY --from=privilege-escalation /tool/veinmind-privilege-escalation ./plugin
 COPY --from=minio /tool/veinmind-minio ./plugin
+COPY --from=trace /tool/veinmind-trace ./plugin
 
 RUN pip install -r plugin/veinmind-history/requirements.txt && chmod +x plugin/*/scan.py
 RUN echo "#!/bin/bash\n\n./veinmind-runner \$*" > /tool/entrypoint.sh && chmod +x /tool/entrypoint.sh && chmod +x /tool/veinmind-runner

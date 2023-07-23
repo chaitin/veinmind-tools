@@ -22,6 +22,7 @@ jobs:
           veinmind-weakpass,
           veinmind-webshell,
           veinmind-minio,
+          veinmind-trace
         ]
         path: [ ./plugins/go/ ]
         include:
