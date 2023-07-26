@@ -56,8 +56,8 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-weakpass](plugins/go/veinmind-weakpass)                         | 扫描容器/镜像中的弱口令      |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2)                             | 扫描容器/镜像中的log4j2漏洞 |
 | [veinmind-minio](plugins/go/veinmind-minio)                               | 扫描容器/镜像中的minio漏洞  |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive)                   | 扫描镜像中的敏感信息        |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor)                     | 扫描镜像中的后门          |
+| [veinmind-sensitive](plugins/go/veinmind-sensitive)                       | 扫描镜像中的敏感信息        |
+| [veinmind-backdoor](plugins/go/veinmind-backdoor)                         | 扫描镜像中的后门          |
 | [veinmind-history](plugins/python/veinmind-history)                       | 扫描镜像中的异常历史命令      |
 | [veinmind-vuln](plugins/go/veinmind-vuln)                                 | 扫描容器/镜像中的资产信息和漏洞  |
 | [veinmind-webshell](plugins/go/veinmind-webshell)                         | 扫描镜像中的 Webshell   |
@@ -65,7 +65,8 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-iac](plugins/go/veinmind-iac)                                   | 扫描镜像/集群的IaC文件     |
 | [veinmind-escape](plugins/go/veinmind-escape)                             | 扫描容器/镜像中的逃逸风险     |
 | [veinmind-privilege-escalation](plugins/go/veinmind-privilege-escalation) | 扫描容器/镜像中的提权风险     |
-| [veinmind-backdoor](plugins/go/veinmind-backdoor)                         | 扫描容器/镜像中的后门       |
+| [veinmind-trace](plugins/go/veinmind-trace)                               | 扫描容器中的入侵痕迹        |
+
 PS: 目前所有工具均已支持平行容器的方式运行
 
 ## 🧑‍💻 编写插件
@@ -76,7 +77,7 @@ PS: 目前所有工具均已支持平行容器的方式运行
 | 名称                                                          | 类别    | 是否兼容 |
 |-------------------------------------------------------------|-------|------|
 | [Jenkins](https://github.com/chaitin/veinmind-jenkins)      | CI/CD | ✔️   |
-| Gitlab CI                                                   | CI/CD | ✔️   |
+| [Gitlab CI](https://veinmind.chaitin.com/docs/ci/gitlab/)   | CI/CD | ✔️   |
 | [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD | ✔️   |
 | DockerHub                                                   | 镜像仓库  | ✔️   |
 | Docker Registry                                             | 镜像仓库  | ✔️   |
