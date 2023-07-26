@@ -67,8 +67,8 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-weakpass](plugins/go/veinmind-weakpass/README.en.md)            | scan containers/images for weak passwords              |
 | [veinmind-log4j2](plugins/go/veinmind-log4j2/README.en.md)                | scan containers/images for log4j2(CVE-2021-44228)      |
 | [veinmind-minio](plugins/go/veinmind-minio)                               | scan containers/images for minio(CVE-2023-28432)       |
-| [veinmind-sensitive](plugins/python/veinmind-sensitive/README.en.md)      | scan images for sensitive information                  |
-| [veinmind-backdoor](plugins/python/veinmind-backdoor/README.en.md)        | scan images for backdoors                              |
+| [veinmind-sensitive](plugins/go/veinmind-sensitive/README.en.md)          | scan images for sensitive information                  |
+| [veinmind-backdoor](plugins/go/veinmind-backdoor/README.en.md)            | scan images for backdoors                              |
 | [veinmind-history](plugins/python/veinmind-history/README.en.md)          | scan images for abnormal history commands              |
 | [veinmind-vuln](plugins/go/veinmind-vuln/README.en.md)                    | scan containers/images for asset information and vulns |
 | [veinmind-webshell](plugins/go/veinmind-webshell)                         | scan containers/images for webshell                    |
@@ -76,7 +76,7 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 | [veinmind-iac](plugins/go/veinmind-iac)                                   | scan images/cluster IaC file                           |
 | [veinmind-escape](plugins/go/veinmind-escape)                             | scan containers/images for escape risk                 |
 | [veinmind-privilege-escalation](plugins/go/veinmind-privilege-escalation) | scan containers/images for privilege escalation risk   |
-| [veinmind-backdoor](plugins/go/veinmind-backdoor/README.en.md)            | scan images for backdoors                              |
+| [veinmind-trace](plugins/go/veinmind-trace)                               | scan  containers attack trace                          |
 
 
 PS: All tools currently support running in parallel containers
@@ -87,17 +87,17 @@ Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 
 ## ☁️ Cloud-native infrastructure compatibility
 
-| Name                                                        | Type     | Compatibility |
-|-------------------------------------------------------------|----------|---------------|
-| [Jenkins](https://github.com/chaitin/veinmind-jenkins)      | CI/CD    | ✔️            |
-| Gitlab CI                                                   | CI/CD    | ✔️            |
-| [Github Action](https://github.com/chaitin/veinmind-action) | CI/CD    | ✔️            |
-| DockerHub                                                   | Registry | ✔️            |
-| Docker Registry                                             | Registry | ✔️            |
-| Harbor                                                      | Registry | ✔️            |
-| Docker                                                      | Runtime  | ✔️            |
-| Containerd                                                  | Runtime  | ✔️            |
-| kubernetes                                                  | Cluster  | ✔️            |
+| Name                                                         | Type     | Compatibility |
+|--------------------------------------------------------------|----------|---------------|
+| [Jenkins](https://github.com/chaitin/veinmind-jenkins)       | CI/CD    | ✔️            |
+| [Gitlab CI](https://veinmind.chaitin.com/docs/ci/gitlab/)    | CI/CD    | ✔️            |
+| [Github Action](https://github.com/chaitin/veinmind-action)  | CI/CD    | ✔️            |
+| DockerHub                                                    | Registry | ✔️            |
+| Docker Registry                                              | Registry | ✔️            |
+| Harbor                                                       | Registry | ✔️            |
+| Docker                                                       | Runtime  | ✔️            |
+| Containerd                                                   | Runtime  | ✔️            |
+| kubernetes                                                   | Cluster  | ✔️            |
 
 ## 🛴 Architecture
 ![](docs/architecture.png)
