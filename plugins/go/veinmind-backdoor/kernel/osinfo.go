@@ -2,7 +2,7 @@ package kernel
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,7 +44,7 @@ func (version *KernelVersion) GetKernelVersion(apiFileSystem api.FileSystem) err
 		return err
 	}
 	defer file.Close()
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}
