@@ -77,7 +77,7 @@ docker run --rm -it --mount 'type=bind,source=/,target=/host,readonly,bind-propa
 
 ## 使用
 
-1. 扫描本地所有镜像
+1. 扫描本地所有容器
 
 ```
 ./veinmind-trace scan container
