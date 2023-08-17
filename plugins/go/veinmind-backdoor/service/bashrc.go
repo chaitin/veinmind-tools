@@ -21,12 +21,12 @@ func bashrcBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorD
 		//校验文件是否存在
 		fileInfo, err := apiFileSystem.Stat(filepath)
 		if err != nil {
-			return false, nil
+			continue
 		}
 		//校验文件是否存在后门
 		file, err := apiFileSystem.Open(filepath)
 		if err != nil {
-			return false, nil
+			continue
 		}
 		defer file.Close()
 		contents, err := io.ReadAll(file)
@@ -35,7 +35,7 @@ func bashrcBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorD
 			check = true
 			fileDetail, err := file2FileDetail(fileInfo, filepath)
 			if err != nil {
-				return false, nil
+				continue
 			}
 			res = append(res, &event.BackdoorDetail{
 				FileDetail:  fileDetail,
@@ -56,6 +56,7 @@ func bashrcBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorD
 		contents, err := io.ReadAll(file)
 		risk, content := analysisStrings(string(contents))
 		if risk {
+			check = true
 			fileDetail, err := file2FileDetail(info, path)
 			if err != nil {
 				return nil
@@ -82,6 +83,7 @@ func bashrcBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorD
 				contents, err := io.ReadAll(file)
 				risk, content := analysisStrings(string(contents))
 				if risk {
+					check = true
 					fileDetail, err := file2FileDetail(info, path)
 					if err != nil {
 						return nil
