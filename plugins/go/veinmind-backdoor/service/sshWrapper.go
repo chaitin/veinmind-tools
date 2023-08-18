@@ -30,11 +30,11 @@ func sshWrapperBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.Backd
 
 	// 判断文件头是否被修改
 	if string(header) != ELFMagicByte {
-		check = true
 		fileDetail, err := file2FileDetail(fileInfo, sshdPath)
 		if err != nil {
 			return false, nil
 		}
+		check = true
 		res = append(res, &event.BackdoorDetail{
 			FileDetail:  fileDetail,
 			Content:     "sshd file is not ELF format",
