@@ -14,20 +14,20 @@ func tcpWrapperBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.Backd
 	for _, filePath := range filePaths {
 		fileInfo, err := apiFileSystem.Stat(filePath)
 		if err != nil {
-			return false, nil
+			return check, res
 		}
 		file, err := apiFileSystem.Open(filePath)
 		if err != nil {
-			return false, nil
+			return check, res
 		}
 		contents, err := io.ReadAll(file)
 		risk, content := analysisStrings(string(contents))
 		if risk {
-			check = true
 			fileDetail, err := file2FileDetail(fileInfo, filePath)
 			if err != nil {
-				return false, nil
+				return check, res
 			}
+			check = true
 			res = append(res, &event.BackdoorDetail{
 				FileDetail:  fileDetail,
 				Content:     content,

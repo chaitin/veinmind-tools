@@ -28,11 +28,11 @@ func cronBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDet
 			contents, err := io.ReadAll(file)
 			risk, content := analysisStrings(string(contents))
 			if risk {
-				check = true
 				fileDetail, err := file2FileDetail(info, path)
 				if err != nil {
 					return nil
 				}
+				check = true
 				res = append(res, &event.BackdoorDetail{
 					FileDetail:  fileDetail,
 					Content:     content,

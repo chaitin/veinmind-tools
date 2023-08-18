@@ -23,11 +23,11 @@ func inetdBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDe
 	contents, err := io.ReadAll(file)
 	risk, content := analysisStrings(string(contents))
 	if risk {
-		check = true
 		fileDetail, err := file2FileDetail(fileInfo, filePath)
 		if err != nil {
 			return false, nil
 		}
+		check = true
 		res = append(res, &event.BackdoorDetail{
 			FileDetail:  fileDetail,
 			Content:     content,
