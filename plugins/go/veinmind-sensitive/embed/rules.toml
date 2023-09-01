@@ -701,9 +701,9 @@ level = 'medium'
 
 [[rule]]
 id = 98
-name = "Password In Enviroment"
-description = "Password In Enviroment"
-env = '''[^=]*(auth|pass|key|secret|token)[^=]*=.*'''
+name = "Password In Environment"
+description = "Password In Environment"
+env = '''(?i)[^=]*(auth|pass|key|secret|token)[^=]*=.*'''
 level = 'high'
 
 [[rule]]
