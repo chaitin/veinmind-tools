@@ -58,6 +58,16 @@ wget -q https://download.veinmind.tech/scripts/veinmind-runner-parallel-containe
 > Note: When using openAI, please ensure that the current network can access openAI
 > When starting a parallel container, you need to manually use docker run -e http_proxy=xxxx -e https_proxy=xxxx Set proxy (in non global proxy scenarios)
 
+
+### 6. generate <html> <cli> <json> report
+
+```
+./run.sh scan [image/container] --format=html,cli
+```
+
+> this will generate a file at path which name `report.html` or `report.json`
+> you can use `,` to generate different reports，like `--format=html,cli,json` will output both  `report.html` and `report.json` and cli table。
+
 ## 🔨 Toolset
 
 | Tool                                                                      | Description                                            | 
