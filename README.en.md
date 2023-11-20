@@ -93,7 +93,7 @@ PS: All tools currently support running in parallel containers
 
 ## 🧑‍💻 Coding Plugins
 
-Use exmaple to create a veinmind-tool plugin quickly, see more at [veinmind-example](example/README.en.md)
+Use example to create a veinmind-tool plugin quickly, see more at [veinmind-example](example/README.en.md)
 
 ## ☁️ Cloud-native infrastructure compatibility
 
