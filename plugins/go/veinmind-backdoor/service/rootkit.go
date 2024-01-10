@@ -111,11 +111,11 @@ func rootkitLKMCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDetai
 		if ext == ".so" || ext == ".ko" || ext == ".ko.xz" {
 			for _, lkm := range kernel.BadLKM {
 				if lkm == strings.TrimSuffix(strings.ToLower(filepath.Base(path)), ext) {
-					check = true
 					fileDetail, err := file2FileDetail(info, path)
 					if err != nil {
-						return err
+						return nil
 					}
+					check = true
 					res = append(res, &event.BackdoorDetail{
 						FileDetail:  fileDetail,
 						Content:     path,

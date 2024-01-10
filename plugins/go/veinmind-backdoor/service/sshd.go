@@ -16,23 +16,23 @@ func sshdBackdoorCheck(apiFileSystem api.FileSystem) (bool, []*event.BackdoorDet
 	apiFileSystem.Walk("/", func(path string, info fs.FileInfo, err error) error {
 		lstat, err := apiFileSystem.Lstat(path)
 		if err != nil {
-			return err
+			return nil
 		}
 
 		// 检查文件的软连接
 		if lstat.Mode()&fs.ModeSymlink == fs.ModeSymlink {
 			fLink, err := apiFileSystem.Readlink(path)
 			if err != nil {
-				return err
+				return nil
 			}
 			fExeName := path[strings.LastIndex(path, "/")+1:]
 			fLinkExeName := fLink[strings.LastIndex(fLink, "/")+1:]
 			if ContainsString(rootokList, fExeName) && fLinkExeName == "sshd" {
-				check = true
 				fileDetail, err := file2FileDetail(info, path)
 				if err != nil {
 					return nil
 				}
+				check = true
 				res = append(res, &event.BackdoorDetail{
 					FileDetail:  fileDetail,
 					Content:     fLink,
