@@ -118,7 +118,7 @@ Use example to create a veinmind-tool plugin quickly, see more at [veinmind-exam
 2. By scanning the QR code below (use wechat), you can join the discussion group of veinmind users for detailed
    discussions by adding the veinmind assistant.
 
-![](docs/veinmind-group-qrcode.jpg)
+![](docs/veinmind-group-qrcode.png)
 
 ## ✨ CTStack
 <img src="https://ctstack-oss.oss-cn-beijing.aliyuncs.com/CT%20Stack-2.png" width="30%" />
