@@ -21,3 +21,5 @@ test
 venv
 __pycache__
 .DS_Store
+result.json
+plugins/go/veinmind-sensitive/veinmind-sensitive
