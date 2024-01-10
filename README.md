@@ -117,7 +117,7 @@ PS: 目前所有工具均已支持平行容器的方式运行
 1. 您可以通过 GitHub Issue 直接进行 Bug 反馈和功能建议。
 2. 扫描下方二维码可以通过添加问脉小助手，以加入问脉用户讨论群进行详细讨论
 
-![](docs/veinmind-group-qrcode.jpg)
+![](docs/veinmind-group-qrcode.png)
 
 ## ✨ CTStack
 
